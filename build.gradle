@@ -29,6 +29,7 @@ dependencies {
 	//thymeleaf
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 }
 
 tasks.named('bootBuildImage') {

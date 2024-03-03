@@ -39,7 +39,6 @@ public class KakaoLoginController {
         session.setAttribute("userName", userInfo.get("name")); // 추가 정보 저장
         session.setAttribute("userGender", userInfo.get("gender")); // 추가 정보 저장
         session.setAttribute("userAgeRange", userInfo.get("ageRange")); // 추가 정보 저장
-        session.setAttribute("userPhoneNumber", userInfo.get("phoneNumber")); // 추가 정보 저장
 
         log.info("userId : " + userInfo.get("userId"));
         log.info("userNickname : " + userInfo.get("nickname"));
