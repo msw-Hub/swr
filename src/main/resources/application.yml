@@ -1,0 +1,3 @@
+kakao:
+  client_id: REMOVED_KAKAO_CLIENT_ID
+  redirect_uri: http://localhost:8080/callback
