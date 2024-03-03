@@ -1,3 +1,10 @@
 kakao:
   client_id: REMOVED_KAKAO_CLIENT_ID
   redirect_uri: https://port-0-swr-17xco2nlst8pr67.sel5.cloudtype.app/callback
+
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://REMOVED_DB_HOST/mariadb?characterEncoding=UTF-8&serverTimezone=UTC
+    username: mariadb
+    password: REMOVED
