@@ -5,6 +5,6 @@ kakao:
 spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://svc.sel5.cloudtype.app:30452/mariadb?characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mariadb://svc.sel5.cloudtype.app:30452/testdb?characterEncoding=UTF-8&serverTimezone=UTC
     username: mariadb
     password: 1234
