@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.Map;
 
-
 @Slf4j
 @RestController
 @RequestMapping("")
@@ -49,12 +48,11 @@ public class KakaoLoginController {
         log.info("userGender : " + userInfo.get("gender"));
         log.info("userAgeRange : " + userInfo.get("ageRange"));
 
-        UserInfoService.saveUserInfo(userInfo);
+        // 사용자 정보를 데이터베이스에 저장
+        UserInfoService userInfoService = new UserInfoService();
+        userInfoService.saveUserInfo(userInfo);
 
         // 세션 ID를 제외한 URL로 리다이렉션
         response.sendRedirect("/login/success");
     }
-
-
-
 }
