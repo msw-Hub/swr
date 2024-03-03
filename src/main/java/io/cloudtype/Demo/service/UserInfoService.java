@@ -9,9 +9,9 @@ import java.util.Map;
 public class UserInfoService {
 
     @Autowired
-    private static JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
-    public static void saveUserInfo(Map<String, Object> userInfo) {
+    public void saveUserInfo(Map<String, Object> userInfo) {
         String sql = "INSERT INTO user_info (user_id, nickname, profile_image, email, name, gender, age_range) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,
