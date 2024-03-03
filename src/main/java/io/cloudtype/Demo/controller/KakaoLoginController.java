@@ -1,6 +1,7 @@
 package io.cloudtype.Demo.controller;
 
 import io.cloudtype.Demo.service.KakaoService;
+import io.cloudtype.Demo.service.UserInfoService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,8 @@ public class KakaoLoginController {
         log.info("userName : " + userInfo.get("name"));
         log.info("userGender : " + userInfo.get("gender"));
         log.info("userAgeRange : " + userInfo.get("ageRange"));
+
+        UserInfoService.saveUserInfo(userInfo);
 
         // 세션 ID를 제외한 URL로 리다이렉션
         response.sendRedirect("/login/success");
