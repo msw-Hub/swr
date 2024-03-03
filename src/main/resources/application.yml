@@ -5,6 +5,6 @@ kakao:
 spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://REMOVED_DB_HOST/mariadb?characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mariadb://REMOVED_DB_HOST/testdb?characterEncoding=UTF-8&serverTimezone=UTC
     username: mariadb
     password: REMOVED
