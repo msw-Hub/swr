@@ -1,3 +1,10 @@
 kakao:
   client_id: 53035b0763b5b30c2d9270a501fb614b
   redirect_uri: https://port-0-swr-17xco2nlst8pr67.sel5.cloudtype.app/callback
+
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://svc.sel5.cloudtype.app:30452/mariadb?characterEncoding=UTF-8&serverTimezone=UTC
+    username: mariadb
+    password: 1234
