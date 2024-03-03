@@ -3,6 +3,7 @@ package io.cloudtype.Demo.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+
 import java.util.Map;
 
 @Service
@@ -12,7 +13,7 @@ public class UserInfoService {
     private JdbcTemplate jdbcTemplate;
 
     public void saveUserInfo(Map<String, Object> userInfo) {
-        String sql = "INSERT INTO user_info (user_id, nickname, profile_image, email, name, gender, age_range) "
+        String sql = "INSERT INTO testdb.user_info (user_id, nickname, profile_image, email, name, gender, age_range) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,
                 userInfo.get("userId"),
