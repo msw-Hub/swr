@@ -16,7 +16,7 @@ public class UserInfoService {
         String sql = "INSERT INTO testdb.user_info (user_id, nickname, profile_image, email, name, gender, age_range) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,
-                userInfo.get("userId"),
+                (Long) userInfo.get("userId"), // userId를 Long으로 캐스팅
                 userInfo.get("nickname"),
                 userInfo.get("profileImage"),
                 userInfo.get("email"),

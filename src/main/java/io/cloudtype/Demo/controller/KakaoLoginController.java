@@ -52,6 +52,8 @@ public class KakaoLoginController {
         UserInfoService userInfoService = new UserInfoService();
         userInfoService.saveUserInfo(userInfo);
 
+        log.info("디비 저장함수가 켜지긴함.");
+
         // 세션 ID를 제외한 URL로 리다이렉션
         response.sendRedirect("/login/success");
     }
