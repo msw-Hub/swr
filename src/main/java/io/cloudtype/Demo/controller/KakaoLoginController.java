@@ -26,6 +26,9 @@ public class KakaoLoginController {
     @Autowired
     private KakaoService kakaoService;
 
+    @Autowired
+    private UserInfoService userInfoService; // UserInfoService 주입
+
     @GetMapping("/callback")
     public void callback(@RequestParam("code") String code, HttpSession session, HttpServletResponse response) throws IOException {
         String accessToken = kakaoService.getAccessTokenFromKakao(client_id, code);
@@ -49,8 +52,7 @@ public class KakaoLoginController {
         log.info("userAgeRange : " + userInfo.get("ageRange"));
 
         // 사용자 정보를 데이터베이스에 저장
-        UserInfoService userInfoService = new UserInfoService();
-        userInfoService.saveUserInfo(userInfo);
+        userInfoService.saveUserInfo(userInfo); // 수정된 부분
 
         log.info("디비 저장함수가 켜지긴함.");
 
