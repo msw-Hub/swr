@@ -21,7 +21,7 @@ public class UserInfoService {
                 userInfo.get("email"),
                 userInfo.get("name"),
                 userInfo.get("gender"),
-                userInfo.get("ageRange"),
+                userInfo.get("ageRange")
         );
     }
 }
