@@ -33,6 +33,7 @@ public class KakaoLoginController {
 
     @GetMapping("/callback")
     public void callback(@RequestParam("code") String code, HttpSession session, HttpServletResponse response) throws IOException {
+        log.info(code);
         Map<String, String> tokens = kakaoService.getTokensFromKakao(client_id, code);
         String accessToken = tokens.get("access_token");
         String refreshToken = tokens.get("refresh_token");
@@ -55,23 +56,25 @@ public class KakaoLoginController {
         session.setAttribute("userGender", userInfo.get("gender")); // 추가 정보 저장
         session.setAttribute("userAgeRange", userInfo.get("ageRange")); // 추가 정보 저장
 
+
+
+//        Map<String, String> tokenResponse = new HashMap<>();
+//        tokenResponse.put("access_token", accessToken);
+//        tokenResponse.put("refresh_token", refreshToken);
+//        tokenResponse.put("refresh_token_expires_in", refreshTokenExpiresIn);
+//
+//        log.info("JSON Response: " + new ObjectMapper().writeValueAsString(tokenResponse));
+//
+//        response.setContentType("application/json");
+//        response.setCharacterEncoding("UTF-8");
+//        response.getWriter().write(new ObjectMapper().writeValueAsString(tokenResponse));
+//
+//        response.sendRedirect("/login/successSign");
 //        if(count ==0){
 //            userInfoService.saveUserInfo(userInfo);
 //            response.sendRedirect("/login/successSign");
 //        }
 //        else response.sendRedirect("/login/successLogin");
 
-        Map<String, String> tokenResponse = new HashMap<>();
-        tokenResponse.put("access_token", accessToken);
-        tokenResponse.put("refresh_token", refreshToken);
-        tokenResponse.put("refresh_token_expires_in", refreshTokenExpiresIn);
-
-        log.info("JSON Response: " + new ObjectMapper().writeValueAsString(tokenResponse));
-        
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(new ObjectMapper().writeValueAsString(tokenResponse));
-
     }
-
 }
