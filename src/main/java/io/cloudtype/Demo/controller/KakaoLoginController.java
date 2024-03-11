@@ -1,5 +1,6 @@
 package io.cloudtype.Demo.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudtype.Demo.service.KakaoService;
 import io.cloudtype.Demo.service.UserInfoService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -53,11 +55,23 @@ public class KakaoLoginController {
         session.setAttribute("userGender", userInfo.get("gender")); // 추가 정보 저장
         session.setAttribute("userAgeRange", userInfo.get("ageRange")); // 추가 정보 저장
 
-        if(count ==0){
-            userInfoService.saveUserInfo(userInfo);
-            response.sendRedirect("/login/successSign");
-        }
-        else response.sendRedirect("/login/successLogin");
+//        if(count ==0){
+//            userInfoService.saveUserInfo(userInfo);
+//            response.sendRedirect("/login/successSign");
+//        }
+//        else response.sendRedirect("/login/successLogin");
+
+        Map<String, String> tokenResponse = new HashMap<>();
+        tokenResponse.put("access_token", accessToken);
+        tokenResponse.put("refresh_token", refreshToken);
+        tokenResponse.put("refresh_token_expires_in", refreshTokenExpiresIn);
+
+        log.info("JSON Response: " + new ObjectMapper().writeValueAsString(tokenResponse));
+        
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(new ObjectMapper().writeValueAsString(tokenResponse));
+
     }
 
 }
