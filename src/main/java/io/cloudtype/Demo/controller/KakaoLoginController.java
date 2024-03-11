@@ -1,6 +1,5 @@
 package io.cloudtype.Demo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudtype.Demo.service.KakaoService;
 import io.cloudtype.Demo.service.UserInfoService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -8,13 +7,13 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -32,7 +31,7 @@ public class KakaoLoginController {
     private UserInfoService userInfoService; // UserInfoService 주입
 
     @GetMapping("/callback")
-    public void callback(@RequestParam("code") String code, HttpSession session, HttpServletResponse response) throws IOException {
+    public ResponseEntity<String> callback(@RequestParam("code") String code, HttpSession session, HttpServletResponse response) throws IOException {
         log.info(code);
         Map<String, String> tokens = kakaoService.getTokensFromKakao(client_id, code);
         String accessToken = tokens.get("access_token");
@@ -57,24 +56,13 @@ public class KakaoLoginController {
         session.setAttribute("userAgeRange", userInfo.get("ageRange")); // 추가 정보 저장
 
 
+        // 프론트엔드에 전달할 응답 생성
+        String responseJson = "{\"access_token\": \"" + accessToken + "\"}";
 
-//        Map<String, String> tokenResponse = new HashMap<>();
-//        tokenResponse.put("access_token", accessToken);
-//        tokenResponse.put("refresh_token", refreshToken);
-//        tokenResponse.put("refresh_token_expires_in", refreshTokenExpiresIn);
-//
-//        log.info("JSON Response: " + new ObjectMapper().writeValueAsString(tokenResponse));
-//
-//        response.setContentType("application/json");
-//        response.setCharacterEncoding("UTF-8");
-//        response.getWriter().write(new ObjectMapper().writeValueAsString(tokenResponse));
-//
-//        response.sendRedirect("/login/successSign");
-//        if(count ==0){
-//            userInfoService.saveUserInfo(userInfo);
-//            response.sendRedirect("/login/successSign");
-//        }
-//        else response.sendRedirect("/login/successLogin");
+        // JSON 응답과 함께 HTTP 상태코드 200을 반환
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(responseJson);
 
     }
 }
