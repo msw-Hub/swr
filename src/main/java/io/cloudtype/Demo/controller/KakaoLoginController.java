@@ -55,10 +55,9 @@ public class KakaoLoginController {
 
         if(count ==0){
             userInfoService.saveUserInfo(userInfo);
+            response.sendRedirect("/login/successSign");
         }
-
-        // 세션 ID를 제외한 URL로 리다이렉션
-        response.sendRedirect("/login/success");
+        else response.sendRedirect("/login/successLogin");
     }
 
 }

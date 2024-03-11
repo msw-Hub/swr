@@ -23,8 +23,12 @@ public class KakaoLoginPageController {
 
         return "login";
     }
-    @GetMapping("/success")
-    public String loginSuccessPage() {
-        return "success"; // success.html 파일이 있는 경로를 리턴합니다.
+    @GetMapping("/successSign")
+    public String successSignPage() {
+        return "successSign"; // successSign.html 파일이 있는 경로를 리턴합니다.
+    }
+    @GetMapping("/successLogin")
+    public String successLoginPage() {
+        return "successLogin"; // successSign.html 파일이 있는 경로를 리턴합니다.
     }
 }
