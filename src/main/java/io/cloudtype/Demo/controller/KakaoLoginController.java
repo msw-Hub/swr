@@ -51,16 +51,8 @@ public class KakaoLoginController {
         session.setAttribute("userGender", userInfo.get("gender")); // 추가 정보 저장
         session.setAttribute("userAgeRange", userInfo.get("ageRange")); // 추가 정보 저장
 
-        log.info("userId : " + userInfo.get("userId"));
-        log.info("userNickname : " + userInfo.get("nickname"));
-        log.info("userProfileImage : " + userInfo.get("profileImage"));
-        log.info("userEmail : " + userInfo.get("email"));
-        log.info("userName : " + userInfo.get("name"));
-        log.info("userGender : " + userInfo.get("gender"));
-        log.info("userAgeRange : " + userInfo.get("ageRange"));
-
         // 사용자 정보를 데이터베이스에 저장
-        userInfoService.saveUserInfo(userInfo); // 수정된 부분
+        //userInfoService.saveUserInfo(userInfo); // 수정된 부분
 
         log.info("디비 저장함수가 켜지긴함.");
 
