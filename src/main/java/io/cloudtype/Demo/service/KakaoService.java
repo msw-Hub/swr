@@ -3,7 +3,9 @@ package io.cloudtype.Demo.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,6 +19,16 @@ import java.util.Map;
 @Service
 @SuppressWarnings("unchecked")
 public class KakaoService {
+    private final JdbcTemplate jdbcTemplate;
+    private final UserInfoService userInfoService;
+
+    // 생성자를 통한 주입
+    @Autowired
+    public KakaoService(JdbcTemplate jdbcTemplate, UserInfoService userInfoService) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.userInfoService = userInfoService;
+    }
+
 
     public Map<String, String> getTokensFromKakao(String client_id, String code) throws IOException {
         //------kakao POST 요청------
@@ -94,5 +106,13 @@ public class KakaoService {
 
         return userInfo;
     }
+    // 회원가입 또는 로그인 처리 메서드
+    public int processUser(Map<String, Object> userInfo) {
+        Long userId = (Long) userInfo.get("userId");
 
+        // 사용자 ID가 데이터베이스에 이미 존재하는지 확인
+        String sql = "SELECT COUNT(*) FROM testdb.user_info WHERE user_id = ?";
+        int count = jdbcTemplate.queryForObject(sql, Integer.class, userId);
+        return count;
+    }
 }
