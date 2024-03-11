@@ -42,6 +42,8 @@ public class KakaoLoginController {
 
         Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
 
+        var count = kakaoService.processUser(userInfo);
+
         // 세션에 사용자 정보 저장
         session.setAttribute("userId", userInfo.get("userId"));
         session.setAttribute("userNickname", userInfo.get("nickname"));
@@ -51,12 +53,12 @@ public class KakaoLoginController {
         session.setAttribute("userGender", userInfo.get("gender")); // 추가 정보 저장
         session.setAttribute("userAgeRange", userInfo.get("ageRange")); // 추가 정보 저장
 
-        // 사용자 정보를 데이터베이스에 저장
-        userInfoService.saveUserInfo(userInfo); // 수정된 부분
-
-        log.info("디비 저장함수가 켜지긴함.");
+        if(count ==0){
+            userInfoService.saveUserInfo(userInfo);
+        }
 
         // 세션 ID를 제외한 URL로 리다이렉션
         response.sendRedirect("/login/success");
     }
+
 }
