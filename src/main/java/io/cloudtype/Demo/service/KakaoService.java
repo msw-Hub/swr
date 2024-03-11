@@ -38,11 +38,6 @@ public class KakaoService {
 
         log.info("Response Body : " + result);
 
-        log.info("Access Token : " + tokens.get("access_token"));
-        log.info("Refresh Token : " + tokens.get("refresh_token"));
-        log.info("Refresh Token Expires In : " + tokens.get("refresh_token_expires_in"));
-        log.info("Scope : " + tokens.get("scope"));
-
         return tokens;
     }
 

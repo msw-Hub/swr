@@ -52,7 +52,7 @@ public class KakaoLoginController {
         session.setAttribute("userAgeRange", userInfo.get("ageRange")); // 추가 정보 저장
 
         // 사용자 정보를 데이터베이스에 저장
-        //userInfoService.saveUserInfo(userInfo); // 수정된 부분
+        userInfoService.saveUserInfo(userInfo); // 수정된 부분
 
         log.info("디비 저장함수가 켜지긴함.");
 
