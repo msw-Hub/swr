@@ -18,16 +18,14 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class KakaoService {
 
-    public String getAccessTokenFromKakao(String client_id, String code) throws IOException {
+    public Map<String, String> getTokensFromKakao(String client_id, String code) throws IOException {
         //------kakao POST 요청------
         String reqURL = "https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id="+client_id+"&code=" + code;
         URL url = new URL(reqURL);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
 
-
         BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
         String line = "";
         String result = "";
 
@@ -36,22 +34,16 @@ public class KakaoService {
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> jsonMap = objectMapper.readValue(result, new TypeReference<Map<String, Object>>() {
-        });
+        Map<String, String> tokens = objectMapper.readValue(result, new TypeReference<Map<String, String>>() {});
 
         log.info("Response Body : " + result);
 
-        String accessToken = (String) jsonMap.get("access_token");
-        String refreshToken = (String) jsonMap.get("refresh_token");
-        String scope = (String) jsonMap.get("scope");
+        log.info("Access Token : " + tokens.get("access_token"));
+        log.info("Refresh Token : " + tokens.get("refresh_token"));
+        log.info("Refresh Token Expires In : " + tokens.get("refresh_token_expires_in"));
+        log.info("Scope : " + tokens.get("scope"));
 
-
-        log.info("Access Token : " + accessToken);
-        log.info("Refresh Token : " + refreshToken);
-        log.info("Scope : " + scope);
-
-
-        return accessToken;
+        return tokens;
     }
 
     public Map<String, Object> getUserInfo(String access_Token) throws IOException {

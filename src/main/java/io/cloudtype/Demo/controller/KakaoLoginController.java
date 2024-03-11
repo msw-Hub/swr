@@ -31,7 +31,15 @@ public class KakaoLoginController {
 
     @GetMapping("/callback")
     public void callback(@RequestParam("code") String code, HttpSession session, HttpServletResponse response) throws IOException {
-        String accessToken = kakaoService.getAccessTokenFromKakao(client_id, code);
+        Map<String, String> tokens = kakaoService.getTokensFromKakao(client_id, code);
+        String accessToken = tokens.get("access_token");
+        String refreshToken = tokens.get("refresh_token");
+        String refreshTokenExpiresIn = tokens.get("refresh_token_expires_in");
+
+        log.info("Access Token : " + accessToken);
+        log.info("Refresh Token : " + refreshToken);
+        log.info("Refresh Token Expires In : " + refreshTokenExpiresIn);
+
         Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
 
         // 세션에 사용자 정보 저장
