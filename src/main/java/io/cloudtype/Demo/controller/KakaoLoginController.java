@@ -33,10 +33,12 @@ public class KakaoLoginController {
         log.info(code);
         Map<String, String> tokens = kakaoService.getTokensFromKakao(client_id, code);
         String accessToken = tokens.get("access_token");
+        String expiresIn = tokens.get("expires_in");
         String refreshToken = tokens.get("refresh_token");
         String refreshTokenExpiresIn = tokens.get("refresh_token_expires_in");
 
         log.info("Access Token : " + accessToken);
+        log.info("Expires_In : " + expiresIn);
         log.info("Refresh Token : " + refreshToken);
         log.info("Refresh Token Expires In : " + refreshTokenExpiresIn);
 
@@ -54,12 +56,6 @@ public class KakaoLoginController {
         session.setAttribute("userAgeRange", userInfo.get("ageRange")); // 추가 정보 저장
 
         // 프론트엔드에 전달할 응답 생성
-        String responseJson = "{\"access_token\": \"" + accessToken + "\"}";
-
-
-        // JSON 응답과 함께 HTTP 상태코드 200을 반환
-        return ResponseEntity.ok()
-                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .body(responseJson);
+        return ResponseEntity.ok().body(tokens.toString());
     }
 }
