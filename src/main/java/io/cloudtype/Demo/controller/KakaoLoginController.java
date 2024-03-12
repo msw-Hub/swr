@@ -1,5 +1,6 @@
 package io.cloudtype.Demo.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudtype.Demo.service.KakaoService;
 import io.cloudtype.Demo.service.UserInfoService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -63,7 +64,11 @@ public class KakaoLoginController {
         jsonResponse.put("expires_in", expiresIn);
         jsonResponse.put("refresh_token_expires_in", refreshTokenExpiresIn);
 
+        // ObjectMapper를 사용하여 Map 객체를 JSON 문자열로 변환
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonString = objectMapper.writeValueAsString(jsonResponse);
+
         // 프론트엔드에 전달할 응답 생성
-        return ResponseEntity.ok().body(jsonResponse.toString());
+        return ResponseEntity.ok().body(jsonString);
     }
 }
