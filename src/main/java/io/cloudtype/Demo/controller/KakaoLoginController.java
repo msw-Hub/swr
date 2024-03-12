@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -55,7 +56,14 @@ public class KakaoLoginController {
         session.setAttribute("userGender", userInfo.get("gender")); // 추가 정보 저장
         session.setAttribute("userAgeRange", userInfo.get("ageRange")); // 추가 정보 저장
 
+        Map<String, String> jsonResponse = new HashMap<>();
+        jsonResponse.put("access_token", accessToken);
+        jsonResponse.put("token_type", "bearer");
+        jsonResponse.put("refresh_token", refreshToken);
+        jsonResponse.put("expires_in", expiresIn);
+        jsonResponse.put("refresh_token_expires_in", refreshTokenExpiresIn);
+
         // 프론트엔드에 전달할 응답 생성
-        return ResponseEntity.ok().body(tokens.toString());
+        return ResponseEntity.ok().body(jsonResponse.toString());
     }
 }
