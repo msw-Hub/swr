@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,16 +37,18 @@ public class KakaoLoginController {
         log.info(code);
         Map<String, String> tokens = kakaoService.getTokensFromKakao(client_id, code);
         String accessToken = tokens.get("access_token");
-        String expiresIn = tokens.get("expires_in");
+        String expiresInStr = tokens.get("expires_in");
+        int expiresIn = Integer.parseInt(expiresInStr);
         String refreshToken = tokens.get("refresh_token");
         String refreshTokenExpiresIn = tokens.get("refresh_token_expires_in");
 
         log.info("Access Token : " + accessToken);
-        log.info("Expires_In : " + expiresIn);
+        log.info("Expires_In : " + expiresInStr);
         log.info("Refresh Token : " + refreshToken);
         log.info("Refresh Token Expires In : " + refreshTokenExpiresIn);
 
         Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+        String nickName = (String) userInfo.get("nickname");
 
         var count = kakaoService.processUser(userInfo);
 
@@ -57,12 +61,19 @@ public class KakaoLoginController {
         session.setAttribute("userGender", userInfo.get("gender")); // 추가 정보 저장
         session.setAttribute("userAgeRange", userInfo.get("ageRange")); // 추가 정보 저장
 
+        // 현재 시간을 milliseconds로 변환하여 expiresIn(초)만큼 더하여 유효한 만료 시간 계산
+        long now = System.currentTimeMillis();
+        long expiresInMillis = now + (expiresIn * 1000L);
+        Date expiryDate = new Date(expiresInMillis);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        // 날짜 형식으로 변환한 만료 시간을 JSON에 추가
+        String expiryDateString = sdf.format(expiryDate);
+
         Map<String, String> jsonResponse = new HashMap<>();
         jsonResponse.put("access_token", accessToken);
-        jsonResponse.put("token_type", "bearer");
-        jsonResponse.put("refresh_token", refreshToken);
-        jsonResponse.put("expires_in", expiresIn);
-        jsonResponse.put("refresh_token_expires_in", refreshTokenExpiresIn);
+        jsonResponse.put("nick_name", nickName);
+        jsonResponse.put("expires_at", expiryDateString);
 
         // ObjectMapper를 사용하여 Map 객체를 JSON 문자열로 변환
         ObjectMapper objectMapper = new ObjectMapper();
