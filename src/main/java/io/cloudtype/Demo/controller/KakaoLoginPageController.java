@@ -2,8 +2,6 @@ package io.cloudtype.Demo.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
@@ -16,20 +14,4 @@ public class KakaoLoginPageController {
     @Value("${kakao.redirect_uri}")
     private String redirect_uri;
 
-//    @GetMapping("/page")
-//    public String loginPage(Model model) {
-//        String location = "https://kauth.kakao.com/oauth/authorize?response_type=code&client_id="+client_id+"&redirect_uri="+redirect_uri;
-//        model.addAttribute("location", location);
-//
-//        return "login";
-//    }
-//    @GetMapping("/successSign")
-//    public String successSignPage() {
-//        return "successSign"; // successSign.html 파일이 있는 경로를 리턴합니다.
-//    }
-//
-//    @GetMapping("/successLogin")
-//    public String successLoginPage() {
-//        return "successLogin"; // successSign.html 파일이 있는 경로를 리턴합니다.
-//    }
 }
