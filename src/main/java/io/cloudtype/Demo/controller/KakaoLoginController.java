@@ -32,7 +32,7 @@ public class KakaoLoginController {
 
     @CrossOrigin(origins = "https://teamswr.store")
     @GetMapping("/callback")
-    public ResponseEntity<String> callback(@RequestParam("code") String code, HttpSession session, HttpServletResponse response) throws IOException {
+    public ResponseEntity<String> callback(@RequestParam("code") String code) throws IOException {
         log.info(code);
         Map<String, String> tokens = kakaoService.getTokensFromKakao(client_id, code);
         String accessToken = tokens.get("access_token");
@@ -47,18 +47,14 @@ public class KakaoLoginController {
         log.info("Refresh Token Expires In : " + refreshTokenExpiresIn);
 
         Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+        Long userId = (Long) userInfo.get("userId");
         String nickName = (String) userInfo.get("nickname");
 
-        var count = kakaoService.processUser(userInfo);
+        //데이터베이스에 있는 내용인지 검토
+        int count = kakaoService.processUser(userInfo);
 
-        // 세션에 사용자 정보 저장
-        session.setAttribute("userId", userInfo.get("userId"));
-        session.setAttribute("userNickname", userInfo.get("nickname"));
-        session.setAttribute("userProfileImage", userInfo.get("profileImage"));
-        session.setAttribute("userEmail", userInfo.get("email")); // 추가 정보 저장
-        session.setAttribute("userName", userInfo.get("name")); // 추가 정보 저장
-        session.setAttribute("userGender", userInfo.get("gender")); // 추가 정보 저장
-        session.setAttribute("userAgeRange", userInfo.get("ageRange")); // 추가 정보 저장
+        String logMessage = count == 0 ? "회원가입 완료" : "로그인 완료";
+        log.info(logMessage);
 
         // UNIX 시간으로 만료 시간 계산
         long now = System.currentTimeMillis();
