@@ -113,6 +113,12 @@ public class KakaoService {
         // 사용자 ID가 데이터베이스에 이미 존재하는지 확인
         String sql = "SELECT COUNT(*) FROM testdb.user_info WHERE user_id = ?";
         int count = jdbcTemplate.queryForObject(sql, Integer.class, userId);
+
+        if (count == 0) {
+            // 사용자 정보가 데이터베이스에 존재하지 않는 경우, 사용자 정보를 저장
+            userInfoService.saveUserInfo(userInfo);
+        }
+
         return count;
     }
 }
