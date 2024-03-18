@@ -18,7 +18,7 @@ public class UserInfoService {
     }
 
     public Map<String, Object> getUserInfoById(Long userId) {
-        String sql = "SELECT * FROM testdb.user_info WHERE user_id = ?";
+        String sql = "SELECT * FROM mydb.user_info WHERE user_id = ?";
         return jdbcTemplate.queryForMap(sql, userId);
     }
 
@@ -26,7 +26,7 @@ public class UserInfoService {
         if (jdbcTemplate == null) {
             throw new IllegalStateException("JdbcTemplate이 올바르게 주입되지 않았습니다.");
         }
-        String sql = "INSERT INTO testdb.user_info (user_id, nickname, profile_image, email, name, gender, age_range) "
+        String sql = "INSERT INTO mydb.user_info (user_id, nickname, profile_image, email, name, gender, age_range) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,
                 (Long) userInfo.get("userId"), // userId를 Long으로 캐스팅
