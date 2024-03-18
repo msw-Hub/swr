@@ -1,3 +1,5 @@
+package io.cloudtype.Demo.controller;
+
 import io.cloudtype.Demo.service.KakaoService;
 import io.cloudtype.Demo.service.UserInfoService;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
+@CrossOrigin(origins = "https://teamswr.store")
 public class MyPageController {
 
     @Autowired
