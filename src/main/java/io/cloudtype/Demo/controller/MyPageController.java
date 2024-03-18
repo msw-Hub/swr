@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@CrossOrigin(origins = "https://teamswr.store")
+@CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 public class MyPageController {
 
     @Autowired
