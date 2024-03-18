@@ -1,5 +1,3 @@
-package io.cloudtype.Demo.controller;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudtype.Demo.service.KakaoService;
 import io.cloudtype.Demo.service.UserInfoService;
@@ -10,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,9 +42,14 @@ public class KakaoLoginController {
         log.info("Refresh Token : " + refreshToken);
         log.info("Refresh Token Expires In : " + refreshTokenExpiresIn);
 
-        // UNIX 시간으로 만료 시간 계산
-        long now = System.currentTimeMillis();
-        long expiresAtUnix = now + (expiresIn * 1000L);
+        // 현재 시간을 가져옴
+        Instant now = Instant.now();
+
+        // 만료 시간을 현재 시간에 만료 기간을 더한 값으로 계산
+        Instant expiresAtInstant = now.plusSeconds(expiresIn);
+        long expiresAtUnix = expiresAtInstant.getEpochSecond();
+
+        log.info(String.valueOf(expiresAtUnix));
 
         Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
         String nickName = (String) userInfo.get("nickname");
