@@ -8,3 +8,5 @@ spring:
     url: ${url}
     username: ${username}
     password: ${password}
+  thymeleaf:
+    check-template-location: false
