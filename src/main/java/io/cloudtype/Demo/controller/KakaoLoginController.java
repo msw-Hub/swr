@@ -28,7 +28,7 @@ public class KakaoLoginController {
     @Autowired
     private UserInfoService userInfoService; // UserInfoService 주입
 
-    @CrossOrigin(origins = "https://teamswr.store")
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @GetMapping("/callback")
     public ResponseEntity<String> callback(@RequestParam("code") String code) throws IOException {
         log.info(code);

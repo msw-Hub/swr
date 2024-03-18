@@ -25,7 +25,7 @@ public class MyPageController {
     @Autowired
     private UserInfoService userInfoService;
 
-    @CrossOrigin(origins = "https://teamswr.store")
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @GetMapping("/mypage")
     public ResponseEntity<Map<String, Object>> myPage(@RequestHeader("Authorization") String accessToken) {
         try {
