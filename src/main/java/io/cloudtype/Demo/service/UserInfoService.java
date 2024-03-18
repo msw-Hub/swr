@@ -17,6 +17,11 @@ public class UserInfoService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    public Map<String, Object> getUserInfoById(Long userId) {
+        String sql = "SELECT * FROM testdb.user_info WHERE user_id = ?";
+        return jdbcTemplate.queryForMap(sql, userId);
+    }
+
     public void saveUserInfo(Map<String, Object> userInfo) {
         if (jdbcTemplate == null) {
             throw new IllegalStateException("JdbcTemplate이 올바르게 주입되지 않았습니다.");
