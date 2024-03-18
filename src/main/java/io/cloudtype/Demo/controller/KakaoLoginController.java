@@ -1,3 +1,5 @@
+package io.cloudtype.Demo.controller;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudtype.Demo.service.KakaoService;
 import io.cloudtype.Demo.service.UserInfoService;
