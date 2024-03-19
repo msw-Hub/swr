@@ -51,4 +51,32 @@ public class UserInfoService {
                 + "ON DUPLICATE KEY UPDATE phone_number = VALUES(phone_number), pin_number = VALUES(pin_number), birthday = VALUES(birthday)";
         jdbcTemplate.update(sql, phoneNumber, pinNumber, birthday);
     }
+
+    //개인정보 수정시 pin번호를 조회하는 메서드
+    public String getPinNumberByUserId(Long userId) {
+        if (jdbcTemplate == null) {
+            throw new IllegalStateException("JdbcTemplate이 올바르게 주입되지 않았습니다.");
+        }
+
+        // 데이터베이스에서 userId에 해당하는 사용자의 핀 번호를 조회하는 쿼리 작성
+        String sql = "SELECT pin_number FROM mydb.user_additional_info WHERE user_id = ?";
+
+        // 쿼리 실행하여 결과 가져오기
+        return jdbcTemplate.queryForObject(sql, String.class);
+    }
+
+    public void updateUserInfo(Long userId, String column, String value) {
+        // 수정할 column에 따라 SQL 쿼리를 동적으로 생성하여 실행
+        String sql = switch (column) {
+            case "nickname" -> "UPDATE user_info SET nickname = ? WHERE user_id = ?";
+            case "pin_number" -> "UPDATE user_info SET pin_number = ? WHERE user_id = ?";
+            case "phone_number" -> "UPDATE user_info SET phone_number = ? WHERE user_id = ?";
+            default ->
+                // 유효하지 않은 column인 경우 예외 처리
+                    throw new IllegalArgumentException("유효하지 않은 column입니다: " + column);
+        };
+
+        // SQL 쿼리 실행
+        jdbcTemplate.update(sql, value, userId);
+    }
 }

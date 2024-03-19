@@ -65,11 +65,12 @@ public class KakaoLoginController {
         //데이터베이스에 있는 내용인지 검토
         int count = kakaoService.processUser(userInfo);
 
-        String logMessage = count == 0 ? "회원가입 완료" : "로그인 완료";
+        String logMessage = count == 0 ? "회원가입" : "로그인";
         log.info(logMessage);
 
         // JSON 응답에 포함할 데이터 준비
         Map<String, Object> jsonResponse = new HashMap<>();
+        jsonResponse.put("login_or_sign", logMessage);
         jsonResponse.put("access_token", accessToken);
         jsonResponse.put("expires_at_unix", expiresAtUnix);
         jsonResponse.put("refresh_token", refreshToken);
@@ -148,7 +149,7 @@ public class KakaoLoginController {
             userInfo.put("birthday", birthday);
             userInfoService.saveAdditionalUserInfo(phoneNumber, pinNumber, birthday);
 
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body("3개의 데이터 문제없이 받아서 저장함");
         } catch (IOException e) {
             log.error("Failed to fetch user info from Kakao API", e);
             return ResponseEntity.internalServerError().build();
