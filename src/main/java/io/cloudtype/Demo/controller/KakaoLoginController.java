@@ -85,7 +85,8 @@ public class KakaoLoginController {
 
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/refresh")
-    public ResponseEntity<String> refresh(@RequestParam("refresh_token") String refreshedToken) throws IOException {
+    public ResponseEntity<String> refresh(@RequestBody Map<String, String> requestBody) throws IOException {
+        String refreshedToken = requestBody.get("refresh_token");
         log.info("Received refresh token: " + refreshedToken);
 
         // KakaoService를 통해 액세스 토큰 갱신 요청
