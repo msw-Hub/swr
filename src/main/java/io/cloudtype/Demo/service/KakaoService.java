@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -121,4 +122,52 @@ public class KakaoService {
 
         return count;
     }
+
+    public Map<String, String> refreshAccessToken(String client_id, String refresh_token) throws IOException {
+        // 토큰 갱신 요청을 보낼 URL
+        String reqURL = "https://kauth.kakao.com/oauth/token";
+
+        // 토큰 갱신 요청에 필요한 파라미터 설정
+        String params = "grant_type=refresh_token" +
+                "&client_id=" + client_id +
+                "&refresh_token=" + refresh_token;
+
+        // URL 객체 생성
+        URL url = new URL(reqURL);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+        // HTTP 요청 메서드 설정
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+        // 출력 스트림을 사용하여 파라미터 전송
+        conn.setDoOutput(true);
+        OutputStream os = conn.getOutputStream();
+        os.write(params.getBytes());
+        os.flush();
+        os.close();
+
+        // 응답코드 확인
+        int responseCode = conn.getResponseCode();
+        System.out.println("Response Code : " + responseCode);
+
+        // 응답을 읽어올 BufferedReader 생성
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        StringBuilder response = new StringBuilder();
+        String line;
+
+        // 응답 내용을 문자열로 읽어옴
+        while ((line = br.readLine()) != null) {
+            response.append(line);
+        }
+        br.close();
+
+        // 응답 내용을 JSON 형식으로 파싱하여 Map으로 반환
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> tokens = objectMapper.readValue(response.toString(), new TypeReference<Map<String, String>>() {});
+
+        return tokens;
+    }
+
+
 }
