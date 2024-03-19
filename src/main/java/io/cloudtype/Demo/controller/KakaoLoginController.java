@@ -144,6 +144,11 @@ public class KakaoLoginController {
             String pinNumber = requestBody.get("pin_number");
             String birthday = requestBody.get("birthday");
 
+            // 공백 문자가 있는지 확인하여 처리
+            if (phoneNumber.trim().isEmpty() || pinNumber.trim().isEmpty() || birthday.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("입력값에 공백 문자가 포함되어 있습니다. 다시 입력해주세요.");
+            }
+
             userInfo.put("phone_number", phoneNumber);
             userInfo.put("pin_number", pinNumber);
             userInfo.put("birthday", birthday);
@@ -155,6 +160,6 @@ public class KakaoLoginController {
             return ResponseEntity.internalServerError().build();
         }
     }
-
+    }
 
 }
