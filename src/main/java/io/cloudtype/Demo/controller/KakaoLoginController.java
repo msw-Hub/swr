@@ -160,6 +160,5 @@ public class KakaoLoginController {
             return ResponseEntity.internalServerError().build();
         }
     }
-    }
 
 }
