@@ -73,7 +73,7 @@ public class KakaoLoginController {
         jsonResponse.put("access_token", accessToken);
         jsonResponse.put("expires_at_unix", expiresAtUnix);
         jsonResponse.put("refresh_token", refreshToken);
-        jsonResponse.put("refresh_token_expires_in", refreshTokenExpiresAtUnix); // 수정된 부분
+        jsonResponse.put("refresh_token_expires_in", refreshTokenExpiresAtUnix);
 
         // ObjectMapper를 사용하여 Map 객체를 JSON 문자열로 변환
         ObjectMapper objectMapper = new ObjectMapper();
@@ -82,4 +82,51 @@ public class KakaoLoginController {
         // 프론트엔드에 전달할 응답 생성
         return ResponseEntity.ok().body(jsonString);
     }
+
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
+    @PostMapping("/refresh")
+    public ResponseEntity<String> refresh(@RequestParam("refresh_token") String refreshedToken) throws IOException {
+        log.info("Received refresh token: " + refreshedToken);
+
+        // KakaoService를 통해 액세스 토큰 갱신 요청
+        Map<String, String> tokens = kakaoService.refreshAccessToken(client_id, refreshedToken);
+        String accessToken = tokens.get("access_token");
+        String expiresInStr = tokens.get("expires_in");
+        int expiresIn = Integer.parseInt(expiresInStr);
+        String refreshToken = tokens.get("refresh_token");
+        String refreshTokenExpiresInStr = tokens.get("refresh_token_expires_in");
+        int refreshTokenExpiresIn = Integer.parseInt(refreshTokenExpiresInStr);
+
+        log.info("Access Token : " + accessToken);
+        log.info("Expires_In : " + expiresInStr);
+        log.info("Refresh Token : " + refreshToken);
+        log.info("Refresh Token Expires In : " + refreshTokenExpiresInStr);
+
+        // 현재 시간을 가져옴
+        Instant now = Instant.now();
+
+        // 만료 시간을 현재 시간에 만료 기간을 더한 값으로 계산
+        Instant expiresAtInstant = now.plusSeconds(expiresIn);
+        long expiresAtUnix = expiresAtInstant.getEpochSecond();
+
+        // refreshToken 만료 시간을 계산
+        Instant refreshTokenExpiresAtInstant = now.plusSeconds(refreshTokenExpiresIn);
+        long refreshTokenExpiresAtUnix = refreshTokenExpiresAtInstant.getEpochSecond();
+
+        log.info(String.valueOf(expiresAtUnix));
+
+        Map<String, Object> jsonResponse = new HashMap<>();
+        jsonResponse.put("access_token", accessToken);
+        jsonResponse.put("expires_at_unix", expiresAtUnix);
+        jsonResponse.put("refresh_token", refreshToken);
+        jsonResponse.put("refresh_token_expires_in", refreshTokenExpiresAtUnix);
+
+        // ObjectMapper를 사용하여 Map 객체를 JSON 문자열로 변환
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonString = objectMapper.writeValueAsString(jsonResponse);
+
+        // 프론트엔드에 전달할 응답 생성
+        return ResponseEntity.ok().body(jsonString);
+    }
+
 }
