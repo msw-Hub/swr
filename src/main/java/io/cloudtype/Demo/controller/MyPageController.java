@@ -35,7 +35,7 @@ public class MyPageController {
             // 가져온 유저 정보에서 고유 ID를 확인
             Long userId = (Long) userInfo.get("userId");
 
-            // 확인된 고유 ID를 가지고 데이터베이스에 해당 사용자가 이미 존재하는지 확인
+            // 확인된 고유 ID를 가지고 데이터베이스에 해당 사용자가 이미 존재하는지 확인하고 가져오기
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
 
             if (dbUserInfo != null) {
