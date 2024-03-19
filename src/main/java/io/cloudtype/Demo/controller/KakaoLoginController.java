@@ -95,32 +95,29 @@ public class KakaoLoginController {
         String expiresInStr = tokens.get("expires_in");
         int expiresIn = Integer.parseInt(expiresInStr);
         String refreshToken = tokens.get("refresh_token");
-        String refreshTokenExpiresInStr = tokens.get("refresh_token_expires_in");
-        int refreshTokenExpiresIn = Integer.parseInt(refreshTokenExpiresInStr);
-
-        log.info("Access Token : " + accessToken);
-        log.info("Expires_In : " + expiresInStr);
-        log.info("Refresh Token : " + refreshToken);
-        log.info("Refresh Token Expires In : " + refreshTokenExpiresInStr);
 
         // 현재 시간을 가져옴
         Instant now = Instant.now();
-
         // 만료 시간을 현재 시간에 만료 기간을 더한 값으로 계산
         Instant expiresAtInstant = now.plusSeconds(expiresIn);
         long expiresAtUnix = expiresAtInstant.getEpochSecond();
 
-        // refreshToken 만료 시간을 계산
-        Instant refreshTokenExpiresAtInstant = now.plusSeconds(refreshTokenExpiresIn);
-        long refreshTokenExpiresAtUnix = refreshTokenExpiresAtInstant.getEpochSecond();
-
-        log.info(String.valueOf(expiresAtUnix));
-
         Map<String, Object> jsonResponse = new HashMap<>();
         jsonResponse.put("access_token", accessToken);
         jsonResponse.put("expires_at_unix", expiresAtUnix);
-        jsonResponse.put("refresh_token", refreshToken);
-        jsonResponse.put("refresh_token_expires_in", refreshTokenExpiresAtUnix);
+
+        if (refreshToken!=null){
+            String refreshTokenExpiresInStr = tokens.get("refresh_token_expires_in");
+            int refreshTokenExpiresIn = Integer.parseInt(refreshTokenExpiresInStr);
+
+            // refreshToken 만료 시간을 계산
+            Instant refreshTokenExpiresAtInstant = now.plusSeconds(refreshTokenExpiresIn);
+            long refreshTokenExpiresAtUnix = refreshTokenExpiresAtInstant.getEpochSecond();
+
+            jsonResponse.put("refresh_token", refreshToken);
+            jsonResponse.put("refresh_token_expires_in", refreshTokenExpiresAtUnix);
+
+        };
 
         // ObjectMapper를 사용하여 Map 객체를 JSON 문자열로 변환
         ObjectMapper objectMapper = new ObjectMapper();
@@ -129,5 +126,34 @@ public class KakaoLoginController {
         // 프론트엔드에 전달할 응답 생성
         return ResponseEntity.ok().body(jsonString);
     }
+
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
+    @PostMapping("/signup")
+    public ResponseEntity<String> signUp(@RequestHeader("Authorization") String accessToken,
+                                         @RequestBody Map<String, String> requestBody) {
+        try {
+            // 카카오 서버에서 해당 엑세스 토큰을 사용하여 유저 정보를 가져옴
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+
+            // 가져온 유저 정보에서 고유 ID를 확인
+            Long userId = (Long) userInfo.get("userId");
+
+            // 회원가입 시 추가 정보를 데이터베이스에 저장
+            String phoneNumber = requestBody.get("phone_number");
+            String pinNumber = requestBody.get("pin_number");
+            String birthday = requestBody.get("birthday");
+
+            userInfo.put("phone_number", phoneNumber);
+            userInfo.put("pin_number", pinNumber);
+            userInfo.put("birthday", birthday);
+            userInfoService.saveAdditionalUserInfo(phoneNumber, pinNumber, birthday);
+
+            return ResponseEntity.ok().build();
+        } catch (IOException e) {
+            log.error("Failed to fetch user info from Kakao API", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 
 }

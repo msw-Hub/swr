@@ -3,6 +3,7 @@ package io.cloudtype.Demo.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,6 +32,7 @@ public class KakaoService {
     }
 
 
+    //로그인 첫 토큰 발행
     public Map<String, String> getTokensFromKakao(String client_id, String code) throws IOException {
         //------kakao POST 요청------
         String reqURL = "https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id="+client_id+"&code=" + code;
@@ -54,6 +56,7 @@ public class KakaoService {
         return tokens;
     }
 
+    //카카오로부터 유저정보 받아오는 메서드
     public Map<String, Object> getUserInfo(String access_Token) throws IOException {
         // 클라이언트 요청 정보
         Map<String, Object> userInfo = new HashMap<>();
@@ -107,8 +110,9 @@ public class KakaoService {
 
         return userInfo;
     }
-    // 회원가입 또는 로그인 처리 메서드
-    public int processUser(Map<String, Object> userInfo) {
+
+    // 회원가입 처리 메서드
+    public int processUser(@NotNull Map<String, Object> userInfo) {
         Long userId = (Long) userInfo.get("userId");
 
         // 사용자 ID가 데이터베이스에 이미 존재하는지 확인
@@ -123,6 +127,7 @@ public class KakaoService {
         return count;
     }
 
+    //리프레시 토큰으로 엑세스 토큰 갱신하는 메서드
     public Map<String, String> refreshAccessToken(String client_id, String refresh_token) throws IOException {
         // 토큰 갱신 요청을 보낼 URL
         String reqURL = "https://kauth.kakao.com/oauth/token";
