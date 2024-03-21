@@ -33,6 +33,7 @@ dependencies {
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'io.springfox:springfox-swagger2:3.0.0'
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 }
 
 tasks.named('bootBuildImage') {
