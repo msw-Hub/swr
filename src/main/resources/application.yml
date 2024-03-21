@@ -12,7 +12,7 @@ spring:
     check-template-location: false
 
 springdoc:
-  packages-to-scan: com.colabear754.springdoc_example.controllers
+  packages-to-scan: io.cloudtype.Demo.controller
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
   swagger-ui:
