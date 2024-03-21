@@ -6,6 +6,7 @@ import io.cloudtype.Demo.service.UserInfoService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,7 @@ public class KakaoLoginController {
 
 
     @Operation(summary = "엑세스토큰갱신" , description = "엑세스토큰 갱신을 위한 API")
-    @Parameter(name = "refresh_token", description = "리프레시 토큰", required = true)
+    @Parameter(name = "refresh_token", description = "리프레시 토큰", required = true, in = ParameterIn.DEFAULT)
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/refresh")
     public ResponseEntity<String> refresh(@RequestBody Map<String, String> requestBody) throws IOException {
@@ -140,9 +141,10 @@ public class KakaoLoginController {
 
 
     @Operation(summary = "회원가입", description = "회원가입을 위한 API")
-    @Parameter(name = "phone_number", description = "전화번호", required = true)
-    @Parameter(name = "pin_number", description = "핀번호", required = true)
-    @Parameter(name = "birthday", description = "생년월일", required = true)
+    @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "phone_number", description = "전화번호", required = true, in = ParameterIn.DEFAULT)
+    @Parameter(name = "pin_number", description = "핀번호", required = true, in = ParameterIn.DEFAULT)
+    @Parameter(name = "birthday", description = "생년월일", required = true, in = ParameterIn.DEFAULT)
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@RequestHeader("Authorization") String accessToken,
