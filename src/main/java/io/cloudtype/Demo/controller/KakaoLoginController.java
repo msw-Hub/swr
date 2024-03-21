@@ -7,6 +7,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +25,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("")
-@Api(tags = "Kakao Login")
+@Tag(name = "kakao", description = "카카오 로그인 관련 API")
 public class KakaoLoginController {
 
     @Value("${kakao.client_id}")
@@ -33,10 +37,8 @@ public class KakaoLoginController {
     @Autowired
     private UserInfoService userInfoService; // UserInfoService 주입
 
-    @ApiOperation(value = "카카오 콜백", notes = "카카오 인증 콜백 엔드포인트")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "카카오 인증이 성공적으로 처리되었습니다.")
-    })
+    @Operation(summary = "카카오 로그인", description = "카카오 로그인을 위한 엔드포인트입니다. 클라이언트는 카카오 로그인 페이지로 리다이렉트해야 합니다.")
+    @Parameter(name = "code", description = "카카오 로그인 페이지에서 받은 코드", required = true)
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @GetMapping("/callback")
     public ResponseEntity<String> callback(@RequestParam("code") String code) throws IOException {
@@ -93,10 +95,8 @@ public class KakaoLoginController {
         return ResponseEntity.ok().body(jsonString);
     }
 
-    @ApiOperation(value = "액세스 토큰 갱신", notes = "액세스 토큰 갱신 엔드포인트")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "액세스 토큰이 성공적으로 갱신되었습니다.")
-    })
+    @Operation(summary = "액세스 토큰 갱신", description = "액세스 토큰을 갱신하기 위한 엔드포인트입니다. 클라이언트는 리프레시 토큰을 바디에 포함하여 요청을 보내야 합니다.")
+    @Parameter(name = "refresh_token", description = "리프레시 토큰", required = true)
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/refresh")
     public ResponseEntity<String> refresh(@RequestBody Map<String, String> requestBody) throws IOException {
@@ -141,12 +141,13 @@ public class KakaoLoginController {
         return ResponseEntity.ok().body(jsonString);
     }
 
-    @ApiOperation(value = "회원가입", notes = "회원가입을 위한 엔드포인트입니다. 클라이언트는 유저 토큰을 헤더에 포함하여 요청을 보내야 합니다. 바디에는 폰 번호, 핀 번호, 생일을 포함해야 합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "회원가입이 성공적으로 처리되었습니다."),
-            @ApiResponse(code = 400, message = "입력값에 공백 문자가 포함되어 있거나 유효하지 않은 값입니다."),
-            @ApiResponse(code = 500, message = "내부 서버 오류가 발생했습니다.")
-    })
+    @Operation(summary = "회원가입", description = "회원가입을 위한 엔드포인트입니다. 클라이언트는 회원가입 시 추가 정보를 바디에 포함하여 요청을 보내야 합니다.")
+    @Parameter(name = "phone_number", description = "전화번호", required = true)
+    @Parameter(name = "pin_number", description = "핀번호", required = true)
+    @Parameter(name = "birthday", description = "생년월일", required = true)
+    @ApiResponse(responseCode = "200", description = "회원가입 성공")
+    @ApiResponse(responseCode = "400", description = "입력값에 공백 문자가 포함되어 있음")
+    @ApiResponse(responseCode = "500", description = "카카오 API에서 유저 정보를 가져오는데 실패")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@RequestHeader("Authorization") String accessToken,
