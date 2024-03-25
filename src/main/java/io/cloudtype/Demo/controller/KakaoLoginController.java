@@ -174,7 +174,7 @@ public class KakaoLoginController {
             userInfo.put("phone_number", phoneNumber);
             userInfo.put("pin_number", pinNumber);
             userInfo.put("birthday", birthday);
-            userInfoService.saveAdditionalUserInfo(phoneNumber, pinNumber, birthday);
+            userInfoService.saveAdditionalUserInfo(userId,phoneNumber, pinNumber, birthday);
 
             return ResponseEntity.ok().body("3개의 데이터 문제없이 받아서 저장함");
         } catch (IOException e) {
