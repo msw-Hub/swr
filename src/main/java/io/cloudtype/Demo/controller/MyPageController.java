@@ -163,7 +163,7 @@ public class MyPageController {
             if (pinNumber != null && !pinNumber.trim().isEmpty() && pinNumber.matches("\\d{6}")) {
                 column = "pin_number";
                 int nowPinNunber = (int) dbUserInfo.get("pin_number");
-                if(nowPinNunber == Integer.parseInt(pinNumber){
+                if(nowPinNunber == Integer.parseInt(pinNumber)){
                     jsonResponse.put("bad", "이미 사용중인 핀번호입니다.");
                     ObjectMapper objectMapper = new ObjectMapper();
                     String jsonString = objectMapper.writeValueAsString(jsonResponse);
