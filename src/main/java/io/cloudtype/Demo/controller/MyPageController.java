@@ -133,6 +133,8 @@ public class MyPageController {
 
             String column = "";
 
+            Map<String, Object> jsonResponse = new HashMap<>();
+
             // 닉네임을 수정할 경우, 중복된 닉네임이 있는지 확인
             String changeNickname = requestBody.get("nickname");
             if (changeNickname != null && !changeNickname.trim().isEmpty()) {
@@ -142,7 +144,10 @@ public class MyPageController {
                 String nowNickname = (String) dbUserInfo.get("nickname");
                 boolean isNicknameDuplicate = nowNickname.equalsIgnoreCase(changeNickname);
                 if (isNicknameDuplicate) {
-                    return ResponseEntity.badRequest().body("이미 사용 중인 닉네임입니다.");
+                    jsonResponse.put("bad", "이미 사용중인 닉네임입니다.");
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    String jsonString = objectMapper.writeValueAsString(jsonResponse);
+                    return ResponseEntity.badRequest().body(jsonString);
                 }
                 else {
                     log.info("바뀌기전 nickname : " +dbUserInfo.get("nickname"));
@@ -157,6 +162,13 @@ public class MyPageController {
             String pinNumber = requestBody.get("pin_number");
             if (pinNumber != null && !pinNumber.trim().isEmpty() && pinNumber.matches("\\d{6}")) {
                 column = "pin_number";
+                String nowPinNunber = (String) dbUserInfo.get("pin_number");
+                if(nowPinNunber.equals(pinNumber)){
+                    jsonResponse.put("bad", "이미 사용중인 핀번호입니다.");
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    String jsonString = objectMapper.writeValueAsString(jsonResponse);
+                    return ResponseEntity.badRequest().body(jsonString);
+                }
                 log.info("바뀌기전 pin_number : " +dbUserInfo.get("pin_number"));
                 userInfoService.updateUserInfo(userId,column,pinNumber);
                 dbUserInfo = userInfoService.getUserInfoById(userId);
@@ -167,12 +179,19 @@ public class MyPageController {
             String phoneNumber = requestBody.get("phone_number");
             if (phoneNumber != null && !phoneNumber.trim().isEmpty() && phoneNumber.matches("01[0-9]-\\d{4}-\\d{4}")) {
                 column = "phone_number";
+                String nowPhoneNumber = (String) dbUserInfo.get("phone_number");
+                if(nowPhoneNumber.equals(pinNumber)){
+                    jsonResponse.put("bad", "이미 사용중인 전화번호입니다.");
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    String jsonString = objectMapper.writeValueAsString(jsonResponse);
+                    return ResponseEntity.badRequest().body(jsonString);
+                }
                 log.info("바뀌기전 phone_number : " +dbUserInfo.get("phone_number"));
                 userInfoService.updateUserInfo(userId,column,phoneNumber);
                 dbUserInfo = userInfoService.getUserInfoById(userId);
                 log.info("바뀐후 phone_number : " +dbUserInfo.get("phone_number"));
             }
-            Map<String, Object> jsonResponse = new HashMap<>();
+
             jsonResponse.put("success", "정보가 성공적으로 수정되었습니다.");
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonString = objectMapper.writeValueAsString(jsonResponse);

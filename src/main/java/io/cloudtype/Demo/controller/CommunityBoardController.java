@@ -40,13 +40,24 @@ public class CommunityBoardController {
         this.communityBoardService = communityBoardService;
     }
 
-    @GetMapping("")
+    @PostMapping("")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "커뮤니티 게시판 글 목록 가져오기", description = "최신 글부터 페이지별로 반환합니다.")
-    @Parameter(name = "page", description = "페이지번호_디폴트값1", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "accessToken", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "page", description = "페이지 번호 (기본값 1)", required = true)
     @ApiResponse(responseCode = "200", description = "커뮤니티 게시판 글 목록 반환 성공",content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
-    public ResponseEntity<Map<String, Object>> getCommunityBoard(@RequestParam(name = "page", defaultValue = "1") int page) {
+    public ResponseEntity<Map<String, Object>> getCommunityBoard(
+            @RequestHeader("Authorization") String accessToken,
+            @RequestBody Map<String, Object> requestBody
+    ) {
         try {
+            int page = (int) requestBody.get("page");
+            // 가입된 사람만 사용하도록 확인
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+            int count = kakaoService.processUser(userInfo);
+            if (count == 0) {
+                return ResponseEntity.badRequest().build();
+            }
             Map<String, Object> communityBoardList = communityBoardService.getCommunityBoardPosts(page);
             log.info("communityBoardList: " + communityBoardList);
 

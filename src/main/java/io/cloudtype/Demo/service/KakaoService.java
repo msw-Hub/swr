@@ -111,7 +111,7 @@ public class KakaoService {
         return userInfo;
     }
 
-    // 회원가입 처리 메서드
+    //사용자 정보 처리 메서드 (DB에 이미 존재하는지 확인후 있으면 로그인, 없으면 회원가입 진행)
     public int processUser(@NotNull Map<String, Object> userInfo) {
         Long userId = (Long) userInfo.get("userId");
 
