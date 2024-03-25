@@ -178,9 +178,15 @@ public class KakaoLoginController {
             userInfo.put("phone_number", phoneNumber);
             userInfo.put("pin_number", pinNumber);
             userInfo.put("birthday", birthday);
-            userInfoService.saveAdditionalUserInfo(userId,phoneNumber, pinNumber, birthday);
+            userInfoService.saveAdditionalUserInfo(userId, phoneNumber, pinNumber, birthday);
 
-            return ResponseEntity.ok().body("3개의 데이터 문제없이 받아서 저장함");
+            Map<String, Object> jsonResponse = new HashMap<>();
+            jsonResponse.put("success", "3개의 데이터 문제없이 받아서 저장함");
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonString = objectMapper.writeValueAsString(jsonResponse);
+
+            return ResponseEntity.ok().body(jsonString);
         } catch (IOException e) {
             log.error("Failed to fetch user info from Kakao API", e);
             return ResponseEntity.internalServerError().build();
