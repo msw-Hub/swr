@@ -71,11 +71,12 @@ public class CommunityBoardController {
     @PostMapping("/create")
     @Operation(summary = "게시글 작성", description = "게시글을 작성합니다.")
     @Parameter(name = "accessToken", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "title", description = "게시글 제목", required = true)
+    @Parameter(name = "content", description = "게시글 내용", required = true)
     @ApiResponse(responseCode = "200", description = "글 작성 성공",content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     public ResponseEntity<Map<String, String>> writePost(
             @RequestHeader("Authorization") String accessToken,
-            @RequestParam("title") String title,
-            @RequestParam("content") String content
+            @RequestBody Map<String, Object> requestBody
     ) {
         try {
             // 카카오 API를 통해 사용자 정보 가져오기
@@ -85,6 +86,9 @@ public class CommunityBoardController {
             Long writerId = (Long) dbUserInfo.get("Id");
             String nickname = (String) dbUserInfo.get("nickname");
 
+            String title = (String) requestBody.get("title");
+            String content = (String) requestBody.get("content");
+            
             // 게시글 작성
             communityBoardService.writePost(writerId, nickname, title, content);
 
