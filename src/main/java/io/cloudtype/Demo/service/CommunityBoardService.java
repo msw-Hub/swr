@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,11 +33,11 @@ public class CommunityBoardService {
 
         // SQL 쿼리 실행
         try {
-            List<Map<String, Object>> posts = jdbcTemplate.queryForList(sql, start, pageSize);
+            List<Map<String, Object>> lists = jdbcTemplate.queryForList(sql, start, pageSize);
 
             // 결과 맵 생성
             Map<String, Object> result = new HashMap<>();
-            result.put("posts", posts);
+            result.put("posts", lists);
             result.put("page", page);
             result.put("pageSize", pageSize);
 
@@ -45,5 +46,14 @@ public class CommunityBoardService {
             log.error("Failed to fetch community board posts", e);
             return null;
         }
+    }
+
+    public void writePost(Long userId, String nickname, String title, String content) {
+        // 현재 시간 가져오기
+        Instant now = Instant.now();
+
+        // 게시글 작성 SQL 쿼리 실행
+        String sql = "INSERT INTO community_board (writer_id, writer_nickname, title, content, created_date) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, userId, nickname, title, content, now);
     }
 }

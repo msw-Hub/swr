@@ -86,10 +86,12 @@ public class MyPageController {
 
             // 프론트로부터 받은 핀 번호
             String pinNumber = requestBody.get("pin_number");
+            log.info("pinNumber : "+pinNumber);
 
             // 데이터베이스에서 해당 사용자의 핀 번호 가져오기
             String dbPinNumber = userInfoService.getPinNumberByUserId(userId);
-            
+            log.info("dbPinNumber : "+dbPinNumber);
+
             // 받은 핀 번호와 데이터베이스의 핀 번호 비교
             Map<String, Object> jsonResponse = new HashMap<>();
             if (pinNumber.equals(dbPinNumber)) {
