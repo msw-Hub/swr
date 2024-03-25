@@ -1,7 +1,15 @@
 package io.cloudtype.Demo.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudtype.Demo.service.KakaoService;
 import io.cloudtype.Demo.service.UserInfoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +23,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/mypage")
+@Tag(name = "mypage", description = "마이페이지 관련 API")
 @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 public class MyPageController {
 
@@ -24,6 +33,9 @@ public class MyPageController {
     @Autowired
     private UserInfoService userInfoService;
 
+    @Operation(summary = "마이페이지 정보 조회", description = "마이페이지 정보를 조회하는 API")
+    @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @ApiResponse(responseCode = "200", description = "조회 성공_닉네임,이메일 반환", content = @Content(mediaType = "application/json",schema = @Schema(implementation = Map.class)))
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @GetMapping("")
     public ResponseEntity<Map<String, Object>> myPage(@RequestHeader("Authorization") String accessToken) {
@@ -57,6 +69,10 @@ public class MyPageController {
         }
     }
 
+    @Operation(summary = "핀 번호 확인", description = "핀 번호를 확인하는 API")
+    @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "pin_number", description = "핀 번호", required = true)
+    @ApiResponse(responseCode = "200", description = "핀 번호 일치_메세지반환", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/pin-check")
     public ResponseEntity<String> pinCheck(@RequestHeader("Authorization") String accessToken,
@@ -73,19 +89,33 @@ public class MyPageController {
 
             // 데이터베이스에서 해당 사용자의 핀 번호 가져오기
             String dbPinNumber = userInfoService.getPinNumberByUserId(userId);
-
+            
             // 받은 핀 번호와 데이터베이스의 핀 번호 비교
+            Map<String, Object> jsonResponse = new HashMap<>();
             if (pinNumber.equals(dbPinNumber)) {
-                return ResponseEntity.ok().body("핀 번호가 일치");
+                jsonResponse.put("success", "핀번호가 일치함");
+                ObjectMapper objectMapper = new ObjectMapper();
+                String jsonString = objectMapper.writeValueAsString(jsonResponse);
+                return ResponseEntity.ok().body(jsonString);
             } else {
                 // 핀 번호가 일치하지 않는 경우, 400 상태 코드와 메시지 반환
-                return ResponseEntity.badRequest().body("핀 번호가 일치하지 않음");
+                jsonResponse.put("bad", "핀번호가 불일치함");
+                ObjectMapper objectMapper = new ObjectMapper();
+                String jsonString = objectMapper.writeValueAsString(jsonResponse);
+                return ResponseEntity.badRequest().body(jsonString);
             }
         } catch (IOException e) {
             log.error("Failed to fetch user info from Kakao API", e);
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @Operation(summary = "정보 수정", description = "사용자 정보를 수정하는 API")
+    @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "nickname", description = "변경할 닉네임", required = false)
+    @Parameter(name = "pin_number", description = "변경할 핀 번호", required = false)
+    @Parameter(name = "phone_number", description = "변경할 전화번호", required = false)
+    @ApiResponse(responseCode = "200", description = "정보 수정 성공_성공메세지반환", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/edit-info")
     public ResponseEntity<String> editInfo(@RequestHeader("Authorization") String accessToken,
@@ -140,8 +170,11 @@ public class MyPageController {
                 dbUserInfo = userInfoService.getUserInfoById(userId);
                 log.info("바뀐후 phone_number : " +dbUserInfo.get("phone_number"));
             }
-
-            return ResponseEntity.ok().body("정보가 성공적으로 수정되었습니다.");
+            Map<String, Object> jsonResponse = new HashMap<>();
+            jsonResponse.put("success", "정보가 성공적으로 수정되었습니다.");
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonString = objectMapper.writeValueAsString(jsonResponse);
+            return ResponseEntity.ok().body(jsonString);
         } catch (IOException e) {
             log.error("Failed to fetch user info from Kakao API", e);
             return ResponseEntity.internalServerError().build();
