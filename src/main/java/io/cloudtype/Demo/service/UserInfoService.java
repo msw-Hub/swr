@@ -60,7 +60,7 @@ public class UserInfoService {
         String sql = "SELECT pin_number FROM mydb.user_info WHERE user_id = ?";
 
         // 쿼리 실행하여 결과 가져오기
-        return jdbcTemplate.queryForObject(sql, String.class);
+        return jdbcTemplate.queryForObject(sql, String.class, userId);
     }
 
     public void updateUserInfo(Long userId, String column, String value) {
