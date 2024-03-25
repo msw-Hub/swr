@@ -38,7 +38,7 @@ public class KakaoLoginController {
 
     @Operation(summary = "카카오 로그인", description = "카카오 로그인을 위한 API")
     @Parameter(name = "code", description = "카카오 로그인 시 발급받은 코드", required = true)
-    @ApiResponse(responseCode = "200", description = "로그인성공", content = @Content(schema = @Schema(implementation = String.class, example = "이름,닉네임,토큰반환")))
+    @ApiResponse(responseCode = "200", description = "로그인성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class, example = "이름,닉네임,토큰반환")))
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @GetMapping("/callback")
     public ResponseEntity<String> callback(@RequestParam("code") String code) throws IOException {
@@ -98,7 +98,7 @@ public class KakaoLoginController {
 
     @Operation(summary = "엑세스토큰갱신" , description = "엑세스토큰 갱신을 위한 API")
     @Parameter(name = "refresh_token", description = "리프레시 토큰", required = true)
-    @ApiResponse(responseCode = "200", description = "엑세스토큰갱신성공", content = @Content(schema = @Schema(implementation = String.class, example = "갱신된토큰반환")))
+    @ApiResponse(responseCode = "200", description = "엑세스토큰갱신성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class, example = "갱신된토큰반환")))
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/refresh")
     public ResponseEntity<String> refresh(@RequestBody Map<String, String> requestBody) throws IOException {
@@ -149,7 +149,7 @@ public class KakaoLoginController {
     @Parameter(name = "phone_number", description = "전화번호", required = true)
     @Parameter(name = "pin_number", description = "핀번호", required = true)
     @Parameter(name = "birthday", description = "생년월일", required = true)
-    @ApiResponse(responseCode = "200", description = "데이터저장성공", content = @Content(schema = @Schema(implementation = String.class, example = "데이터저장성공")))
+    @ApiResponse(responseCode = "200", description = "데이터저장성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class, example = "데이터저장성공")))
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@RequestHeader("Authorization") String accessToken,
