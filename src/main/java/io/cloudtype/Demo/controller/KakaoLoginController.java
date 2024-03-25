@@ -165,6 +165,10 @@ public class KakaoLoginController {
             String phoneNumber = requestBody.get("phone_number");
             String pinNumber = requestBody.get("pin_number");
             String birthday = requestBody.get("birthday");
+            log.info("phoneNumber : "+phoneNumber);
+            log.info("pinNumber : "+pinNumber);
+            log.info("birthday : "+birthday);
+
 
             // 공백 문자가 있는지 확인하여 처리
             if (phoneNumber.trim().isEmpty() || pinNumber.trim().isEmpty() || birthday.trim().isEmpty()) {
