@@ -46,7 +46,7 @@ public class UserInfoService {
         if (jdbcTemplate == null) {
             throw new IllegalStateException("JdbcTemplate이 올바르게 주입되지 않았습니다.");
         }
-        String sql = "INSERT INTO mydb.user_additional_info (phone_number, pin_number, birthday) "
+        String sql = "INSERT INTO mydb.user_info (phone_number, pin_number, birthday) "
                 + "VALUES (?, ?, ?) "
                 + "ON DUPLICATE KEY UPDATE phone_number = VALUES(phone_number), pin_number = VALUES(pin_number), birthday = VALUES(birthday)";
         jdbcTemplate.update(sql, phoneNumber, pinNumber, birthday);
@@ -59,7 +59,7 @@ public class UserInfoService {
         }
 
         // 데이터베이스에서 userId에 해당하는 사용자의 핀 번호를 조회하는 쿼리 작성
-        String sql = "SELECT pin_number FROM mydb.user_additional_info WHERE user_id = ?";
+        String sql = "SELECT pin_number FROM mydb.user_info WHERE user_id = ?";
 
         // 쿼리 실행하여 결과 가져오기
         return jdbcTemplate.queryForObject(sql, String.class);
