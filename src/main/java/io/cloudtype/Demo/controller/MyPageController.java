@@ -95,8 +95,9 @@ public class MyPageController {
             // 받은 핀 번호와 데이터베이스의 핀 번호 비교
             Map<String, Object> jsonResponse = new HashMap<>();
             if (pinNumber.equals(dbPinNumber)) {
-                String nickname = (String) userInfo.get("nickname");
-                String phoneNumber = (String) userInfo.get("phone_number");
+                Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
+                String nickname = (String) dbUserInfo.get("nickname");
+                String phoneNumber = (String) dbUserInfo.get("phone_number");
                 jsonResponse.put("success", "핀번호가 일치함");
                 jsonResponse.put("nickname", nickname);
                 jsonResponse.put("phone_number", phoneNumber);
