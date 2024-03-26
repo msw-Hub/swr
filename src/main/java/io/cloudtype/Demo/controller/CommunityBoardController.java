@@ -88,7 +88,7 @@ public class CommunityBoardController {
 
             String title = (String) requestBody.get("title");
             String content = (String) requestBody.get("content");
-            
+
             // 게시글 작성
             communityBoardService.writePost(writerId, nickname, title, content);
 
