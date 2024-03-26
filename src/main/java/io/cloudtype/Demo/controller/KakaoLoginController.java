@@ -83,7 +83,7 @@ public class KakaoLoginController {
         Map<String, Object> jsonResponse = new HashMap<>();
         jsonResponse.put("login_or_sign", logMessage);
         jsonResponse.put("access_token", accessToken);
-        jsonResponse.put("expires_at_unix", expiresAtUnix);
+        jsonResponse.put("access_token_expires_in", expiresAtUnix);
         jsonResponse.put("refresh_token", refreshToken);
         jsonResponse.put("refresh_token_expires_in", refreshTokenExpiresAtUnix);
 
@@ -120,7 +120,7 @@ public class KakaoLoginController {
 
         Map<String, Object> jsonResponse = new HashMap<>();
         jsonResponse.put("access_token", accessToken);
-        jsonResponse.put("expires_at_unix", expiresAtUnix);
+        jsonResponse.put("access_token_expires_in", expiresAtUnix);
 
         if (refreshToken!=null){
             String refreshTokenExpiresInStr = tokens.get("refresh_token_expires_in");
