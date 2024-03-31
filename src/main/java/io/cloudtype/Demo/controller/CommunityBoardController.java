@@ -26,12 +26,6 @@ import java.util.Map;
 @Tag(name = "community", description = "커뮤니티 게시판 관련 API")
 public class CommunityBoardController {
 
-    @Value("${spring.cloud.gcp.storage.credentials.location}")
-    private String keyFileName;
-
-    @Value("${spring.cloud.gcp.storage.bucket}")
-    private String bucketName;
-
     private final CommunityBoardService communityBoardService;
 
     @Autowired
@@ -97,7 +91,7 @@ public class CommunityBoardController {
             String imageUrl = null;
             if(image != null){
                 // 이미지 업로드 서비스 호출
-                imageUrl = communityBoardService.uploadImage(image, keyFileName, bucketName);
+                imageUrl = communityBoardService.uploadImage(image);
             }
             // 게시글 작성
             communityBoardService.writePost(writerId, nickname, title, content, imageUrl);

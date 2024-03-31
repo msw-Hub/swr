@@ -8,6 +8,7 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
@@ -27,9 +28,16 @@ import java.util.UUID;
 public class CommunityBoardService {
 
     private final JdbcTemplate jdbcTemplate;
+    @Value("${spring.cloud.gcp.storage.credentials.location}")
+    private final String keyFileName;
+
+    @Value("${spring.cloud.gcp.storage.bucket}")
+    private final String bucketName;
 
     @Autowired
     public CommunityBoardService(String keyFileName, String bucketName, JdbcTemplate jdbcTemplate) {
+        this.keyFileName = keyFileName;
+        this.bucketName = bucketName;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -70,7 +78,7 @@ public class CommunityBoardService {
         jdbcTemplate.update(sql, userId, nickname, title, content, now, imgUrl);
     }
 
-    public String uploadImage(MultipartFile image, String keyFileName, String bucketName) {
+    public String uploadImage(MultipartFile image) {
         try {
             // 이미지가 비어 있는지 확인
             if (image.isEmpty()) {
