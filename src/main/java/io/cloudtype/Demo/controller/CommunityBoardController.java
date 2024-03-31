@@ -1,6 +1,5 @@
 package io.cloudtype.Demo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudtype.Demo.service.CommunityBoardService;
 import io.cloudtype.Demo.service.KakaoService;
 import io.cloudtype.Demo.service.UserInfoService;
@@ -11,14 +10,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +25,12 @@ import java.util.Map;
 @RequestMapping("/community")
 @Tag(name = "community", description = "커뮤니티 게시판 관련 API")
 public class CommunityBoardController {
+
+    @Value("${spring.cloud.gcp.storage.credentials.location}")
+    private String keyFileName;
+
+    @Value("${spring.cloud.gcp.storage.bucket}")
+    private String bucketName;
 
     private final CommunityBoardService communityBoardService;
 
@@ -73,6 +77,7 @@ public class CommunityBoardController {
     @Parameter(name = "accessToken", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "title", description = "게시글 제목", required = true)
     @Parameter(name = "content", description = "게시글 내용", required = true)
+    @Parameter(name = "image", description = "이미지파일 / 없으면 null", required = true)
     @ApiResponse(responseCode = "200", description = "글 작성 성공",content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     public ResponseEntity<Map<String, String>> writePost(
             @RequestHeader("Authorization") String accessToken,
@@ -88,9 +93,14 @@ public class CommunityBoardController {
 
             String title = (String) requestBody.get("title");
             String content = (String) requestBody.get("content");
-
+            MultipartFile image = (MultipartFile) requestBody.get("image");
+            String imageUrl = null;
+            if(image != null){
+                // 이미지 업로드 서비스 호출
+                imageUrl = communityBoardService.uploadImage(image, keyFileName, bucketName);
+            }
             // 게시글 작성
-            communityBoardService.writePost(writerId, nickname, title, content);
+            communityBoardService.writePost(writerId, nickname, title, content, imageUrl);
 
             // 성공 메시지 반환
             Map<String, String> response = new HashMap<>();
@@ -101,4 +111,5 @@ public class CommunityBoardController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
 }

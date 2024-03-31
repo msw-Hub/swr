@@ -1,6 +1,6 @@
 kakao:
-  client_id: ${client_id}
-  redirect_uri: ${redirect_uri}
+  client_id: ${kakao_client_id}
+  redirect_uri: ${kakao_redirect_uri}
 
 spring:
   datasource:
@@ -10,3 +10,10 @@ spring:
     password: ${password}
   thymeleaf:
     check-template-location: false
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: ${key_location}
+        project-id: ${gcp_project_id}
+        bucket: ${gcp_bucket}
