@@ -75,7 +75,9 @@ public class CommunityBoardController {
     @ApiResponse(responseCode = "200", description = "글 작성 성공",content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     public ResponseEntity<Map<String, String>> writePost(
             @RequestHeader("Authorization") String accessToken,
-            @RequestBody Map<String, Object> requestBody
+            @ModelAttribute("title") String title,
+            @ModelAttribute("content") String content,
+            @RequestPart("image") MultipartFile image
     ) {
         try {
             // 카카오 API를 통해 사용자 정보 가져오기
@@ -85,9 +87,6 @@ public class CommunityBoardController {
             Long writerId = (Long) dbUserInfo.get("Id");
             String nickname = (String) dbUserInfo.get("nickname");
 
-            String title = (String) requestBody.get("title");
-            String content = (String) requestBody.get("content");
-            MultipartFile image = (MultipartFile) requestBody.get("image");
             String imageUrl = null;
             if(image != null){
                 // 이미지 업로드 서비스 호출
