@@ -84,13 +84,14 @@ public class CommunityBoardController {
             Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
             Long userId = (Long) userInfo.get("userId");
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
-            Long writerId = (Long) dbUserInfo.get("Id");
+            Long writerId = (Long) dbUserInfo.get("id");
             String nickname = (String) dbUserInfo.get("nickname");
 
             String imageUrl = null;
             if(image != null){
                 // 이미지 업로드 서비스 호출
                 imageUrl = communityBoardService.uploadImage(image);
+                log.info("imageUrl: " + imageUrl);
             }
             // 게시글 작성
             communityBoardService.writePost(writerId, nickname, title, content, imageUrl);
