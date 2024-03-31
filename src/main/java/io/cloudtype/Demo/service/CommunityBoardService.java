@@ -35,11 +35,14 @@ public class CommunityBoardService {
     private final String bucketName;
 
     @Autowired
-    public CommunityBoardService(String keyFileName, String bucketName, JdbcTemplate jdbcTemplate) {
+    public CommunityBoardService(@Value("${spring.cloud.gcp.storage.credentials.location}") String keyFileName,
+                                 @Value("${spring.cloud.gcp.storage.bucket}") String bucketName,
+                                 JdbcTemplate jdbcTemplate) {
         this.keyFileName = keyFileName;
         this.bucketName = bucketName;
         this.jdbcTemplate = jdbcTemplate;
     }
+
 
     public Map<String, Object> getCommunityBoardPosts(int page) {
         // 한 페이지에 표시할 게시글 수
