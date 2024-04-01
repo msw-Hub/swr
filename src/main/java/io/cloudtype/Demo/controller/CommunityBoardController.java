@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -102,6 +103,24 @@ public class CommunityBoardController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Failed to write post", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/{communityBoardId}")
+    @Operation(summary = "해당글의 댓글모음", description = "{communityBoardId}로 요청하면 해당글의 댓글들을 불러옵니다.")
+    @Parameter(name = "accessToken", description = "Access Token", required = true)
+    @ApiResponse(responseCode = "200", description = "댓글들 반환",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
+    public ResponseEntity<List<Map<String, Object>>> getReplies(
+            @RequestHeader("Authorization") String accessToken,
+            @PathVariable Long communityBoardId
+    ) {
+        try {
+            // 게시글 ID를 기반으로 해당 게시글의 댓글 가져오기
+            List<Map<String, Object>> replies = communityBoardService.getCommentsForPost(communityBoardId);
+            return ResponseEntity.ok(replies);
+        } catch (Exception e) {
+            log.error("Failed to fetch replies for community board post", e);
             return ResponseEntity.internalServerError().build();
         }
     }

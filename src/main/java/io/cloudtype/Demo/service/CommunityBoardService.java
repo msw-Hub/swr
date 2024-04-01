@@ -114,4 +114,9 @@ public class CommunityBoardService {
             return null;
         }
     }
+
+    public List<Map<String, Object>> getCommentsForPost(Long postId) {
+        String sql = "SELECT * FROM comments WHERE post_id = ?";
+        return jdbcTemplate.queryForList(sql, postId);
+    }
 }
