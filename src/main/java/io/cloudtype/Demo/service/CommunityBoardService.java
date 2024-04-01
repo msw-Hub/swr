@@ -33,15 +33,20 @@ public class CommunityBoardService {
     @Value("${spring.cloud.gcp.storage.credentials.location}")
     private final String keyFileName;
 
+    @Value("${spring.cloud.gcp.storage.project-id}")
+    private final String projectId;
+
     @Value("${spring.cloud.gcp.storage.bucket}")
     private final String bucketName;
 
     @Autowired
     public CommunityBoardService(@Value("${spring.cloud.gcp.storage.credentials.location}") String keyFileName,
                                  @Value("${spring.cloud.gcp.storage.bucket}") String bucketName,
+                                 @Value("${spring.cloud.gcp.storage.project-id}") String projectId,
                                  JdbcTemplate jdbcTemplate) {
         this.keyFileName = keyFileName;
         this.bucketName = bucketName;
+        this.projectId = projectId;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -131,25 +136,23 @@ public class CommunityBoardService {
             String objectName = imgUrl.substring(imgUrl.lastIndexOf('/') + 1);
             log.info("Object name: {}", objectName);
             try {
+                InputStream keyFile = ResourceUtils.getURL(keyFileName).openStream();
                 // 인증 정보를 사용하여 Storage 객체 생성
-                Storage storage = StorageOptions.newBuilder()
-                        .setCredentials(GoogleCredentials.fromStream(new FileInputStream(keyFileName)))
-                        .build()
-                        .getService();
-
-                // GCS에서 이미지 파일(객체) 삭제
-                boolean deleted = storage.delete(bucketName, objectName);
-                if (deleted) {
-                    // 객체 삭제 로그
-                    log.info("Object " + objectName + " was deleted from " + bucketName);
-                } else {
-                    // 객체를 찾지 못했거나 이미 삭제된 경우의 로그
-                    log.info("The object " + objectName + " was not found or already deleted in " + bucketName);
+                Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+                Blob blob = storage.get(bucketName, objectName);
+                if (blob == null) {
+                    log.info("The object " + objectName + " wasn't found in " + bucketName);
+                    return;
                 }
+                Storage.BlobSourceOption precondition =
+                        Storage.BlobSourceOption.generationMatch(blob.getGeneration());
+
+                storage.delete(bucketName, objectName, precondition);
+                log.info("Object " + objectName + " was deleted from " + bucketName);
             } catch (FileNotFoundException e) {
-                System.err.println("Key file for GCP credentials not found: " + e.getMessage());
+                log.error("Key file for GCP credentials not found: {}", e.getMessage());
             } catch (IOException e) {
-                System.err.println("Error occurred while accessing GCP credentials: " + e.getMessage());
+                log.error("Error occurred while accessing GCP credentials: {}", e.getMessage());
             }
         }
 

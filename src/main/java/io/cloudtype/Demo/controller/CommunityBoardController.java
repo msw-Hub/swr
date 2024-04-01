@@ -116,6 +116,9 @@ public class CommunityBoardController {
             @PathVariable Long communityBoardId
     ) {
         try {
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+            Long userId = (Long) userInfo.get("userId");
+
             // 게시글 ID를 기반으로 해당 게시글의 댓글 가져오기
             List<Map<String, Object>> replies = communityBoardService.getCommentsForPost(communityBoardId);
             return ResponseEntity.ok(replies);
@@ -133,6 +136,9 @@ public class CommunityBoardController {
             @PathVariable Long communityBoardId
     ) {
         try {
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+            Long userId = (Long) userInfo.get("userId");
+
             communityBoardService.deleteCommunityBoard(communityBoardId);
             // 성공 메시지 반환
             Map<String, String> response = new HashMap<>();
