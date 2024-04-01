@@ -123,7 +123,7 @@ public class CommunityBoardService {
 
     public void deleteCommunityBoard(Long communityBoardId) {
         // 게시글 id를 토대로 이미지 URL을 가져옴
-        String sql = "SELECT img_url FROM community_board WHERE id = ?";
+        String sql = "SELECT img_url FROM community_board WHERE community_board_id = ?";
         String imgUrl = jdbcTemplate.queryForObject(sql, String.class, communityBoardId);
 
         if (imgUrl != null && !imgUrl.isEmpty()) {
@@ -158,7 +158,7 @@ public class CommunityBoardService {
         jdbcTemplate.update(deleteReplySql, communityBoardId);
 
         // 게시글 삭제
-        String deleteSql = "DELETE FROM community_board WHERE id = ?";
+        String deleteSql = "DELETE FROM community_board WHERE community_board_id = ?";
         jdbcTemplate.update(deleteSql, communityBoardId);
     }
 }
