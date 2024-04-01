@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -145,22 +146,27 @@ public class MyPageController {
             if (changeNickname != null && !changeNickname.trim().isEmpty()) {
                 column = "nickname";
 
-                // 닉네임 중복 확인
+                // 데이터베이스에서 현재 사용자의 닉네임 가져오기
                 String nowNickname = (String) dbUserInfo.get("nickname");
-                boolean isNicknameDuplicate = nowNickname.equalsIgnoreCase(changeNickname);
+
+                // 모든 사용자의 닉네임을 가져와서 중복 검사
+                List<String> allNicknames = userInfoService.getAllNicknames();
+
+                // 닉네임 중복 확인
+                boolean isNicknameDuplicate = allNicknames.stream()
+                        .anyMatch(nickname -> nickname.equalsIgnoreCase(changeNickname));
+
                 if (isNicknameDuplicate) {
                     jsonResponse.put("bad", "이미 사용중인 닉네임입니다.");
                     ObjectMapper objectMapper = new ObjectMapper();
                     String jsonString = objectMapper.writeValueAsString(jsonResponse);
                     return ResponseEntity.badRequest().body(jsonString);
-                }
-                else {
-                    log.info("바뀌기전 nickname : " +dbUserInfo.get("nickname"));
-                    userInfoService.updateUserInfo(userId,column,changeNickname);
+                } else {
+                    log.info("바뀌기전 nickname : " + nowNickname);
+                    userInfoService.updateUserInfo(userId, column, changeNickname);
                     dbUserInfo = userInfoService.getUserInfoById(userId);
-                    log.info("바뀐후 nickname : " +dbUserInfo.get("nickname"));
+                    log.info("바뀐후 nickname : " + dbUserInfo.get("nickname"));
                 }
-
             }
 
             // 핀 번호를 수정할 경우

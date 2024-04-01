@@ -71,8 +71,8 @@ public class CommunityBoardController {
     @Parameter(name = "accessToken", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "title", description = "게시글 제목", required = true)
     @Parameter(name = "content", description = "게시글 내용", required = true)
-    @Parameter(name = "image", description = "이미지파일 / 없으면 null", required = true)
-    @ApiResponse(responseCode = "200", description = "글 작성 성공",content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
+    @Parameter(name = "image", description = "이미지파일 / 없으면 null")
+    @ApiResponse(responseCode = "200", description = "글 작성 성공",content = @Content(mediaType = "multipart/form-data",schema = @Schema(implementation = String.class)))
     public ResponseEntity<Map<String, String>> writePost(
             @RequestHeader("Authorization") String accessToken,
             @ModelAttribute("title") String title,

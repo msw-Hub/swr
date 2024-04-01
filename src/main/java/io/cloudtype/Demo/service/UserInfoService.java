@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -42,12 +43,12 @@ public class UserInfoService {
     }
 
     // 회원가입 시 추가 정보를 저장하는 메서드
-    public void saveAdditionalUserInfo(Long userId, String phoneNumber, String pinNumber, String birthday) {
+    public void saveAdditionalUserInfo(Long userId, String nickName , String phoneNumber, String pinNumber, String birthday) {
         if (jdbcTemplate == null) {
             throw new IllegalStateException("JdbcTemplate이 올바르게 주입되지 않았습니다.");
         }
-        String updateSql = "UPDATE mydb.user_info SET phone_number = ?, pin_number = ?, birthday = ? WHERE user_id = ?";
-        jdbcTemplate.update(updateSql, phoneNumber, pinNumber, birthday, userId);
+        String updateSql = "UPDATE mydb.user_info SET nickname=?, phone_number = ?, pin_number = ?, birthday = ? WHERE user_id = ?";
+        jdbcTemplate.update(updateSql, nickName ,phoneNumber, pinNumber, birthday, userId);
     }
 
     //개인정보 수정시 pin번호를 조회하는 메서드
@@ -76,5 +77,10 @@ public class UserInfoService {
 
         // SQL 쿼리 실행
         jdbcTemplate.update(sql, value, userId);
+    }
+
+    public List<String> getAllNicknames() {
+        String sql = "SELECT nickname FROM mydb.user_info";
+        return jdbcTemplate.queryForList(sql, String.class);
     }
 }
