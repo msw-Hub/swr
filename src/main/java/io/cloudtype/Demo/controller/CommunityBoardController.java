@@ -68,6 +68,7 @@ public class CommunityBoardController {
     }
 
     @PostMapping("/create")
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "게시글 작성", description = "게시글을 작성합니다.")
     @Parameter(name = "accessToken", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "title", description = "게시글 제목", required = true)
@@ -83,6 +84,10 @@ public class CommunityBoardController {
         try {
             // 카카오 API를 통해 사용자 정보 가져오기
             Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+            int count = kakaoService.processUser(userInfo);
+            if (count == 0) {
+                return ResponseEntity.badRequest().build();
+            }
             Long userId = (Long) userInfo.get("userId");
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             Long writerId = (Long) dbUserInfo.get("id");
@@ -108,6 +113,7 @@ public class CommunityBoardController {
     }
 
     @GetMapping("/{communityBoardId}")
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "해당글의 댓글모음", description = "{communityBoardId}로 요청하면 해당글의 댓글들을 불러옵니다.")
     @Parameter(name = "accessToken", description = "Access Token", required = true)
     @ApiResponse(responseCode = "200", description = "댓글들 반환",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
@@ -116,8 +122,12 @@ public class CommunityBoardController {
             @PathVariable Long communityBoardId
     ) {
         try {
+            // 카카오 API를 통해 사용자 정보 가져오기
             Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
-            Long userId = (Long) userInfo.get("userId");
+            int count = kakaoService.processUser(userInfo);
+            if (count == 0) {
+                return ResponseEntity.badRequest().build();
+            }
 
             // 게시글 ID를 기반으로 해당 게시글의 댓글 가져오기
             List<Map<String, Object>> replies = communityBoardService.getCommentsForPost(communityBoardId);
@@ -128,16 +138,21 @@ public class CommunityBoardController {
         }
     }
     @DeleteMapping("/{communityBoardId}")
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "해당글 삭제", description = "{communityBoardId}로 요청하면 해당글에 관련된 모든것이 삭제됩니다.")
     @Parameter(name = "accessToken", description = "Access Token", required = true)
-    @ApiResponse(responseCode = "200", description = "댓글들 반환",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
+    @ApiResponse(responseCode = "200", description = "삭제완료",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
     public ResponseEntity<Map<String, String>> deleteCommunityBoardPost(
             @RequestHeader("Authorization") String accessToken,
             @PathVariable Long communityBoardId
     ) {
         try {
+            // 카카오 API를 통해 사용자 정보 가져오기
             Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
-            Long userId = (Long) userInfo.get("userId");
+            int count = kakaoService.processUser(userInfo);
+            if (count == 0) {
+                return ResponseEntity.badRequest().build();
+            }
 
             communityBoardService.deleteCommunityBoard(communityBoardId);
             // 성공 메시지 반환
@@ -147,7 +162,6 @@ public class CommunityBoardController {
         } catch (Exception e) {
         log.error("Failed to delete", e);
         return ResponseEntity.internalServerError().build();
+        }
     }
-    }
-
 }
