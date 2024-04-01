@@ -136,19 +136,18 @@ public class CommunityBoardService {
             String objectName = imgUrl.substring(imgUrl.lastIndexOf('/') + 1);
             log.info("Object name: {}", objectName);
             try {
-                InputStream keyFile = ResourceUtils.getURL(keyFileName).openStream();
                 // 인증 정보를 사용하여 Storage 객체 생성
-                Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-                Blob blob = storage.get(bucketName, objectName);
-                if (blob == null) {
-                    log.info("The object " + objectName + " wasn't found in " + bucketName);
-                    return;
-                }
-                Storage.BlobSourceOption precondition =
-                        Storage.BlobSourceOption.generationMatch(blob.getGeneration());
+                InputStream keyFile = ResourceUtils.getURL(keyFileName).openStream();
+                Storage storage = StorageOptions.newBuilder().setCredentials(GoogleCredentials.fromStream(keyFile)).build().getService();
 
-                storage.delete(bucketName, objectName, precondition);
-                log.info("Object " + objectName + " was deleted from " + bucketName);
+                // GCS에서 이미지 파일(객체) 삭제
+                Blob blob = storage.get(bucketName, objectName);
+                if (blob != null) {
+                    blob.delete();
+                    log.info("Object {} was deleted from {}", objectName, bucketName);
+                } else {
+                    log.info("The object {} wasn't found in {}", objectName, bucketName);
+                }
             } catch (FileNotFoundException e) {
                 log.error("Key file for GCP credentials not found: {}", e.getMessage());
             } catch (IOException e) {
