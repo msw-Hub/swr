@@ -124,5 +124,15 @@ public class CommunityBoardController {
             return ResponseEntity.internalServerError().build();
         }
     }
+    @DeleteMapping("/{communityBoardId}")
+    @Operation(summary = "해당글 삭제", description = "{communityBoardId}로 요청하면 해당글에 관련된 모든것이 삭제됩니다.")
+    public ResponseEntity<String> deleteCommunityBoardPost(@PathVariable Long communityBoardId) {
+        try {
+            communityBoardService.deleteCommunityBoard(communityBoardId);
+            return ResponseEntity.ok("게시글 삭제 성공");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("게시글 삭제 실패");
+        }
+    }
 
 }

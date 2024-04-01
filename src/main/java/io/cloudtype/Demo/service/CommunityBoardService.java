@@ -15,6 +15,8 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
@@ -114,9 +116,49 @@ public class CommunityBoardService {
             return null;
         }
     }
-
     public List<Map<String, Object>> getCommentsForPost(Long postId) {
         String sql = "SELECT * FROM community_reply WHERE community_board_id = ?";
         return jdbcTemplate.queryForList(sql, postId);
+    }
+
+    public void deleteCommunityBoard(Long communityBoardId) {
+        // 게시글 id를 토대로 이미지 URL을 가져옴
+        String sql = "SELECT img_url FROM community_board WHERE id = ?";
+        String imgUrl = jdbcTemplate.queryForObject(sql, String.class, communityBoardId);
+
+        if (imgUrl != null && !imgUrl.isEmpty()) {
+            // imgUrl에서 파일 이름(객체 이름)을 추출
+            String objectName = imgUrl.substring(imgUrl.lastIndexOf('/') + 1);
+            log.info("Object name: {}", objectName);
+            try {
+                // 인증 정보를 사용하여 Storage 객체 생성
+                Storage storage = StorageOptions.newBuilder()
+                        .setCredentials(GoogleCredentials.fromStream(new FileInputStream(keyFileName)))
+                        .build()
+                        .getService();
+
+                // GCS에서 이미지 파일(객체) 삭제
+                boolean deleted = storage.delete(bucketName, objectName);
+                if (deleted) {
+                    // 객체 삭제 로그
+                    log.info("Object " + objectName + " was deleted from " + bucketName);
+                } else {
+                    // 객체를 찾지 못했거나 이미 삭제된 경우의 로그
+                    log.info("The object " + objectName + " was not found or already deleted in " + bucketName);
+                }
+            } catch (FileNotFoundException e) {
+                System.err.println("Key file for GCP credentials not found: " + e.getMessage());
+            } catch (IOException e) {
+                System.err.println("Error occurred while accessing GCP credentials: " + e.getMessage());
+            }
+        }
+
+        // 게시글의 댓글부터 삭제
+        String deleteReplySql = "DELETE FROM community_reply WHERE community_board_id = ?";
+        jdbcTemplate.update(deleteReplySql, communityBoardId);
+
+        // 게시글 삭제
+        String deleteSql = "DELETE FROM community_board WHERE id = ?";
+        jdbcTemplate.update(deleteSql, communityBoardId);
     }
 }
