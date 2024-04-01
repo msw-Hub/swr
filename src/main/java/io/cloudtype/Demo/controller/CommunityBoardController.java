@@ -112,14 +112,15 @@ public class CommunityBoardController {
         }
     }
 
-    @GetMapping("/{communityBoardId}")
+    @PostMapping("/replies")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "해당글의 댓글모음", description = "{communityBoardId}로 요청하면 해당글의 댓글들을 불러옵니다.")
-    @Parameter(name = "accessToken", description = "Access Token", required = true)
+    @Parameter(name = "accessToken", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "communityBoardId", description = "게시글 ID", required = true)
     @ApiResponse(responseCode = "200", description = "댓글들 반환",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
     public ResponseEntity<List<Map<String, Object>>> getReplies(
             @RequestHeader("Authorization") String accessToken,
-            @PathVariable Long communityBoardId
+            @RequestBody Map<String, Object> requestBody
     ) {
         try {
             // 카카오 API를 통해 사용자 정보 가져오기
@@ -128,6 +129,9 @@ public class CommunityBoardController {
             if (count == 0) {
                 return ResponseEntity.badRequest().build();
             }
+
+            // requestBody에서 communityBoardId 추출
+            Long communityBoardId = Long.valueOf(requestBody.get("communityBoardId").toString());
 
             // 게시글 ID를 기반으로 해당 게시글의 댓글 가져오기
             List<Map<String, Object>> replies = communityBoardService.getCommentsForPost(communityBoardId);
@@ -137,14 +141,16 @@ public class CommunityBoardController {
             return ResponseEntity.internalServerError().build();
         }
     }
-    @DeleteMapping("/{communityBoardId}")
+
+    @DeleteMapping("/remove-reply")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "해당글 삭제", description = "{communityBoardId}로 요청하면 해당글에 관련된 모든것이 삭제됩니다.")
     @Parameter(name = "accessToken", description = "Access Token", required = true)
+    @Parameter(name = "communityBoardId", description = "게시글 ID", required = true)
     @ApiResponse(responseCode = "200", description = "삭제완료",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
     public ResponseEntity<Map<String, String>> deleteCommunityBoardPost(
             @RequestHeader("Authorization") String accessToken,
-            @PathVariable Long communityBoardId
+            @RequestBody Map<String, Object> requestBody
     ) {
         try {
             // 카카오 API를 통해 사용자 정보 가져오기
@@ -154,7 +160,10 @@ public class CommunityBoardController {
                 return ResponseEntity.badRequest().build();
             }
 
+            // requestBody에서 communityBoardId 추출
+            Long communityBoardId = Long.valueOf(requestBody.get("communityBoardId").toString());
             communityBoardService.deleteCommunityBoard(communityBoardId);
+
             // 성공 메시지 반환
             Map<String, String> response = new HashMap<>();
             response.put("success", "삭제 성공");
