@@ -126,13 +126,22 @@ public class CommunityBoardController {
     }
     @DeleteMapping("/{communityBoardId}")
     @Operation(summary = "해당글 삭제", description = "{communityBoardId}로 요청하면 해당글에 관련된 모든것이 삭제됩니다.")
-    public ResponseEntity<String> deleteCommunityBoardPost(@PathVariable Long communityBoardId) {
+    @Parameter(name = "accessToken", description = "Access Token", required = true)
+    @ApiResponse(responseCode = "200", description = "댓글들 반환",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
+    public ResponseEntity<Map<String, String>> deleteCommunityBoardPost(
+            @RequestHeader("Authorization") String accessToken,
+            @PathVariable Long communityBoardId
+    ) {
         try {
             communityBoardService.deleteCommunityBoard(communityBoardId);
-            return ResponseEntity.ok("게시글 삭제 성공");
+            // 성공 메시지 반환
+            Map<String, String> response = new HashMap<>();
+            response.put("success", "삭제 성공");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("게시글 삭제 실패");
-        }
+        log.error("Failed to delete", e);
+        return ResponseEntity.internalServerError().build();
+    }
     }
 
 }
