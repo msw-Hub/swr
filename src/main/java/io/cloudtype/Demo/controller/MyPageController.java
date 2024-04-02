@@ -137,72 +137,57 @@ public class MyPageController {
 
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
 
-            String column = "";
-
             Map<String, Object> jsonResponse = new HashMap<>();
+            int changeCount=0;  //0=변경없음, 1=이름변경, 10=핀번호변경, 100=전화번호변경
 
             // 닉네임을 수정할 경우, 중복된 닉네임이 있는지 확인
             String changeNickname = requestBody.get("nickname");
+            String nowNickname= (String) dbUserInfo.get("nickname");
             if (changeNickname != null && !changeNickname.trim().isEmpty()) {
-                column = "nickname";
-
-                // 데이터베이스에서 현재 사용자의 닉네임 가져오기
-                String nowNickname = (String) dbUserInfo.get("nickname");
-
                 // 모든 사용자의 닉네임을 가져와서 중복 검사
                 List<String> allNicknames = userInfoService.getAllNicknames();
-
-                // 닉네임 중복 확인
                 boolean isNicknameDuplicate = allNicknames.stream()
                         .anyMatch(nickname -> nickname.equalsIgnoreCase(changeNickname));
-
                 if (isNicknameDuplicate) {
                     jsonResponse.put("bad", "이미 사용중인 닉네임입니다.");
                     ObjectMapper objectMapper = new ObjectMapper();
                     String jsonString = objectMapper.writeValueAsString(jsonResponse);
                     return ResponseEntity.badRequest().body(jsonString);
-                } else {
-                    log.info("바뀌기전 nickname : " + nowNickname);
-                    userInfoService.updateUserInfo(userId, column, changeNickname);
-                    dbUserInfo = userInfoService.getUserInfoById(userId);
-                    log.info("바뀐후 nickname : " + dbUserInfo.get("nickname"));
-                }
+                } else changeCount+=1;
             }
 
             // 핀 번호를 수정할 경우
             String pinNumber = requestBody.get("pin_number");
             if (pinNumber != null && !pinNumber.trim().isEmpty() && pinNumber.matches("\\d{6}")) {
-                column = "pin_number";
                 int nowPinNunber = (int) dbUserInfo.get("pin_number");
                 if(nowPinNunber == Integer.parseInt(pinNumber)){
-                    jsonResponse.put("bad", "이미 사용중인 핀번호입니다.");
+                    jsonResponse.put("bad", "현재 사용중인 핀번호입니다.");
                     ObjectMapper objectMapper = new ObjectMapper();
                     String jsonString = objectMapper.writeValueAsString(jsonResponse);
                     return ResponseEntity.badRequest().body(jsonString);
-                }
-                log.info("바뀌기전 pin_number : " +dbUserInfo.get("pin_number"));
-                userInfoService.updateUserInfo(userId,column,pinNumber);
-                dbUserInfo = userInfoService.getUserInfoById(userId);
-                log.info("바뀐후 pin_number : " +dbUserInfo.get("pin_number"));
+                }else changeCount+=10;
             }
 
             // 전화번호를 수정할 경우
             String phoneNumber = requestBody.get("phone_number");
             if (phoneNumber != null && !phoneNumber.trim().isEmpty() && phoneNumber.matches("01[0-9]-\\d{4}-\\d{4}")) {
-                column = "phone_number";
                 String nowPhoneNumber = (String) dbUserInfo.get("phone_number");
                 if(nowPhoneNumber.equals(pinNumber)){
-                    jsonResponse.put("bad", "이미 사용중인 전화번호입니다.");
+                    jsonResponse.put("bad", "현재 사용중인 전화번호입니다.");
                     ObjectMapper objectMapper = new ObjectMapper();
                     String jsonString = objectMapper.writeValueAsString(jsonResponse);
                     return ResponseEntity.badRequest().body(jsonString);
-                }
-                log.info("바뀌기전 phone_number : " +dbUserInfo.get("phone_number"));
-                userInfoService.updateUserInfo(userId,column,phoneNumber);
-                dbUserInfo = userInfoService.getUserInfoById(userId);
-                log.info("바뀐후 phone_number : " +dbUserInfo.get("phone_number"));
+                }else changeCount+=100;
             }
-
+            if(changeCount==1 || changeCount==11 || changeCount==101 || changeCount==111){
+                userInfoService.updateUserInfo(userId,"nickname",changeNickname,nowNickname);
+            }
+            if(changeCount==10 || changeCount==11 || changeCount==110 || changeCount==111){
+                userInfoService.updateUserInfo(userId,"pin_number",pinNumber,nowNickname);
+            }
+            if(changeCount==100 ||changeCount==101 || changeCount==110 || changeCount==111){
+                userInfoService.updateUserInfo(userId,"phone_number",phoneNumber,nowNickname);
+            }
             jsonResponse.put("success", "정보가 성공적으로 수정되었습니다.");
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonString = objectMapper.writeValueAsString(jsonResponse);

@@ -15,7 +15,6 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -54,13 +54,10 @@ public class CommunityBoardService {
     public Map<String, Object> getCommunityBoardPosts(int page) {
         // 한 페이지에 표시할 게시글 수
         int pageSize = 10;
-
         // 페이지 번호에 따라 시작 게시글의 인덱스 계산
         int start = (page - 1) * pageSize;
-
         // SQL 쿼리 생성
         String sql = "SELECT * FROM community_board ORDER BY created_date DESC LIMIT ?, ?";
-
         // SQL 쿼리 실행
         try {
             List<Map<String, Object>> lists = jdbcTemplate.queryForList(sql, start, pageSize);
@@ -77,13 +74,13 @@ public class CommunityBoardService {
             return null;
         }
     }
-    public void writePost(Long userId, String nickname, String title, String content, String imgUrl){
+    public void writePost(String nickname, String title, String content, String imgUrl){
         // 현재 시간 가져오기
         Instant now = Instant.now();
         // 게시글 작성 SQL 쿼리 실행
-        String sql = "INSERT INTO community_board (writer_id, writer_nickname, title, content, created_date, img_url) " +
+        String sql = "INSERT INTO community_board (writer_nickname, title, content, created_date, img_url) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, userId, nickname, title, content, now, imgUrl);
+        jdbcTemplate.update(sql,nickname, title, content, now, imgUrl);
     }
     public String uploadImage(MultipartFile image) {
         try {
@@ -126,14 +123,28 @@ public class CommunityBoardService {
         // 게시글 id를 토대로 이미지 URL을 가져옴
         String sql = "SELECT img_url FROM community_board WHERE community_board_id = ?";
         String imgUrl = jdbcTemplate.queryForObject(sql, String.class, communityBoardId);
-
         if (imgUrl != null && !imgUrl.isEmpty()) {
             deleteImageGcs(imgUrl);
         }
 
-        // 게시글의 댓글부터 삭제
-        String deleteReplySql = "DELETE FROM community_reply WHERE community_board_id = ?";
-        jdbcTemplate.update(deleteReplySql, communityBoardId);
+        // 게시글에 연결된 모든 댓글의 ID를 찾음
+        String findRepliesSql = "SELECT community_reply_id FROM community_reply WHERE community_board_id = ?";
+        List<Long> replyIds = jdbcTemplate.queryForList(findRepliesSql, Long.class, communityBoardId);
+
+        // 모든 댓글의 ID를 쉼표로 구분된 문자열로 변환
+        String replyIdsStr = replyIds.stream().map(Object::toString).collect(Collectors.joining(","));
+
+        // 모든 댓글과 관련된 좋아요를 한 번의 쿼리로 삭제
+        String deleteLikesSql = "DELETE FROM likes WHERE likes_reply_id IN (" + replyIdsStr + ")";
+        jdbcTemplate.update(deleteLikesSql);
+
+        // 모든 댓글을 한 번의 쿼리로 삭제
+        String deleteRepliesSql = "DELETE FROM community_reply WHERE community_reply_id IN (" + replyIdsStr + ")";
+        jdbcTemplate.update(deleteRepliesSql);
+
+        //게시글의 좋아요 삭제
+        String deleteLikesSql2 = "DELETE FROM likes WHERE likes_board_id = ?";
+        jdbcTemplate.update(deleteLikesSql2, communityBoardId);
 
         // 게시글 삭제
         String deleteSql = "DELETE FROM community_board WHERE community_board_id = ?";
@@ -162,6 +173,12 @@ public class CommunityBoardService {
             log.error("Error occurred while accessing GCP credentials: {}", e.getMessage());
         }
     }
+    public void deleteReply(Long communityReplyId) {    //댓글과 관련된 좋아요 삭제 후 해당 댓글 하나 삭제.
+        String likesSql = "DELETE FROM likes WHERE likes_reply_id = ?";
+        jdbcTemplate.update(likesSql, communityReplyId);
+        String sql = "DELETE FROM community_reply WHERE community_reply_id = ?";
+        jdbcTemplate.update(sql, communityReplyId);
+    }
     public void editCommunityBoard(Long communityBoardId,  String title, String content, MultipartFile image, Boolean imageChangeCheck) {
         String sql = "SELECT img_url FROM community_board WHERE community_board_id = ?";
         String imgUrl = jdbcTemplate.queryForObject(sql, String.class, communityBoardId);
@@ -180,13 +197,43 @@ public class CommunityBoardService {
             jdbcTemplate.update(updateSql, title, content, communityBoardId);
         }
     }
-    public void writeReply(Long userId, Long communityBoardId, String nickname, String content) {
+    public void writeReply(Long communityBoardId, String nickname, String content) {
         Instant now = Instant.now();
-        String sql = "INSERT INTO community_reply (community_board_id,reply_writer,reply_content,reply_date,writer_nickname) " +
+        String sql = "INSERT INTO community_reply (community_board_id,reply_content,reply_date,writer_nickname) " +
                 "VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, communityBoardId, userId, content, now, nickname);
+        jdbcTemplate.update(sql, communityBoardId,content, now, nickname);
         //해당글의 댓글수 증가
         String sql2 = "UPDATE community_board SET views = views + 1 WHERE community_board_id = ?";
         jdbcTemplate.update(sql2, communityBoardId);
+    }
+    public void plusViews(Long communityBoardId) {
+        String sql = "UPDATE community_board SET replies = replies + 1 WHERE community_board_id = ?";
+        jdbcTemplate.update(sql, communityBoardId);
+    }
+    public void plusBoardLikes(Long communityBoardId, String nickname) {
+        String sql = "SELECT likes_nickname FROM likes WHERE likes_board_id = ?";
+        List<String> nicknames = jdbcTemplate.queryForList(sql, String.class, communityBoardId);
+
+        if (!nicknames.contains(nickname)) {
+            String updateSql = "UPDATE community_board SET likes = likes + 1 WHERE community_board_id = ?";
+            jdbcTemplate.update(updateSql, communityBoardId);
+        }
+    }
+    public void plusReplyLikes(Long communityReplyId, String nickname) {
+        String sql = "SELECT likes_nickname FROM likes WHERE likes_reply_id = ?";
+        List<String> nicknames = jdbcTemplate.queryForList(sql, String.class, communityReplyId);
+
+        if (!nicknames.contains(nickname)) {
+            String updateSql = "UPDATE community_reply SET likes = likes + 1 WHERE community_reply_id = ?";
+            jdbcTemplate.update(updateSql, communityReplyId);
+        }
+    }
+    public void deleteReplyBeforeCheck(Long communityReplyId, String nickname) {
+        String sql = "SELECT writer_nickname FROM community_reply WHERE community_reply_id = ?";
+        String writerNickname = jdbcTemplate.queryForObject(sql, String.class, communityReplyId);
+
+        if (nickname.equals(writerNickname)) {
+            deleteReply(communityReplyId);
+        }
     }
 }

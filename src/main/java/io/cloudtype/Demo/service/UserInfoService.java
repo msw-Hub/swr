@@ -77,21 +77,32 @@ public class UserInfoService {
         return jdbcTemplate.queryForObject(sql, String.class, communityBoardId);
     }
 
-    public void updateUserInfo(Long userId, String column, String value) {
-        // 수정할 column에 따라 SQL 쿼리를 동적으로 생성하여 실행
-        String sql = switch (column) {
-            case "nickname" -> "UPDATE user_info SET nickname = ? WHERE user_id = ?";
-            case "pin_number" -> "UPDATE user_info SET pin_number = ? WHERE user_id = ?";
-            case "phone_number" -> "UPDATE user_info SET phone_number = ? WHERE user_id = ?";
-            default ->
-                // 유효하지 않은 column인 경우 예외 처리
-                    throw new IllegalArgumentException("유효하지 않은 column입니다: " + column);
-        };
+    public void updateUserInfo(Long userId, String column, String value, String nowNickname) {
+        switch (column) {
+            case "nickname" -> {
+                String sqlUserInfo = "UPDATE user_info SET nickname = ? WHERE user_id = ?";
+                jdbcTemplate.update(sqlUserInfo, value, userId);
 
-        // SQL 쿼리 실행
-        jdbcTemplate.update(sql, value, userId);
+                String sqlCommunityBoard = "UPDATE community_board SET writer_nickname = ? WHERE writer_nickname = ?";
+                jdbcTemplate.update(sqlCommunityBoard, value, nowNickname);
+
+                String sqlCommunityReply = "UPDATE community_reply SET writer_nickname = ? WHERE writer_nickname = ?";
+                jdbcTemplate.update(sqlCommunityReply, value, nowNickname);
+
+                String sqlLike = "UPDATE likes SET likes_nickname = ? WHERE likes_nickname = ?";
+                jdbcTemplate.update(sqlLike, value, nowNickname);
+            }
+            case "pin_number" -> {
+                String sqlPinNumber = "UPDATE user_info SET pin_number = ? WHERE user_id = ?";
+                jdbcTemplate.update(sqlPinNumber, value, userId);
+            }
+            case "phone_number" -> {
+                String sqlPhoneNumber = "UPDATE user_info SET phone_number = ? WHERE user_id = ?";
+                jdbcTemplate.update(sqlPhoneNumber, value, userId);
+            }
+            default -> throw new IllegalArgumentException("유효하지 않은 column입니다: " + column);
+        }
     }
-
     public List<String> getAllNicknames() {
         String sql = "SELECT nickname FROM mydb.user_info";
         return jdbcTemplate.queryForList(sql, String.class);

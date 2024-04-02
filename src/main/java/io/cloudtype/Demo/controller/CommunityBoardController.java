@@ -89,7 +89,6 @@ public class CommunityBoardController {
             }
             Long userId = (Long) userInfo.get("userId");
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
-            Long writerId = (Long) dbUserInfo.get("id");
             String nickname = (String) dbUserInfo.get("nickname");
 
             String imageUrl = null;
@@ -99,7 +98,7 @@ public class CommunityBoardController {
                 log.info("imageUrl: " + imageUrl);
             }
             // 게시글 작성
-            communityBoardService.writePost(writerId, nickname, title, content, imageUrl);
+            communityBoardService.writePost(nickname, title, content, imageUrl);
 
             // 성공 메시지 반환
             Map<String, String> response = new HashMap<>();
@@ -127,9 +126,11 @@ public class CommunityBoardController {
             if (count == 0) {
                 return ResponseEntity.badRequest().build();
             }
-
             // requestBody에서 communityBoardId 추출
             Long communityBoardId = Long.valueOf(requestBody.get("communityBoardId").toString());
+
+            //조회수 카운팅 +1
+            communityBoardService.plusViews(communityBoardId);
 
             // 게시글 ID를 기반으로 해당 게시글의 댓글 가져오기
             List<Map<String, Object>> replies = communityBoardService.getCommentsForPost(communityBoardId);
@@ -140,7 +141,7 @@ public class CommunityBoardController {
         }
     }
 
-    @DeleteMapping("/remove-reply")
+    @DeleteMapping("/remove/board")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "해당글 삭제", description = "요청하면 해당글에 관련된 모든것이 삭제됩니다.")
     @Parameter(name = "communityBoardId", description = "게시글 ID", required = true)
@@ -156,7 +157,6 @@ public class CommunityBoardController {
             if (count == 0) {
                 return ResponseEntity.badRequest().build();
             }
-
 
             // requestBody에서 communityBoardId 추출
             Long communityBoardId = Long.valueOf(requestBody.get("communityBoardId").toString());
@@ -177,7 +177,7 @@ public class CommunityBoardController {
         return ResponseEntity.internalServerError().build();
         }
     }
-    @PostMapping("/edit-board")
+    @PostMapping("/edit/board")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "해당글 수정", description = "요청하면 해당글이 수정됩니다.")
     @Parameter(name = "communityBoardId", description = "게시글 ID", required = true)
@@ -218,7 +218,7 @@ public class CommunityBoardController {
             return ResponseEntity.internalServerError().build();
         }
     }
-    @PostMapping("/create-reply")
+    @PostMapping("/create/reply")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "댓글 작성", description = "요청하면 해당 댓글이 작성됩니다.")
     @Parameter(name = "communityBoardId", description = "게시글 ID", required = true)
@@ -237,13 +237,12 @@ public class CommunityBoardController {
             }
             Long userId = (Long) userInfo.get("userId");
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
-            Long writerId = (Long) dbUserInfo.get("id");
             String nickname = (String) dbUserInfo.get("nickname");
 
             Long communityBoardId = Long.valueOf(requestBody.get("communityBoardId").toString());
             String reply = (String) requestBody.get("reply");
-            
-            communityBoardService.writeReply(writerId,communityBoardId, nickname, reply);
+
+            communityBoardService.writeReply(communityBoardId, nickname, reply);
 
             // 성공 메시지 반환
             Map<String, String> response = new HashMap<>();
@@ -251,6 +250,100 @@ public class CommunityBoardController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Failed to write", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    @PostMapping("/like/board")
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
+    @Operation(summary = "좋아요 클릭", description = "요청하면 게시글의 좋아요가 올라갑니다.")
+    @Parameter(name = "communityBoardId", description = "게시글 ID", required = true)
+    @ApiResponse(responseCode = "200", description = "좋아요확인",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
+    public ResponseEntity<Map<String, String>> likeBoard(
+            @RequestHeader("Authorization") String accessToken,
+            @RequestBody Map<String, Object> requestBody
+    ) {
+        try {
+            // 카카오 API를 통해 사용자 정보 가져오기
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+            int count = kakaoService.processUser(userInfo);
+            if (count == 0) {
+                return ResponseEntity.badRequest().build();
+            }
+            Long userId = (Long) userInfo.get("userId");
+            Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
+            String nickname = (String) dbUserInfo.get("nickname");
+            Long communityBoardId = Long.valueOf(requestBody.get("communityBoardId").toString());
+            communityBoardService.plusBoardLikes(communityBoardId, nickname);
+
+            // 성공 메시지 반환
+            Map<String, String> response = new HashMap<>();
+            response.put("success", "게시글좋아요 성공");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Failed to plus", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    @PostMapping("/like/reply")
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
+    @Operation(summary = "좋아요 클릭", description = "요청하면 댓글의 좋아요가 올라갑니다.")
+    @Parameter(name = "communityReplyId", description = "댓글 ID", required = true)
+    @ApiResponse(responseCode = "200", description = "좋아요확인",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
+    public ResponseEntity<Map<String, String>> likeReply(
+            @RequestHeader("Authorization") String accessToken,
+            @RequestBody Map<String, Object> requestBody
+    ) {
+        try {
+            // 카카오 API를 통해 사용자 정보 가져오기
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+            int count = kakaoService.processUser(userInfo);
+            if (count == 0) {
+                return ResponseEntity.badRequest().build();
+            }
+            Long userId = (Long) userInfo.get("userId");
+            Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
+            String nickname = (String) dbUserInfo.get("nickname");
+            Long communityReplyId = Long.valueOf(requestBody.get("communityReplyId").toString());
+            communityBoardService.plusReplyLikes(communityReplyId, nickname);
+
+            // 성공 메시지 반환
+            Map<String, String> response = new HashMap<>();
+            response.put("success", "댓글좋아요 성공");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Failed to plus", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    @PostMapping("/remove/reply")
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
+    @Operation(summary = "댓글삭제", description = "요청하면 댓글및 댓글의 좋아요를 삭제합니다.")
+    @Parameter(name = "communityReplyId", description = "댓글 ID", required = true)
+    @ApiResponse(responseCode = "200", description = "댓글삭제완료",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
+    public ResponseEntity<Map<String, String>> removeReply(
+            @RequestHeader("Authorization") String accessToken,
+            @RequestBody Map<String, Object> requestBody
+    ) {
+        try {
+            // 카카오 API를 통해 사용자 정보 가져오기
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+            int count = kakaoService.processUser(userInfo);
+            if (count == 0) {
+                return ResponseEntity.badRequest().build();
+            }
+            Long userId = (Long) userInfo.get("userId");
+            Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
+            String nickname = (String) dbUserInfo.get("nickname");
+            Long communityReplyId = Long.valueOf(requestBody.get("communityReplyId").toString());
+
+            communityBoardService.deleteReplyBeforeCheck(communityReplyId, nickname);
+
+            // 성공 메시지 반환
+            Map<String, String> response = new HashMap<>();
+            response.put("success", "댓글 삭제 성공");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Failed to plus", e);
             return ResponseEntity.internalServerError().build();
         }
     }

@@ -145,7 +145,44 @@ public class KakaoLoginController {
     }
 
 
-    @Operation(summary = "회원가입", description = "회원가입을 위한 API")
+    @Operation(summary = "닉네임중복검사", description = "회원가입을 위한 API")
+    @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "nickname", description = "닉네임", required = true)
+    @ApiResponse(responseCode = "200", description = "데이터저장성공_성공메세지반환", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
+    @PostMapping("/signup/nickname")
+    public ResponseEntity<String> signUpNickname(@RequestHeader("Authorization") String accessToken,
+                                         @RequestBody Map<String, String> requestBody) {
+        try {
+            // 카카오 서버에서 해당 엑세스 토큰을 사용하여 유저 정보를 가져옴
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+            // 가져온 유저 정보에서 고유 ID를 확인
+            Long userId = (Long) userInfo.get("userId");
+            // 회원가입 시 추가 정보를 데이터베이스에 저장
+            String nickName = requestBody.get("nickname");
+            // 공백 문자가 있는지 확인하여 처리
+            if (nickName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body("입력값에 공백 문자가 포함되어 있습니다. 다시 입력해주세요.");
+            }
+
+            // 닉네임 중복 확인
+            List<String> allNicknames = userInfoService.getAllNicknames();
+            boolean isNicknameDuplicate = allNicknames.stream()
+                    .anyMatch(nickname -> nickname.equalsIgnoreCase(nickName));
+            if (isNicknameDuplicate) {
+                return ResponseEntity.badRequest().body("이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.");
+            }
+            Map<String, Object> jsonResponse = new HashMap<>();
+            jsonResponse.put("success", "닉네임 중복 없음_성공메세지반환");
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonString = objectMapper.writeValueAsString(jsonResponse);
+            return ResponseEntity.ok().body(jsonString);
+        } catch (IOException e) {
+            log.error("Failed to fetch user info from Kakao API", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    @Operation(summary = "회원가입추가정보", description = "회원가입을 위한 API")
     @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "nickname", description = "닉네임", required = true)
     @Parameter(name = "phone_number", description = "전화번호", required = true)
@@ -168,27 +205,12 @@ public class KakaoLoginController {
             String phoneNumber = requestBody.get("phone_number");
             String pinNumber = requestBody.get("pin_number");
             String birthday = requestBody.get("birthday");
-            log.info("phoneNumber : " + phoneNumber);
-            log.info("pinNumber : " + pinNumber);
-            log.info("birthday : " + birthday);
 
             // 공백 문자가 있는지 확인하여 처리
             if (nickName.trim().isEmpty() || phoneNumber.trim().isEmpty() || pinNumber.trim().isEmpty() || birthday.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("입력값에 공백 문자가 포함되어 있습니다. 다시 입력해주세요.");
             }
 
-            // 닉네임 중복 확인
-            List<String> allNicknames = userInfoService.getAllNicknames();
-            boolean isNicknameDuplicate = allNicknames.stream()
-                    .anyMatch(nickname -> nickname.equalsIgnoreCase(nickName));
-            if (isNicknameDuplicate) {
-                return ResponseEntity.badRequest().body("이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.");
-            }
-
-            userInfo.put("nickname", nickName);
-            userInfo.put("phone_number", phoneNumber);
-            userInfo.put("pin_number", pinNumber);
-            userInfo.put("birthday", birthday);
             userInfoService.saveAdditionalUserInfo(userId, nickName, phoneNumber, pinNumber, birthday);
 
             Map<String, Object> jsonResponse = new HashMap<>();
