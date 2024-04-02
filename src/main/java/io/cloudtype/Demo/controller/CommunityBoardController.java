@@ -157,11 +157,14 @@ public class CommunityBoardController {
             if (count == 0) {
                 return ResponseEntity.badRequest().build();
             }
-
             // requestBody에서 communityBoardId 추출
             Long communityBoardId = Long.valueOf(requestBody.get("communityBoardId").toString());
-            String dbUserId = userInfoService.getUserIdByCommunityBoardId(communityBoardId);
-            if(Objects.equals(dbUserId, userInfo.get("userId").toString())) {
+
+            Long userId = (Long) userInfo.get("userId");
+            Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
+            String dbNickname = (String) dbUserInfo.get("nickname");
+            String boardNickname = userInfoService.getUserIdByCommunityBoardNickname(communityBoardId);
+            if(Objects.equals(boardNickname, dbNickname)) {
                 // 게시글 삭제
                 communityBoardService.deleteCommunityBoard(communityBoardId);
             } else {
@@ -201,8 +204,12 @@ public class CommunityBoardController {
             if (count == 0) {
                 return ResponseEntity.badRequest().build();
             }
-            String dbUserId = userInfoService.getUserIdByCommunityBoardId(communityBoardId);
-            if(Objects.equals(dbUserId, userInfo.get("userId").toString())) {
+            Long userId = (Long) userInfo.get("userId");
+            Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
+            String dbNickname = (String) dbUserInfo.get("nickname");
+
+            String boardNickname = userInfoService.getUserIdByCommunityBoardNickname(communityBoardId);
+            if(Objects.equals(boardNickname, dbNickname)) {
                 // 게시글 수정
                 communityBoardService.editCommunityBoard(communityBoardId, title, content, image, imageChangeCheck);
             } else {
