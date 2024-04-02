@@ -174,19 +174,18 @@ public class CommunityBoardService {
         }
     }
     public void deleteReply(Long communityReplyId) {
-        //댓글과 관련된 좋아요 삭제 후 해당 댓글 하나 삭제.
+        //댓글과 관련된 좋아요 먼저 삭제
         String likesSql = "DELETE FROM likes WHERE likes_reply_id = ?";
         jdbcTemplate.update(likesSql, communityReplyId);
+        //댓글로 해당 게시글 id를 찾아둠
+        String sql2 = "SELECT community_board_id FROM community_reply WHERE community_reply_id = ?";
+        Long communityBoardId = jdbcTemplate.queryForObject(sql2, Long.class, communityReplyId);
+        //댓글 삭제
         String sql = "DELETE FROM community_reply WHERE community_reply_id = ?";
         jdbcTemplate.update(sql, communityReplyId);
-
-        //likes테이블에서 해당 likes_reply_id의 수를 세어서 community_reply의 likes수를 업데이트
-        String sql2 = "SELECT COUNT(*) FROM likes WHERE likes_reply_id = ?";
-        //만일 null이면 0으로 처리
-        Integer likes = jdbcTemplate.queryForObject(sql2, Integer.class, communityReplyId);
-        if(likes == null) likes = 0;
-        String sql3 = "UPDATE community_reply SET likes = ? WHERE community_reply_id = ?";
-        jdbcTemplate.update(sql3, likes, communityReplyId);
+        //댓글을 삭제했으니, 해당 게시글의 댓글수를 감소시킴
+        String sql3 = "UPDATE community_board SET replies = replies - 1 WHERE community_board_id = ?";
+        jdbcTemplate.update(sql3, communityBoardId);
     }
     public void editCommunityBoard(Long communityBoardId,  String title, String content, MultipartFile image, Boolean imageChangeCheck) {
         String sql = "SELECT img_url FROM community_board WHERE community_board_id = ?";
@@ -246,9 +245,6 @@ public class CommunityBoardService {
     public void deleteReplyBeforeCheck(Long communityReplyId, String nickname) {
         String sql = "SELECT writer_nickname FROM mydb.community_reply WHERE community_reply_id = ?";
         String writerNickname =  jdbcTemplate.queryForObject(sql, String.class, communityReplyId);
-        log.info("writerNickname: {}", writerNickname);
-        log.info("nickname: {}", nickname);
-        log.info("communityReplyId: {}", communityReplyId);
         if(nickname.equals(writerNickname)) deleteReply(communityReplyId);
         else log.error("You are not the writer of this reply.");
     }
