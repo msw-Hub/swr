@@ -64,6 +64,19 @@ public class UserInfoService {
         return jdbcTemplate.queryForObject(sql, String.class, userId);
     }
 
+    //글 삭제시, 게시글아이디로 작성자 확인하는 메서드
+    public String getUserIdByCommunityBoardId(Long communityBoardId) {
+        if (jdbcTemplate == null) {
+            throw new IllegalStateException("JdbcTemplate이 올바르게 주입되지 않았습니다.");
+        }
+
+        // 데이터베이스에서 userId에 해당하는 사용자의 핀 번호를 조회하는 쿼리 작성
+        String sql = "SELECT writer_id FROM mydb.community_board WHERE community_board_id = ?";
+
+        // 쿼리 실행하여 결과 가져오기
+        return jdbcTemplate.queryForObject(sql, String.class, communityBoardId);
+    }
+
     public void updateUserInfo(Long userId, String column, String value) {
         // 수정할 column에 따라 SQL 쿼리를 동적으로 생성하여 실행
         String sql = switch (column) {

@@ -77,17 +77,14 @@ public class CommunityBoardService {
             return null;
         }
     }
-
     public void writePost(Long userId, String nickname, String title, String content, String imgUrl){
         // 현재 시간 가져오기
         Instant now = Instant.now();
-
         // 게시글 작성 SQL 쿼리 실행
         String sql = "INSERT INTO community_board (writer_id, writer_nickname, title, content, created_date, img_url) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, userId, nickname, title, content, now, imgUrl);
     }
-
     public String uploadImage(MultipartFile image) {
         try {
             // 이미지가 비어 있는지 확인
@@ -125,34 +122,13 @@ public class CommunityBoardService {
         String sql = "SELECT * FROM community_reply WHERE community_board_id = ?";
         return jdbcTemplate.queryForList(sql, postId);
     }
-
     public void deleteCommunityBoard(Long communityBoardId) {
         // 게시글 id를 토대로 이미지 URL을 가져옴
         String sql = "SELECT img_url FROM community_board WHERE community_board_id = ?";
         String imgUrl = jdbcTemplate.queryForObject(sql, String.class, communityBoardId);
 
         if (imgUrl != null && !imgUrl.isEmpty()) {
-            // imgUrl에서 파일 이름(객체 이름)을 추출
-            String objectName = imgUrl.substring(imgUrl.lastIndexOf('/') + 1);
-            log.info("Object name: {}", objectName);
-            try {
-                // 인증 정보를 사용하여 Storage 객체 생성
-                InputStream keyFile = ResourceUtils.getURL(keyFileName).openStream();
-                Storage storage = StorageOptions.newBuilder().setCredentials(GoogleCredentials.fromStream(keyFile)).build().getService();
-
-                // GCS에서 이미지 파일(객체) 삭제
-                Blob blob = storage.get(bucketName, objectName);
-                if (blob != null) {
-                    blob.delete();
-                    log.info("Object {} was deleted from {}", objectName, bucketName);
-                } else {
-                    log.info("The object {} wasn't found in {}", objectName, bucketName);
-                }
-            } catch (FileNotFoundException e) {
-                log.error("Key file for GCP credentials not found: {}", e.getMessage());
-            } catch (IOException e) {
-                log.error("Error occurred while accessing GCP credentials: {}", e.getMessage());
-            }
+            deleteImageGcs(imgUrl);
         }
 
         // 게시글의 댓글부터 삭제
@@ -162,5 +138,52 @@ public class CommunityBoardService {
         // 게시글 삭제
         String deleteSql = "DELETE FROM community_board WHERE community_board_id = ?";
         jdbcTemplate.update(deleteSql, communityBoardId);
+    }
+    public void deleteImageGcs(String imgUrl){
+        // imgUrl에서 파일 이름(객체 이름)을 추출
+        String objectName = imgUrl.substring(imgUrl.lastIndexOf('/') + 1);
+        log.info("Object name: {}", objectName);
+        try {
+            // 인증 정보를 사용하여 Storage 객체 생성
+            InputStream keyFile = ResourceUtils.getURL(keyFileName).openStream();
+            Storage storage = StorageOptions.newBuilder().setCredentials(GoogleCredentials.fromStream(keyFile)).build().getService();
+
+            // GCS에서 이미지 파일(객체) 삭제
+            Blob blob = storage.get(bucketName, objectName);
+            if (blob != null) {
+                blob.delete();
+                log.info("Object {} was deleted from {}", objectName, bucketName);
+            } else {
+                log.info("The object {} wasn't found in {}", objectName, bucketName);
+            }
+        } catch (FileNotFoundException e) {
+            log.error("Key file for GCP credentials not found: {}", e.getMessage());
+        } catch (IOException e) {
+            log.error("Error occurred while accessing GCP credentials: {}", e.getMessage());
+        }
+    }
+    public void editCommunityBoard(Long communityBoardId,  String title, String content, MultipartFile image, Boolean imageChangeCheck) {
+        String sql = "SELECT img_url FROM community_board WHERE community_board_id = ?";
+        String imgUrl = jdbcTemplate.queryForObject(sql, String.class, communityBoardId);
+        if( imageChangeCheck && image==null ){  //게시글의 이미지 삭제
+            if(imgUrl == null) log.error("Failed to fetch image URL from community board post"); //기존 url이 없었는데 삭제한다니 오류
+            else deleteImageGcs(imgUrl);
+            String updateSql = "UPDATE community_board SET title = ?, content = ?, img_url = ? WHERE community_board_id = ?";
+            jdbcTemplate.update(updateSql, title, content, null, communityBoardId);
+        } else if (imageChangeCheck) {  //게시글의 이미지 변경 (1.gcs이미지 삭제 후 변경이미지 업로드)
+            if(imgUrl != null) deleteImageGcs(imgUrl);
+            String newImgUrl = uploadImage(image);
+            String updateSql = "UPDATE community_board SET title = ?, content = ?, img_url = ? WHERE community_board_id = ?";
+            jdbcTemplate.update(updateSql, title, content, newImgUrl, communityBoardId);
+        } else {   //게시글의 이미지 변경 없이 수정
+            String updateSql = "UPDATE community_board SET title = ?, content = ? WHERE community_board_id = ?";
+            jdbcTemplate.update(updateSql, title, content, communityBoardId);
+        }
+    }
+    public void writeReply(Long userId, Long communityBoardId, String nickname, String content) {
+        Instant now = Instant.now();
+        String sql = "INSERT INTO community_reply (community_board_id,reply_writer,reply_content,reply_date,writer_nickname) " +
+                "VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, communityBoardId, userId, content, now, nickname);
     }
 }
