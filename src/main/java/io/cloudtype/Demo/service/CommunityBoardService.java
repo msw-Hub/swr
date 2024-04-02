@@ -79,7 +79,7 @@ public class CommunityBoardService {
         Instant now = Instant.now();
         // 게시글 작성 SQL 쿼리 실행
         String sql = "INSERT INTO community_board (writer_nickname, title, content, created_date, img_url) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,nickname, title, content, now, imgUrl);
     }
     public String uploadImage(MultipartFile image) {
@@ -200,7 +200,7 @@ public class CommunityBoardService {
     public void writeReply(Long communityBoardId, String nickname, String content) {
         Instant now = Instant.now();
         String sql = "INSERT INTO community_reply (community_board_id,reply_content,reply_date,writer_nickname) " +
-                "VALUES (?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, communityBoardId,content, now, nickname);
         //해당글의 댓글수 증가
         String sql2 = "UPDATE community_board SET views = views + 1 WHERE community_board_id = ?";
