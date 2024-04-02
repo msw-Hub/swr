@@ -185,5 +185,8 @@ public class CommunityBoardService {
         String sql = "INSERT INTO community_reply (community_board_id,reply_writer,reply_content,reply_date,writer_nickname) " +
                 "VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, communityBoardId, userId, content, now, nickname);
+        //해당글의 댓글수 증가
+        String sql2 = "UPDATE community_board SET views = views + 1 WHERE community_board_id = ?";
+        jdbcTemplate.update(sql2, communityBoardId);
     }
 }
