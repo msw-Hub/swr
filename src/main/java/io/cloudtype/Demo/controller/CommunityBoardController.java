@@ -43,7 +43,6 @@ public class CommunityBoardController {
     @PostMapping("")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "커뮤니티 게시판 글 목록 가져오기", description = "최신 글부터 페이지별로 반환합니다.")
-    @Parameter(name = "accessToken", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "page", description = "페이지 번호 (기본값 1)", required = true)
     @ApiResponse(responseCode = "200", description = "커뮤니티 게시판 글 목록 반환 성공",content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     public ResponseEntity<Map<String, Object>> getCommunityBoard(
@@ -71,11 +70,10 @@ public class CommunityBoardController {
     @PostMapping("/create")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "게시글 작성", description = "게시글을 작성합니다.")
-    @Parameter(name = "accessToken", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "title", description = "게시글 제목", required = true)
     @Parameter(name = "content", description = "게시글 내용", required = true)
     @Parameter(name = "image", description = "이미지파일 / 없으면 null")
-    @ApiResponse(responseCode = "200", description = "글 작성 성공",content = @Content(mediaType = "multipart/form-data",schema = @Schema(implementation = String.class)))
+    @ApiResponse(responseCode = "200", description = "글 작성 성공",content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     public ResponseEntity<Map<String, String>> writePost(
             @RequestHeader("Authorization") String accessToken,
             @ModelAttribute("title") String title,
@@ -116,7 +114,6 @@ public class CommunityBoardController {
     @PostMapping("/replies")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "해당글의 댓글모음", description = "요청하면 해당글의 댓글들을 불러옵니다.")
-    @Parameter(name = "accessToken", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "communityBoardId", description = "게시글 ID", required = true)
     @ApiResponse(responseCode = "200", description = "댓글들 반환",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
     public ResponseEntity<List<Map<String, Object>>> getReplies(
@@ -146,7 +143,6 @@ public class CommunityBoardController {
     @DeleteMapping("/remove-reply")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "해당글 삭제", description = "요청하면 해당글에 관련된 모든것이 삭제됩니다.")
-    @Parameter(name = "accessToken", description = "Access Token", required = true,in = ParameterIn.HEADER)
     @Parameter(name = "communityBoardId", description = "게시글 ID", required = true)
     @ApiResponse(responseCode = "200", description = "삭제완료",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
     public ResponseEntity<Map<String, String>> deleteCommunityBoardPost(
@@ -184,16 +180,15 @@ public class CommunityBoardController {
     @PostMapping("/edit-board")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "해당글 수정", description = "요청하면 해당글이 수정됩니다.")
-    @Parameter(name = "accessToken", description = "Access Token", required = true,in = ParameterIn.HEADER)
     @Parameter(name = "communityBoardId", description = "게시글 ID", required = true)
     @Parameter(name = "title", description = "게시글 제목", required = true)
     @Parameter(name = "content", description = "게시글 내용", required = true)
     @Parameter(name = "imageChangeCheck", description = "이미지파일 바뀌면 true, 안바뀌면 false", required = true)
     @Parameter(name = "image", description = "이미지파일 / 없으면 null")
-    @ApiResponse(responseCode = "200", description = "글 수정 성공",content = @Content(mediaType = "multipart/form-data",schema = @Schema(implementation = String.class)))
+    @ApiResponse(responseCode = "200", description = "글 수정 성공",content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     public ResponseEntity<Map<String, String>> editPost(
             @RequestHeader("Authorization") String accessToken,
-            @ModelAttribute("communityBoardId") Long communityBoardId,
+            @RequestParam("communityBoardId") Long communityBoardId,
             @ModelAttribute("title") String title,
             @ModelAttribute("content") String content,
             @ModelAttribute("imageCheck") Boolean imageChangeCheck,
@@ -226,13 +221,12 @@ public class CommunityBoardController {
     @PostMapping("/create-reply")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "댓글 작성", description = "요청하면 해당 댓글이 작성됩니다.")
-    @Parameter(name = "accessToken", description = "Access Token", required = true,in = ParameterIn.HEADER)
     @Parameter(name = "communityBoardId", description = "게시글 ID", required = true)
     @Parameter(name = "reply", description = "댓글내용", required = true)
     @ApiResponse(responseCode = "200", description = "댓글작성완료",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
     public ResponseEntity<Map<String, String>> createReply(
             @RequestHeader("Authorization") String accessToken,
-            @ModelAttribute("communityBoardId") Long communityBoardId,
+            @RequestParam("communityBoardId") Long communityBoardId,
             @ModelAttribute("reply") String reply
     ) {
         try {
