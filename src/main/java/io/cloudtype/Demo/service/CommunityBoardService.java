@@ -203,11 +203,11 @@ public class CommunityBoardService {
                 "VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, communityBoardId,content, now, nickname);
         //해당글의 댓글수 증가
-        String sql2 = "UPDATE community_board SET views = views + 1 WHERE community_board_id = ?";
+        String sql2 = "UPDATE community_board SET replies = replies + 1 WHERE community_board_id = ?";
         jdbcTemplate.update(sql2, communityBoardId);
     }
     public void plusViews(Long communityBoardId) {
-        String sql = "UPDATE community_board SET replies = replies + 1 WHERE community_board_id = ?";
+        String sql = "UPDATE community_board SET views = views + 1 WHERE community_board_id = ?";
         jdbcTemplate.update(sql, communityBoardId);
     }
     public void plusBoardLikes(Long communityBoardId, String nickname) {
