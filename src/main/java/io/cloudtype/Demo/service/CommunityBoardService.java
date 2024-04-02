@@ -173,11 +173,13 @@ public class CommunityBoardService {
             log.error("Error occurred while accessing GCP credentials: {}", e.getMessage());
         }
     }
-    public void deleteReply(Long communityReplyId) {    //댓글과 관련된 좋아요 삭제 후 해당 댓글 하나 삭제.
+    public void deleteReply(Long communityReplyId) {
+        //댓글과 관련된 좋아요 삭제 후 해당 댓글 하나 삭제.
         String likesSql = "DELETE FROM likes WHERE likes_reply_id = ?";
         jdbcTemplate.update(likesSql, communityReplyId);
         String sql = "DELETE FROM community_reply WHERE community_reply_id = ?";
         jdbcTemplate.update(sql, communityReplyId);
+
         //likes테이블에서 해당 likes_reply_id의 수를 세어서 community_reply의 likes수를 업데이트
         String sql2 = "SELECT COUNT(*) FROM likes WHERE likes_reply_id = ?";
         //만일 null이면 0으로 처리
@@ -243,10 +245,13 @@ public class CommunityBoardService {
     }
     public void deleteReplyBeforeCheck(Long communityReplyId, String nickname) {
         String sql = "SELECT writer_nickname FROM community_reply WHERE community_reply_id = ?";
-        String writerNickname = jdbcTemplate.queryForObject(sql, String.class, communityReplyId);
-        log.info("writerNickname: "+writerNickname);
 
-        if (nickname.equals(writerNickname)) {
+        // 결과가 없는 경우에 대비하여 query() 메서드를 사용하여 리스트로 결과를 가져옵니다.
+        List<String> writerNicknames = jdbcTemplate.query(sql, new Object[]{communityReplyId}, (resultSet, i) -> resultSet.getString("writer_nickname"));
+
+        // 만약 결과가 없으면 writerNicknames 리스트는 비어있을 것입니다.
+        // 따라서 writerNicknames가 비어있지 않고, 그 중 첫 번째 값이 nickname과 일치하는 경우에만 댓글을 삭제합니다.
+        if (!writerNicknames.isEmpty() && nickname.equals(writerNicknames.get(0))) {
             deleteReply(communityReplyId);
         }
     }
