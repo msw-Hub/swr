@@ -226,8 +226,7 @@ public class CommunityBoardController {
     @ApiResponse(responseCode = "200", description = "댓글작성완료",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
     public ResponseEntity<Map<String, String>> createReply(
             @RequestHeader("Authorization") String accessToken,
-            @RequestParam("communityBoardId") Long communityBoardId,
-            @ModelAttribute("reply") String reply
+            @RequestBody Map<String, Object> requestBody
     ) {
         try {
             // 카카오 API를 통해 사용자 정보 가져오기
@@ -240,6 +239,10 @@ public class CommunityBoardController {
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             Long writerId = (Long) dbUserInfo.get("id");
             String nickname = (String) dbUserInfo.get("nickname");
+
+            Long communityBoardId = Long.valueOf(requestBody.get("communityBoardId").toString());
+            String reply = (String) requestBody.get("reply");
+            
             communityBoardService.writeReply(writerId,communityBoardId, nickname, reply);
 
             // 성공 메시지 반환
