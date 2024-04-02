@@ -218,28 +218,51 @@ public class CommunityBoardService {
         String sql = "UPDATE community_board SET views = views + 1 WHERE community_board_id = ?";
         jdbcTemplate.update(sql, communityBoardId);
     }
-    public void plusBoardLikes(Long communityBoardId, String nickname) {
+    public String plusBoardLikes(Long communityBoardId, String nickname) {
+        //좋아요를 이미 누르면 안되도록 중복체크
         String sql = "SELECT likes_nickname FROM likes WHERE likes_board_id = ?";
         List<String> nicknames = jdbcTemplate.queryForList(sql, String.class, communityBoardId);
 
         if (!nicknames.contains(nickname)) {
-            String sql2 = "INSERT INTO mydb.likes (likes_nickname, likes_board_id)" + "VALUES (?, ?)";
-            jdbcTemplate.update(sql2, nickname, communityBoardId);
+            //communityBoardId로 community_board 테이블에서 community_board_id가 존재하는지를 확인하고 진행
+            String sql3 = "SELECT community_board_id FROM community_board WHERE community_board_id = ?";
+            Long communityBoardId2 = jdbcTemplate.queryForObject(sql3, Long.class, communityBoardId);
+            if(communityBoardId2 == null) {
+                log.error("유효한 community_board_id가 아닙니다.");
+                return "유효한 community_board_id가 아닙니다.";
+            }
+            else {
+                String sql2 = "INSERT INTO mydb.likes (likes_nickname, likes_board_id)" + "VALUES (?, ?)";
+                jdbcTemplate.update(sql2, nickname, communityBoardId);
 
-            String updateSql = "UPDATE community_board SET likes = likes + 1 WHERE community_board_id = ?";
-            jdbcTemplate.update(updateSql, communityBoardId);
-        }
+                String updateSql = "UPDATE community_board SET likes = likes + 1 WHERE community_board_id = ?";
+                jdbcTemplate.update(updateSql, communityBoardId);
+                return "success";
+            }
+        }else return "이미 좋아요를 눌렀습니다";
     }
-    public void plusReplyLikes(Long communityReplyId, String nickname) {
+    public String plusReplyLikes(Long communityReplyId, String nickname) {
+        //좋아요를 이미 누르면 안되도록 중복체크
         String sql = "SELECT likes_nickname FROM likes WHERE likes_reply_id = ?";
         List<String> nicknames = jdbcTemplate.queryForList(sql, String.class, communityReplyId);
 
         if (!nicknames.contains(nickname)) {
-            String sql2 = "INSERT INTO mydb.likes (likes_nickname, likes_reply_id)" + "VALUES (?, ?)";
-            jdbcTemplate.update(sql2, nickname, communityReplyId);
-            String updateSql = "UPDATE community_reply SET likes = likes + 1 WHERE community_reply_id = ?";
-            jdbcTemplate.update(updateSql, communityReplyId);
-
+            //communityReplyId로 community_reply 테이블에서 community_reply_id가 존재하는지를 확인하고 진행
+            String sql3 = "SELECT community_reply_id FROM community_reply WHERE community_reply_id = ?";
+            Long communityReplyId2 = jdbcTemplate.queryForObject(sql3, Long.class, communityReplyId);
+            if(communityReplyId2 == null) {
+                log.error("유효한 community_reply_id가 아닙니다.");
+                return "유효한 community_reply_id가 아닙니다.";
+            }
+            else {
+                String sql2 = "INSERT INTO mydb.likes (likes_nickname, likes_reply_id)" + "VALUES (?, ?)";
+                jdbcTemplate.update(sql2, nickname, communityReplyId);
+                String updateSql = "UPDATE community_reply SET likes = likes + 1 WHERE community_reply_id = ?";
+                jdbcTemplate.update(updateSql, communityReplyId);
+                return "success";
+            }
+        }else {
+            return "이미 좋아요를 눌렀습니다";
         }
     }
     public void deleteReplyBeforeCheck(Long communityReplyId, String nickname) {

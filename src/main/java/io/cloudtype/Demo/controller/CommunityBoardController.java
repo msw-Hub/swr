@@ -277,14 +277,19 @@ public class CommunityBoardController {
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             String nickname = (String) dbUserInfo.get("nickname");
             Long communityBoardId = Long.valueOf(requestBody.get("communityBoardId").toString());
-            communityBoardService.plusBoardLikes(communityBoardId, nickname);
-
-            // 성공 메시지 반환
+            String check = communityBoardService.plusBoardLikes(communityBoardId, nickname);
             Map<String, String> response = new HashMap<>();
-            response.put("success", "게시글좋아요 성공");
-            return ResponseEntity.ok(response);
+            if(check.equals("success")){
+                // 성공 메시지 반환
+                response.put("success", "게시글좋아요 성공");
+                return ResponseEntity.ok(response);
+            }
+            else{
+                response.put("bad", check);
+                return ResponseEntity.badRequest().body(response);
+            }
         } catch (Exception e) {
-            log.error("Failed to plus", e);
+            log.error("Failed to plus-like", e);
             return ResponseEntity.internalServerError().build();
         }
     }
@@ -308,14 +313,19 @@ public class CommunityBoardController {
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             String nickname = (String) dbUserInfo.get("nickname");
             Long communityReplyId = Long.valueOf(requestBody.get("communityReplyId").toString());
-            communityBoardService.plusReplyLikes(communityReplyId, nickname);
-
-            // 성공 메시지 반환
+            String check = communityBoardService.plusReplyLikes(communityReplyId, nickname);
             Map<String, String> response = new HashMap<>();
-            response.put("success", "댓글좋아요 성공");
-            return ResponseEntity.ok(response);
+            if(check.equals("success")){
+                // 성공 메시지 반환
+                response.put("success", "댓글좋아요 성공");
+                return ResponseEntity.ok(response);
+            }
+            else{
+                response.put("bad", check);
+                return ResponseEntity.badRequest().body(response);
+            }
         } catch (Exception e) {
-            log.error("Failed to plus", e);
+            log.error("Failed to plus-like", e);
             return ResponseEntity.internalServerError().build();
         }
     }
