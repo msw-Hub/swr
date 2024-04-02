@@ -134,7 +134,7 @@ public class CommunityBoardService {
         // 모든 댓글의 ID를 쉼표로 구분된 문자열로 변환
         String replyIdsStr = replyIds.stream().map(Object::toString).collect(Collectors.joining(","));
 
-        // 모든 댓글과 관련된 좋아요를 한 번의 쿼리로 삭제
+        // 모든 댓글과 해당 댓글에 연결된 좋아요를 삭제
         String deleteLikesSql = "DELETE FROM likes WHERE likes_reply_id IN (" + replyIdsStr + ")";
         jdbcTemplate.update(deleteLikesSql);
 
@@ -178,6 +178,13 @@ public class CommunityBoardService {
         jdbcTemplate.update(likesSql, communityReplyId);
         String sql = "DELETE FROM community_reply WHERE community_reply_id = ?";
         jdbcTemplate.update(sql, communityReplyId);
+        //likes테이블에서 해당 likes_reply_id의 수를 세어서 community_reply의 likes수를 업데이트
+        String sql2 = "SELECT COUNT(*) FROM likes WHERE likes_reply_id = ?";
+        //만일 null이면 0으로 처리
+        Integer likes = jdbcTemplate.queryForObject(sql2, Integer.class, communityReplyId);
+        if(likes == null) likes = 0;
+        String sql3 = "UPDATE community_reply SET likes = ? WHERE community_reply_id = ?";
+        jdbcTemplate.update(sql3, likes, communityReplyId);
     }
     public void editCommunityBoard(Long communityBoardId,  String title, String content, MultipartFile image, Boolean imageChangeCheck) {
         String sql = "SELECT img_url FROM community_board WHERE community_board_id = ?";
