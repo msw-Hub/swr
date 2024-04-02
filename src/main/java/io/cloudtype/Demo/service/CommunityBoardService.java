@@ -215,6 +215,9 @@ public class CommunityBoardService {
         List<String> nicknames = jdbcTemplate.queryForList(sql, String.class, communityBoardId);
 
         if (!nicknames.contains(nickname)) {
+            String sql2 = "INSERT INTO mydb.likes (likes_nickname, likes_board_id)" + "VALUES (?, ?)";
+            jdbcTemplate.update(sql2, nickname, communityBoardId);
+
             String updateSql = "UPDATE community_board SET likes = likes + 1 WHERE community_board_id = ?";
             jdbcTemplate.update(updateSql, communityBoardId);
         }
@@ -224,8 +227,11 @@ public class CommunityBoardService {
         List<String> nicknames = jdbcTemplate.queryForList(sql, String.class, communityReplyId);
 
         if (!nicknames.contains(nickname)) {
+            String sql2 = "INSERT INTO mydb.likes (likes_nickname, likes_reply_id)" + "VALUES (?, ?)";
+            jdbcTemplate.update(sql2, nickname, communityReplyId);
             String updateSql = "UPDATE community_reply SET likes = likes + 1 WHERE community_reply_id = ?";
             jdbcTemplate.update(updateSql, communityReplyId);
+
         }
     }
     public void deleteReplyBeforeCheck(Long communityReplyId, String nickname) {
