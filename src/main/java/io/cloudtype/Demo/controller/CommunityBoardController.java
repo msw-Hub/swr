@@ -148,7 +148,7 @@ public class CommunityBoardController {
     @ApiResponse(responseCode = "200", description = "삭제완료",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
     public ResponseEntity<Map<String, String>> deleteCommunityBoardPost(
             @RequestHeader("Authorization") String accessToken,
-            @RequestBody Map<String, Object> requestBody
+            @RequestParam Long communityBoardId
     ) {
         try {
             // 카카오 API를 통해 사용자 정보 가져오기
@@ -157,9 +157,6 @@ public class CommunityBoardController {
             if (count == 0) {
                 return ResponseEntity.badRequest().build();
             }
-            // requestBody에서 communityBoardId 추출
-            Long communityBoardId = Long.valueOf(requestBody.get("communityBoardId").toString());
-
             Long userId = (Long) userInfo.get("userId");
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             String dbNickname = (String) dbUserInfo.get("nickname");
