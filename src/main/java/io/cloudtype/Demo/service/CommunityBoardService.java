@@ -244,11 +244,12 @@ public class CommunityBoardService {
         }
     }
     public void deleteReplyBeforeCheck(Long communityReplyId, String nickname) {
-        String sql = "SELECT writer_nickname FROM mydb.community_board WHERE community_board_id = ?";
+        String sql = "SELECT writer_nickname FROM mydb.community_reply WHERE community_reply_id = ?";
         String writerNickname =  jdbcTemplate.queryForObject(sql, String.class, communityReplyId);
         log.info("writerNickname: {}", writerNickname);
         log.info("nickname: {}", nickname);
         log.info("communityReplyId: {}", communityReplyId);
         if(nickname.equals(writerNickname)) deleteReply(communityReplyId);
+        else log.error("You are not the writer of this reply.");
     }
 }
