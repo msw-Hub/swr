@@ -338,7 +338,6 @@ public class CommunityBoardController {
             Long userId = (Long) userInfo.get("userId");
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             String nickname = (String) dbUserInfo.get("nickname");
-
             communityBoardService.deleteReplyBeforeCheck(communityReplyId, nickname);
 
             // 성공 메시지 반환

@@ -244,15 +244,11 @@ public class CommunityBoardService {
         }
     }
     public void deleteReplyBeforeCheck(Long communityReplyId, String nickname) {
-        String sql = "SELECT writer_nickname FROM community_reply WHERE community_reply_id = ?";
-
-        // 결과가 없는 경우에 대비하여 query() 메서드를 사용하여 리스트로 결과를 가져옵니다.
-        List<String> writerNicknames = jdbcTemplate.query(sql, new Object[]{communityReplyId}, (resultSet, i) -> resultSet.getString("writer_nickname"));
-
-        // 만약 결과가 없으면 writerNicknames 리스트는 비어있을 것입니다.
-        // 따라서 writerNicknames가 비어있지 않고, 그 중 첫 번째 값이 nickname과 일치하는 경우에만 댓글을 삭제합니다.
-        if (!writerNicknames.isEmpty() && nickname.equals(writerNicknames.get(0))) {
-            deleteReply(communityReplyId);
-        }
+        String sql = "SELECT writer_nickname FROM mydb.community_board WHERE community_board_id = ?";
+        String writerNickname =  jdbcTemplate.queryForObject(sql, String.class, communityReplyId);
+        log.info("writerNickname: {}", writerNickname);
+        log.info("nickname: {}", nickname);
+        log.info("communityReplyId: {}", communityReplyId);
+        if(nickname.equals(writerNickname)) deleteReply(communityReplyId);
     }
 }
