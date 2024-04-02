@@ -244,6 +244,7 @@ public class CommunityBoardService {
     public void deleteReplyBeforeCheck(Long communityReplyId, String nickname) {
         String sql = "SELECT writer_nickname FROM community_reply WHERE community_reply_id = ?";
         String writerNickname = jdbcTemplate.queryForObject(sql, String.class, communityReplyId);
+        log.info("writerNickname: "+writerNickname);
 
         if (nickname.equals(writerNickname)) {
             deleteReply(communityReplyId);

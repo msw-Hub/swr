@@ -319,14 +319,14 @@ public class CommunityBoardController {
             return ResponseEntity.internalServerError().build();
         }
     }
-    @PostMapping("/remove/reply")
+    @DeleteMapping("/remove/reply")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @Operation(summary = "댓글삭제", description = "요청하면 댓글및 댓글의 좋아요를 삭제합니다.")
     @Parameter(name = "communityReplyId", description = "댓글 ID", required = true)
     @ApiResponse(responseCode = "200", description = "댓글삭제완료",content = @Content(mediaType = "application/json",schema = @Schema(implementation = List.class)))
     public ResponseEntity<Map<String, String>> removeReply(
             @RequestHeader("Authorization") String accessToken,
-            @RequestBody Map<String, Object> requestBody
+            @RequestParam Long communityReplyId
     ) {
         try {
             // 카카오 API를 통해 사용자 정보 가져오기
@@ -338,7 +338,6 @@ public class CommunityBoardController {
             Long userId = (Long) userInfo.get("userId");
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             String nickname = (String) dbUserInfo.get("nickname");
-            Long communityReplyId = Long.valueOf(requestBody.get("communityReplyId").toString());
 
             communityBoardService.deleteReplyBeforeCheck(communityReplyId, nickname);
 
@@ -347,7 +346,7 @@ public class CommunityBoardController {
             response.put("success", "댓글 삭제 성공");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.error("Failed to plus", e);
+            log.error("Failed to minus", e);
             return ResponseEntity.internalServerError().build();
         }
     }
