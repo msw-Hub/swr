@@ -58,8 +58,6 @@ public class CommunityBoardController {
                 return ResponseEntity.badRequest().build();
             }
             Map<String, Object> communityBoardList = communityBoardService.getCommunityBoardPosts(page);
-            log.info("communityBoardList: " + communityBoardList);
-
             return ResponseEntity.ok(communityBoardList);
         } catch (Exception e) {
             log.error("Failed to fetch community board posts", e);

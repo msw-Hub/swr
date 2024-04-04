@@ -127,22 +127,24 @@ public class CommunityBoardService {
             deleteImageGcs(imgUrl);
         }
 
-        // 게시글에 연결된 모든 댓글의 ID를 찾음
+        // 게시글에 연결된 모든 댓글 ID 찾기
         String findRepliesSql = "SELECT community_reply_id FROM community_reply WHERE community_board_id = ?";
-        List<Long> replyIds = jdbcTemplate.queryForList(findRepliesSql, Long.class, communityBoardId);
+        List<Long> replyIds = jdbcTemplate.queryForList(findRepliesSql, new Object[]{communityBoardId}, Long.class);
 
-        // 모든 댓글의 ID를 쉼표로 구분된 문자열로 변환
-        String replyIdsStr = replyIds.stream().map(Object::toString).collect(Collectors.joining(","));
+        if (!replyIds.isEmpty()) {
+            // 모든 댓글 ID를 쉼표로 구분된 문자열로 변환
+            String replyIdsStr = replyIds.stream().map(Object::toString).collect(Collectors.joining(","));
 
-        // 모든 댓글과 해당 댓글에 연결된 좋아요를 삭제
-        String deleteLikesSql = "DELETE FROM likes WHERE likes_reply_id IN (" + replyIdsStr + ")";
-        jdbcTemplate.update(deleteLikesSql);
+            // 모든 댓글에 연결된 좋아요 삭제
+            String deleteLikesSql = "DELETE FROM likes WHERE likes_reply_id IN (" + replyIdsStr + ")";
+            jdbcTemplate.update(deleteLikesSql);
 
-        // 모든 댓글을 한 번의 쿼리로 삭제
-        String deleteRepliesSql = "DELETE FROM community_reply WHERE community_reply_id IN (" + replyIdsStr + ")";
-        jdbcTemplate.update(deleteRepliesSql);
+            // 모든 댓글 삭제
+            String deleteRepliesSql = "DELETE FROM community_reply WHERE community_reply_id IN (" + replyIdsStr + ")";
+            jdbcTemplate.update(deleteRepliesSql);
+        }
 
-        //게시글의 좋아요 삭제
+        // 게시글에 연결된 좋아요 삭제
         String deleteLikesSql2 = "DELETE FROM likes WHERE likes_board_id = ?";
         jdbcTemplate.update(deleteLikesSql2, communityBoardId);
 
