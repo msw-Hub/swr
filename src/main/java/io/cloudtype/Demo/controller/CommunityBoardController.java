@@ -190,7 +190,7 @@ public class CommunityBoardController {
             @ModelAttribute("title") String title,
             @ModelAttribute("content") String content,
             @ModelAttribute("imageChangeCheck") Boolean imageChangeCheck,
-            @RequestPart("image") MultipartFile image
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
         try {
             // 카카오 API를 통해 사용자 정보 가져오기
