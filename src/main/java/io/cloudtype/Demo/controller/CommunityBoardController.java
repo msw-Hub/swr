@@ -189,7 +189,7 @@ public class CommunityBoardController {
             @RequestParam("communityBoardId") Long communityBoardId,
             @ModelAttribute("title") String title,
             @ModelAttribute("content") String content,
-            @ModelAttribute("imageCheck") Boolean imageChangeCheck,
+            @ModelAttribute("imageChangeCheck") Boolean imageChangeCheck,
             @RequestPart("image") MultipartFile image
     ) {
         try {
