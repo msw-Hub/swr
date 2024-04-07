@@ -12,8 +12,8 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("커머스 프로젝트 API")
-                        .description("상품을 등록하고, 상품을 장바구니에 담는 기능을 제공합니다.")
+                        .title("SWR 프로젝트 API")
+                        .description("반려동물의 산책 및 돌봄을 위한 서비스입니다.")
                         .version("1.0.0"));
     }
 }
