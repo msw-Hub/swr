@@ -22,6 +22,9 @@ public class UserInfoService {
     @Value("${spring.cloud.gcp.storage.bucket}")
     private final String bucketName;
 
+    @Autowired
+    public CommunityBoardService communityBoardService;
+
     // 생성자를 통한 주입
     @Autowired
     public UserInfoService(@Value("${spring.cloud.gcp.storage.credentials.location}") String keyFileName,
@@ -147,5 +150,13 @@ public class UserInfoService {
         }else {
             return "해당 petId의 주인이 아닙니다.";
         }
+    }
+    public Map<String, Object> petInfoList(String ownerNickname){
+        String sql = "SELECT * FROM mydb.pet_info WHERE owner_nickname = ?";
+        return jdbcTemplate.queryForMap(sql, ownerNickname);
+    }
+    public  Map<String, Object> getPetInfoByPetId(Long petId){
+        String sql = "SELECT * FROM mydb.pet_info WHERE pet_info_id = ?";
+        return jdbcTemplate.queryForMap(sql, petId);
     }
 }

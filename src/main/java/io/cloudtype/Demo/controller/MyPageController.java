@@ -287,28 +287,76 @@ public class MyPageController {
     @ApiResponse(responseCode = "200", description = "등록 반려동물 목록 반환", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/pet-info")
-    public ResponseEntity<String> petInfo(@RequestHeader("Authorization") String accessToken) {
+    public ResponseEntity<Map<String, Object>> petInfo(@RequestHeader("Authorization") String accessToken) {
+        try {
+            // 카카오 서버에서 해당 엑세스 토큰을 사용하여 유저 정보를 가져옴
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+            // 가입된 사람만 사용하도록 확인
+            int count = kakaoService.processUser(userInfo);
+            if (count == 0) {
+                return ResponseEntity.badRequest().build();
+            }
+            // 가져온 유저 정보에서 고유 ID를 확인
+            Long userId = (Long) userInfo.get("userId");
+            Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
+            String ownerNickname = (String) dbUserInfo.get("nickname");
+            Map<String,Object> petInfoList = userInfoService.petInfoList(ownerNickname);
+            if(petInfoList.isEmpty()){
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "등록된 반려동물이 없습니다.");
+                return ResponseEntity.ok(response);
+            }
+            return ResponseEntity.ok(petInfoList);
+        } catch (IOException e) {
+            log.error("Failed to fetch user info from Kakao API", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    @Operation(summary = "반려동물 기초정보 수정", description = "기본프로필을 수정하는 API")
+    @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "pet_name", description = "반려동물 이름", required = true)
+    @Parameter(name = "pet_age", description = "반려동물 나이(출생년도를 계산하기 때문에 올해 태어났다면 0살)", required = true)
+    @Parameter(name = "species", description = "반려동물 종", required = true)
+    @Parameter(name = "pet_profile_image", description = "이미지파일", required = true)
+    @Parameter(name = "pet_id",description = "반려동물 고유id / Long", required = true)
+    @Parameter(name = "imageChangeCheck",description = "이미지 변경 여부 / Boolean", required = true)
+    @ApiResponse(responseCode = "200", description = "반려동물 기초 정보 등록완료", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
+    @PostMapping("/pet-info/profile/edit")
+    public ResponseEntity<String> petInfoProfileEdit(
+            @RequestHeader("Authorization") String accessToken,
+            @ModelAttribute("pet_name") String petName,
+            @ModelAttribute("pet_age") Integer petAge,
+            @ModelAttribute("species") String species,
+            @ModelAttribute("pet_id") Long petId,
+            @ModelAttribute("imageChangeCheck") Boolean imageChangeCheck,
+            @RequestPart("pet_profile_image") MultipartFile petProfileImage
+    ) {
         try {
             // 카카오 서버에서 해당 엑세스 토큰을 사용하여 유저 정보를 가져옴
             Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
 
             // 가져온 유저 정보에서 고유 ID를 확인
             Long userId = (Long) userInfo.get("userId");
+
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
-            String ownerNickname = (String) dbUserInfo.get("nickname");
-
-            String check = "success";
-            Map<String, String> response = new HashMap<>();
-
-            if(check.equals("success")){
-                // 성공 메시지 반환
-                response.put("success", "추가정보 등록 성공");
-                return ResponseEntity.ok(response.toString());
+            String nickname = (String) dbUserInfo.get("nickname");
+            Map<String,Object> petInfo = userInfoService.getPetInfoByPetId(petId);
+            String ownerNickname = (String) petInfo.get("owner_nickname");
+            if(!nickname.equals(ownerNickname)){
+                return ResponseEntity.badRequest().build();
             }
-            else{
-                response.put("bad", check);
-                return ResponseEntity.badRequest().body(response.toString());
+
+            String imageUrl = null;
+            if(petProfileImage != null && imageChangeCheck){
+                // 이미지 업로드 서비스 호출
+                imageUrl = communityBoardService.uploadImage(petProfileImage);
+                log.info("imageUrl: " + imageUrl);
             }
+            Map<String, Object> response = new HashMap<>();
+            response.put("pet_info_id", petId);
+            response.put("success", "반려동물 기본 프로필 저장 성공");
+            return ResponseEntity.ok(response.toString());
         } catch (IOException e) {
             log.error("Failed to fetch user info from Kakao API", e);
             return ResponseEntity.internalServerError().build();

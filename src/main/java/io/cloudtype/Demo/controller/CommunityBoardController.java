@@ -87,8 +87,6 @@ public class CommunityBoardController {
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             String nickname = (String) dbUserInfo.get("nickname");
 
-            log.info("image: " + image);
-
             String imageUrl = null;
             if (image != null && !image.isEmpty()) {
                 // 이미지 업로드 서비스 호출
