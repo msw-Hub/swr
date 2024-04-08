@@ -68,13 +68,13 @@ public class CommunityBoardController {
     @Operation(summary = "게시글 작성", description = "게시글을 작성합니다.")
     @Parameter(name = "title", description = "게시글 제목", required = true)
     @Parameter(name = "content", description = "게시글 내용", required = true)
-    @Parameter(name = "image", description = "이미지파일 / 없으면 null")
+    @Parameter(name = "image", description = "이미지파일 / 없으면 null",required=false)
     @ApiResponse(responseCode = "200", description = "글 작성 성공",content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     public ResponseEntity<Map<String, String>> writePost(
             @RequestHeader("Authorization") String accessToken,
             @ModelAttribute("title") String title,
             @ModelAttribute("content") String content,
-            @RequestPart("image") MultipartFile image
+            @RequestPart(value = "image", required=false) MultipartFile image
     ) {
         try {
             // 카카오 API를 통해 사용자 정보 가져오기

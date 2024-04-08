@@ -137,6 +137,14 @@ public class UserInfoService {
     }
     public String savePetInfo2(String ownerNickname, Map<String, Object> petInfo){
         //petInfo로 받은 petId로 ownerNickname을 찾아서 인자로 받은 ownerNickname과 비교
+        String sql = "SELECT owner_nickname FROM mydb.pet_info WHERE pet_id = ?";
+        String ownerNicknameFromDB = jdbcTemplate.queryForObject(sql, String.class, petInfo.get("petId"));
+        //ownerNickname과 ownerNicknameFromDB가 같으면 petInfo를 업데이트
+        if(ownerNickname.equals(ownerNicknameFromDB)){
+            String updateSql = "UPDATE mydb.pet_info SET weight=?, neutering = ?, animal_hospital=?,vaccination=?,etc=? WHERE pet_info_id = ?";
+            jdbcTemplate.update(updateSql, petInfo.get("petName"), petInfo.get("petAge"), petInfo.get("species"), petInfo.get("petId"));
+            return "success";
+        }
 
         return "success";
     }

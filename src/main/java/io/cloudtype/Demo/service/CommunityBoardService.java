@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -78,7 +78,9 @@ public class CommunityBoardService {
     }
     public void writePost(String nickname, String title, String content, String imgUrl){
         // 현재 시간 가져오기
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        LocalDateTime now = LocalDateTime.now();
+        log.info("now : "+ now);
+
         // 게시글 작성 SQL 쿼리 실행
         String sql = "INSERT INTO community_board (writer_nickname, title, content, created_date, img_url) " +
                 "VALUES (?, ?, ?, ?, ?)";
@@ -210,7 +212,7 @@ public class CommunityBoardService {
         }
     }
     public void writeReply(Long communityBoardId, String nickname, String content) {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        LocalDateTime now = LocalDateTime.now();
         String sql = "INSERT INTO community_reply (community_board_id,reply_content,reply_date,writer_nickname) " +
                 "VALUES (?, ?, ?, ?)";
         jdbcTemplate.update(sql, communityBoardId,content, now, nickname);
