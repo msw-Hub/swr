@@ -136,6 +136,7 @@ public class UserInfoService {
 
     }
     public String savePetInfo2(String ownerNickname, Map<String, Object> petInfo){
+        //petInfo로 받은 petId로 ownerNickname을 찾아서 인자로 받은 ownerNickname과 비교
 
         return "success";
     }

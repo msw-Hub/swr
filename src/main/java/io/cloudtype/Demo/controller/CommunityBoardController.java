@@ -90,7 +90,7 @@ public class CommunityBoardController {
             log.info("image: " + image);
 
             String imageUrl = null;
-            if(image != null){
+            if (image != null && !image.isEmpty()) {
                 // 이미지 업로드 서비스 호출
                 imageUrl = communityBoardService.uploadImage(image);
                 log.info("imageUrl: " + imageUrl);

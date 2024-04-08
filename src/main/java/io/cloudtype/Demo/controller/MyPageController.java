@@ -246,6 +246,7 @@ public class MyPageController {
     }
     @Operation(summary = "반려동물 추가정보 등록", description = "반려동물을 등록하는 API")
     @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "pet_id",description = "반려동물 고유id / Long", required = true)
     @Parameter(name = "weight", description = "반려동물 무게 / Integer")
     @Parameter(name = "neutering", description = "반려동물 중성화여부 / Boolean")
     @Parameter(name = "animal_hospital", description = "이용하는 동물병원 / String")
