@@ -282,4 +282,36 @@ public class MyPageController {
             return ResponseEntity.internalServerError().build();
         }
     }
+    @Operation(summary = "반려동물 목록", description = "등록한 반려동물 목록을 반환하는 API")
+    @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @ApiResponse(responseCode = "200", description = "등록 반려동물 목록 반환", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
+    @PostMapping("/pet-info")
+    public ResponseEntity<String> petInfo(@RequestHeader("Authorization") String accessToken) {
+        try {
+            // 카카오 서버에서 해당 엑세스 토큰을 사용하여 유저 정보를 가져옴
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+
+            // 가져온 유저 정보에서 고유 ID를 확인
+            Long userId = (Long) userInfo.get("userId");
+            Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
+            String ownerNickname = (String) dbUserInfo.get("nickname");
+
+            String check = "success";
+            Map<String, String> response = new HashMap<>();
+
+            if(check.equals("success")){
+                // 성공 메시지 반환
+                response.put("success", "추가정보 등록 성공");
+                return ResponseEntity.ok(response.toString());
+            }
+            else{
+                response.put("bad", check);
+                return ResponseEntity.badRequest().body(response.toString());
+            }
+        } catch (IOException e) {
+            log.error("Failed to fetch user info from Kakao API", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }
