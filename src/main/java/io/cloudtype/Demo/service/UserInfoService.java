@@ -1,8 +1,10 @@
 package io.cloudtype.Demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import java.time.Year;
 
 import java.util.List;
 import java.util.Map;
@@ -11,11 +13,25 @@ import java.util.Map;
 public class UserInfoService {
 
     private final JdbcTemplate jdbcTemplate;
+    @Value("${spring.cloud.gcp.storage.credentials.location}")
+    private final String keyFileName;
+
+    @Value("${spring.cloud.gcp.storage.project-id}")
+    private final String projectId;
+
+    @Value("${spring.cloud.gcp.storage.bucket}")
+    private final String bucketName;
 
     // 생성자를 통한 주입
     @Autowired
-    public UserInfoService(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public UserInfoService(@Value("${spring.cloud.gcp.storage.credentials.location}") String keyFileName,
+                @Value("${spring.cloud.gcp.storage.bucket}") String bucketName,
+                @Value("${spring.cloud.gcp.storage.project-id}") String projectId,
+                JdbcTemplate jdbcTemplate) {
+            this.keyFileName = keyFileName;
+            this.bucketName = bucketName;
+            this.projectId = projectId;
+            this.jdbcTemplate = jdbcTemplate;
     }
 
     //유저 고유id를 통해서 유저정보를 가져오는 메서드
@@ -106,5 +122,21 @@ public class UserInfoService {
     public List<String> getAllNicknames() {
         String sql = "SELECT nickname FROM mydb.user_info";
         return jdbcTemplate.queryForList(sql, String.class);
+    }
+    public Long savePetInfo1(String petName, Integer petAge, String species, String imageUrl, String ownerNickname) {
+        int currentYear = Year.now().getValue();
+        int birthYear = currentYear - petAge;
+
+        String sql = "INSERT INTO mydb.pet_info (owner_nickname, pet_profile_image, pet_name, birth_year, species) " + "VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, ownerNickname, imageUrl ,petName, birthYear, species);
+
+        // 삽입된 행의 auto-increment 칼럼의 값을 가져옴
+        Long generatedId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+        return generatedId;
+
+    }
+    public String savePetInfo2(String ownerNickname, Map<String, Object> petInfo){
+
+        return "success";
     }
 }
