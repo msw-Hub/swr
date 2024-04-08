@@ -77,14 +77,10 @@ public class CommunityBoardService {
         }
     }
     public void writePost(String nickname, String title, String content, String imgUrl){
-        // 현재 시간 가져오기
-        LocalDateTime now = LocalDateTime.now();
-        log.info("now : "+ now);
-
         // 게시글 작성 SQL 쿼리 실행
         String sql = "INSERT INTO community_board (writer_nickname, title, content, created_date, img_url) " +
                 "VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql,nickname, title, content, now, imgUrl);
+        jdbcTemplate.update(sql,nickname, title, content, "CURRENT_TIMESTAMP", imgUrl);
     }
     public String uploadImage(MultipartFile image) {
         try {
@@ -212,10 +208,9 @@ public class CommunityBoardService {
         }
     }
     public void writeReply(Long communityBoardId, String nickname, String content) {
-        LocalDateTime now = LocalDateTime.now();
         String sql = "INSERT INTO community_reply (community_board_id,reply_content,reply_date,writer_nickname) " +
                 "VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, communityBoardId,content, now, nickname);
+        jdbcTemplate.update(sql, communityBoardId,content, "CURRENT_TIMESTAMP", nickname);
         //해당글의 댓글수 증가
         String sql2 = "UPDATE community_board SET replies = replies + 1 WHERE community_board_id = ?";
         jdbcTemplate.update(sql2, communityBoardId);

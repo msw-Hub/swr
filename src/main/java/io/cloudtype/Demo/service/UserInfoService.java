@@ -144,8 +144,8 @@ public class UserInfoService {
             String updateSql = "UPDATE mydb.pet_info SET weight=?, neutering = ?, animal_hospital=?,vaccination=?,etc=? WHERE pet_info_id = ?";
             jdbcTemplate.update(updateSql, petInfo.get("petName"), petInfo.get("petAge"), petInfo.get("species"), petInfo.get("petId"));
             return "success";
+        }else {
+            return "해당 petId의 주인이 아닙니다.";
         }
-
-        return "success";
     }
 }
