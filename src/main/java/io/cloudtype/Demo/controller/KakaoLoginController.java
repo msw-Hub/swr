@@ -43,7 +43,6 @@ public class KakaoLoginController {
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @GetMapping("/callback")
     public ResponseEntity<String> callback(@RequestParam("code") String code) throws IOException {
-        log.info(code);
         Map<String, String> tokens = kakaoService.getTokensFromKakao(client_id, code);
         String accessToken = tokens.get("access_token");
         String expiresInStr = tokens.get("expires_in");
@@ -53,9 +52,6 @@ public class KakaoLoginController {
         int refreshTokenExpiresIn = Integer.parseInt(refreshTokenExpiresInStr);
 
         log.info("Access Token : " + accessToken);
-        log.info("Expires_In : " + expiresInStr);
-        log.info("Refresh Token : " + refreshToken);
-        log.info("Refresh Token Expires In : " + refreshTokenExpiresInStr);
 
         // 현재 시간을 가져옴
         Instant now = Instant.now();

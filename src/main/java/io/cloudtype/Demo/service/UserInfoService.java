@@ -126,17 +126,20 @@ public class UserInfoService {
         String sql = "SELECT nickname FROM mydb.user_info";
         return jdbcTemplate.queryForList(sql, String.class);
     }
-    public Long savePetInfo1(String petName, Integer petAge, String species, String imageUrl, String ownerNickname) {
+    public Long savePetInfo1(String petName, Integer petAge, String species, String imageUrl, String ownerNickname, boolean insertOrUpdate, Long petId){
         int currentYear = Year.now().getValue();
         int birthYear = currentYear - petAge;
-
-        String sql = "INSERT INTO mydb.pet_info (owner_nickname, pet_profile_image, pet_name, birth_year, species) " + "VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, ownerNickname, imageUrl ,petName, birthYear, species);
-
-        // 삽입된 행의 auto-increment 칼럼의 값을 가져옴
-        Long generatedId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
-        return generatedId;
-
+        if(insertOrUpdate){
+            String sql = "INSERT INTO mydb.pet_info (owner_nickname, pet_profile_image, pet_name, birth_year, species) " + "VALUES (?, ?, ?, ?, ?)";
+            jdbcTemplate.update(sql, ownerNickname, imageUrl ,petName, birthYear, species);
+            // 삽입된 행의 auto-increment 칼럼의 값을 가져옴
+            return jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
+        }
+        else{
+            String sql = "UPDATE mydb.pet_info SET pet_profile_image = ?, pet_name = ?, birth_year = ?, species = ? WHERE pet_info_id = ?";
+            jdbcTemplate.update(sql, imageUrl, petName, birthYear, species, petId);
+            return petId;
+        }
     }
     public String savePetInfo2(String ownerNickname, Map<String, Object> petInfo){
         //petInfo로 받은 petId로 ownerNickname을 찾아서 인자로 받은 ownerNickname과 비교
@@ -158,5 +161,14 @@ public class UserInfoService {
     public  Map<String, Object> getPetInfoByPetId(Long petId){
         String sql = "SELECT * FROM mydb.pet_info WHERE pet_info_id = ?";
         return jdbcTemplate.queryForMap(sql, petId);
+    }
+    public String getImageUrlByPetId(Long petId){
+        String sql = "SELECT pet_profile_image FROM mydb.pet_info WHERE pet_info_id = ?";
+        return jdbcTemplate.queryForObject(sql, String.class, petId);
+    }
+    public void deletePetInfo(Long petId, String imageUrl){
+        communityBoardService.deleteImageGcs(imageUrl);
+        String sql = "DELETE FROM mydb.pet_info WHERE pet_info_id = ?";
+        jdbcTemplate.update(sql, petId);
     }
 }

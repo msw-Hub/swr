@@ -234,9 +234,10 @@ public class MyPageController {
                 imageUrl = communityBoardService.uploadImage(petProfileImage);
                 log.info("imageUrl: " + imageUrl);
             }
-            Long petId = userInfoService.savePetInfo1(petName,petAge,species,imageUrl, ownerNickname);
+            boolean insertOrUpdate = true;
+            Long petId = userInfoService.savePetInfo1(petName,petAge,species,imageUrl, ownerNickname, insertOrUpdate, 0L);
             Map<String, Object> response = new HashMap<>();
-            response.put("pet_info_id", petId);
+            response.put("pet_id", petId);
             response.put("success", "반려동물 기본 프로필 저장 성공");
             return ResponseEntity.ok(response.toString());
         } catch (IOException e) {
@@ -244,7 +245,7 @@ public class MyPageController {
             return ResponseEntity.internalServerError().build();
         }
     }
-    @Operation(summary = "반려동물 추가정보 등록", description = "반려동물을 등록하는 API")
+    @Operation(summary = "반려동물 추가정보 등록 및 수정", description = "반려동물을 등록과 수정하는 API")
     @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "pet_id",description = "반려동물 고유id / Long", required = true)
     @Parameter(name = "weight", description = "반려동물 무게 / Integer")
@@ -252,7 +253,7 @@ public class MyPageController {
     @Parameter(name = "animal_hospital", description = "이용하는 동물병원 / String")
     @Parameter(name = "vaccination", description = "예방접종 / String")
     @Parameter(name = "etc", description = "특이사항 / String")
-    @ApiResponse(responseCode = "200", description = "반려동물 추가 정보 등록완료", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
+    @ApiResponse(responseCode = "200", description = "반려동물 추가 정보 등록 및 수정완료", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/pet-info/detail")
     public ResponseEntity<String> petInfoDetail(@RequestHeader("Authorization") String accessToken,
@@ -265,7 +266,6 @@ public class MyPageController {
             Long userId = (Long) userInfo.get("userId");
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             String ownerNickname = (String) dbUserInfo.get("nickname");
-
             String check = userInfoService.savePetInfo2(ownerNickname, petInfo);
             Map<String, String> response = new HashMap<>();
             if(check.equals("success")){
@@ -346,16 +346,53 @@ public class MyPageController {
             if(!nickname.equals(ownerNickname)){
                 return ResponseEntity.badRequest().build();
             }
+            String imageUrl = userInfoService.getImageUrlByPetId(petId);
 
-            String imageUrl = null;
             if(petProfileImage != null && imageChangeCheck){
                 // 이미지 업로드 서비스 호출
                 imageUrl = communityBoardService.uploadImage(petProfileImage);
                 log.info("imageUrl: " + imageUrl);
             }
+            boolean insertOrUpdate = false;
+            Long petId2 = userInfoService.savePetInfo1(petName,petAge,species,imageUrl, ownerNickname, insertOrUpdate, petId);
             Map<String, Object> response = new HashMap<>();
-            response.put("pet_info_id", petId);
+            response.put("pet_id", petId2);
             response.put("success", "반려동물 기본 프로필 저장 성공");
+            return ResponseEntity.ok(response.toString());
+        } catch (IOException e) {
+            log.error("Failed to fetch user info from Kakao API", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    @Operation(summary = "반려동물 정보 삭제", description = "반려동물 프로필 삭제하는 API")
+    @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "pet_id",description = "반려동물 고유id / Long", required = true)
+    @ApiResponse(responseCode = "200", description = "반려동물 기초 정보 등록완료", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
+    @PostMapping("/pet-info/profile/delete")
+    public ResponseEntity<String> petInfoDelete(
+            @RequestHeader("Authorization") String accessToken,
+            @RequestBody Map<String, Object> requestBody
+    ) {
+        try {
+            // 카카오 서버에서 해당 엑세스 토큰을 사용하여 유저 정보를 가져옴
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+
+            // 가져온 유저 정보에서 고유 ID를 확인
+            Long userId = (Long) userInfo.get("userId");
+
+            Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
+            String nickname = (String) dbUserInfo.get("nickname");
+            Long petId = (Long) requestBody.get("pet_id");
+            Map<String,Object> petInfo = userInfoService.getPetInfoByPetId(petId);
+            String ownerNickname = (String) petInfo.get("owner_nickname");
+            if(!nickname.equals(ownerNickname)){
+                return ResponseEntity.badRequest().build();
+            }
+            String imageUrl = userInfoService.getImageUrlByPetId(petId);
+            userInfoService.deletePetInfo(petId, imageUrl);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", "반려동물 프로필 삭제 성공, 반려동물 목록 페이지로 이동하세요");
             return ResponseEntity.ok(response.toString());
         } catch (IOException e) {
             log.error("Failed to fetch user info from Kakao API", e);
