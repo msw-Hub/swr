@@ -57,4 +57,36 @@ public class WalkMatchingBoardService {
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, owner_nickname, choosing_pet, walk_time, walk_date, latitude, longitude, title, content, 0);
     }
+    //신청글 목록 반환하기
+    public List<Map<String, Object>> getWalkPostList() {
+        //현재 날짜 이후의 신청글만 반환 + 신청글이 아직 매칭이 안된 것만 반환
+        String sql = "SELECT * FROM mydb.walk_matching_board WHERE walk_date >= CURRENT_DATE() AND status = 0";
+        return jdbcTemplate.queryForList(sql);
+    }
+    //신청글 거리계산(1/3/5km)
+    public List<Map<String, Object>> getWalkPostListWithDistance(double clientLatitude, double clientLongitude, double maxDistance) {
+        List<Map<String, Object>> walkPostList = getWalkPostList();
+        List<Map<String, Object>> filteredWalkPostList = new ArrayList<>();
+        for (Map<String, Object> walkPost : walkPostList) {
+            double postLatitude = (double) walkPost.get("latitude");
+            double postLongitude = (double) walkPost.get("longitude");
+            double distance = calculateDistance(clientLatitude, clientLongitude, postLatitude, postLongitude);
+            if (distance <= maxDistance) {
+                walkPost.put("distance", distance);
+                filteredWalkPostList.add(walkPost);
+            }
+        }
+        return filteredWalkPostList;
+    }
+
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Radius of the earth in km
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // convert to km
+    }
 }

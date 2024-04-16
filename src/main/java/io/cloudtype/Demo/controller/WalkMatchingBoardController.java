@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -37,9 +38,9 @@ public class WalkMatchingBoardController {
     }
 
 
-    @Operation(summary = "매칭-산책 글 작성전, 반려동물 id, name, profile 반환", description = "매칭 게시판에 산책 요청글을 작성합니다.")
+    @Operation(summary = "매칭-산책 글 작성전, 반려동물 id, name, profile 전달하며 반려동물 고르기", description = "매칭 게시판에 산책 요청글을 작성합니다.")
     @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
-    @ApiResponse(responseCode = "200", description = "반려동물 id, name, profile 반환성공", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
+    @ApiResponse(responseCode = "200", description = "반려동물 id, name, profile 반환성공")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/post1")
     public ResponseEntity<String> walkPost1(
@@ -70,13 +71,13 @@ public class WalkMatchingBoardController {
     @Operation(summary = "매칭-산책 글 작성", description = "매칭 게시판에 산책 요청글을 작성합니다.")
     @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "walk_time", description = "산책시간 / INT(30/60/90/120)", required = true)
-    @Parameter(name = "walk_date", description = "산책예약날짜 / DATE(년월일)", required = true)
+    @Parameter(name = "walk_date", description = "산책예약날짜 / DATE(yyyy-mm-dd)", required = true)
     @Parameter(name = "pet_id",description = "서비스 이용할 반려동물 고유id / Long", required = true)
     @Parameter(name = "latitude",description = "신청위치의 위도 / Double", required = true)
     @Parameter(name = "longitude",description = "신청위치의 경도 / Double", required = true)
     @Parameter(name = "title", description = "신청글제목 / String", required = true)
-    @Parameter(name = "content", description = "산책 요청사항 및 주의사항 / String", required = true)
-    @ApiResponse(responseCode = "200", description = "반려동물 기초 정보 등록완료", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
+    @Parameter(name = "content", description = "산책전 만날 상세주소, 요청사항, 주의사항 / String", required = true)
+    @ApiResponse(responseCode = "200", description = "반려동물 기초 정보 등록완료")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/post2")
     public ResponseEntity<String> walkPost2(
@@ -113,6 +114,42 @@ public class WalkMatchingBoardController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", "산책글 작성 성공");
+            return ResponseEntity.ok(response.toString());
+        } catch (IOException e) {
+            log.error("Failed to fetch user info from Kakao API", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    @Operation(summary = "매칭-산책 글 목록반환, 파트너만 볼 수 있도록", description = "매칭 게시판에 산책 요청글을 작성합니다.")
+    @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "now_latitude", description = "현재 위도 / Double", required = true)
+    @Parameter(name = "now_longitude",description = "현재 경도 / Double", required = true)
+    @Parameter(name = "max_distance",description = "최대 거리 / Double(1/3/5)", required = true)
+    @ApiResponse(responseCode = "200", description = "산책 신청글 반환성공")
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
+    @PostMapping("")
+    public ResponseEntity<String> walkList(
+            @RequestHeader("Authorization") String accessToken,
+            @RequestBody Map<String, Object> requestBody
+    ) {
+        try {
+            // 가입된 사람만 사용하도록 확인
+            Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
+            int count = kakaoService.processUser(userInfo);
+            if (count == 0) {
+                return ResponseEntity.badRequest().build();
+            }
+            // 가져온 유저 정보에서 고유 ID를 확인. 해당 ID를 가진 유저가 파트너권한이 있는지를 확인
+            Long userId = (Long) userInfo.get("userId");
+            Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
+            if((Integer) dbUserInfo.get("partnership") == 0){
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "파트너 권한이 없습니다.");
+                return ResponseEntity.ok(response.toString());
+            }
+            //산책 신청글 목록 반환 / 위치 계산
+            List<Map<String, Object>> response = walkMatchingBoardService.getWalkPostListWithDistance(
+                    (Double) requestBody.get("now_latitude"), (Double) requestBody.get("now_longitude"), (Double) requestBody.get("max_distance"));
             return ResponseEntity.ok(response.toString());
         } catch (IOException e) {
             log.error("Failed to fetch user info from Kakao API", e);

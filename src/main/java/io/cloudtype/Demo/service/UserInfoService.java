@@ -2,10 +2,12 @@ package io.cloudtype.Demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import java.time.Year;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -171,8 +173,13 @@ public class UserInfoService {
         String sql = "DELETE FROM mydb.pet_info WHERE pet_info_id = ?";
         jdbcTemplate.update(sql, petId);
     }
-    public  Map<String, Object> getPetInfoByOwnerNickname(String ownerNickname){
-        String sql = "SELECT pet_info_id, pet_profile_image,pet_name FROM mydb.pet_info WHERE owner_nickname = ?";
-        return jdbcTemplate.queryForMap(sql, ownerNickname);
+    public Map<String, Object> getPetInfoByOwnerNickname(String ownerNickname){
+        try {
+            String sql = "SELECT pet_info_id, pet_profile_image,pet_name FROM mydb.pet_info WHERE owner_nickname = ?";
+            return jdbcTemplate.queryForMap(sql, ownerNickname);
+        } catch (IncorrectResultSizeDataAccessException e) {
+            // 검색 결과가 없을 경우 빈 Map 반환
+            return new HashMap<>();
+        }
     }
 }
