@@ -171,4 +171,8 @@ public class UserInfoService {
         String sql = "DELETE FROM mydb.pet_info WHERE pet_info_id = ?";
         jdbcTemplate.update(sql, petId);
     }
+    public  Map<String, Object> getPetInfoByOwnerNickname(String ownerNickname){
+        String sql = "SELECT pet_info_id, pet_profile_image,pet_name FROM mydb.pet_info WHERE owner_nickname = ?";
+        return jdbcTemplate.queryForMap(sql, ownerNickname);
+    }
 }
