@@ -2,6 +2,7 @@ package io.cloudtype.Demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -156,9 +157,14 @@ public class UserInfoService {
             return "해당 petId의 주인이 아닙니다.";
         }
     }
-    public Map<String, Object> petInfoList(String ownerNickname){
-        String sql = "SELECT * FROM mydb.pet_info WHERE owner_nickname = ?";
-        return jdbcTemplate.queryForMap(sql, ownerNickname);
+    public Map<String, Object> petInfoList(String ownerNickname) {
+        try {
+            String sql = "SELECT * FROM mydb.pet_info WHERE owner_nickname = ?";
+            return jdbcTemplate.queryForMap(sql, ownerNickname);
+        } catch (EmptyResultDataAccessException e) {
+            // 검색 결과가 없을 경우 빈 Map 반환
+            return new HashMap<>();
+        }
     }
     public  Map<String, Object> getPetInfoByPetId(Long petId){
         String sql = "SELECT * FROM mydb.pet_info WHERE pet_info_id = ?";
@@ -173,11 +179,11 @@ public class UserInfoService {
         String sql = "DELETE FROM mydb.pet_info WHERE pet_info_id = ?";
         jdbcTemplate.update(sql, petId);
     }
-    public Map<String, Object> getPetInfoByOwnerNickname(String ownerNickname){
+    public Map<String, Object> getPetInfoByOwnerNickname(String ownerNickname) {
         try {
-            String sql = "SELECT pet_info_id, pet_profile_image,pet_name FROM mydb.pet_info WHERE owner_nickname = ?";
+            String sql = "SELECT pet_info_id, pet_profile_image, pet_name FROM mydb.pet_info WHERE owner_nickname = ?";
             return jdbcTemplate.queryForMap(sql, ownerNickname);
-        } catch (IncorrectResultSizeDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             // 검색 결과가 없을 경우 빈 Map 반환
             return new HashMap<>();
         }
