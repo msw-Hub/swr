@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -300,13 +301,19 @@ public class MyPageController {
             Long userId = (Long) userInfo.get("userId");
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             String ownerNickname = (String) dbUserInfo.get("nickname");
-            Map<String,Object> petInfoList = userInfoService.petInfoList(ownerNickname);
-            if(petInfoList.isEmpty()){
+            try {
+                Map<String,Object> petInfoList = userInfoService.petInfoList(ownerNickname);
+                if(petInfoList.isEmpty()){
+                    Map<String, Object> response = new HashMap<>();
+                    response.put("message", "등록된 반려동물이 없습니다.");
+                    return ResponseEntity.ok(response);
+                }
+                return ResponseEntity.ok(petInfoList);
+            } catch (EmptyResultDataAccessException e) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("message", "등록된 반려동물이 없습니다.");
                 return ResponseEntity.ok(response);
             }
-            return ResponseEntity.ok(petInfoList);
         } catch (IOException e) {
             log.error("Failed to fetch user info from Kakao API", e);
             return ResponseEntity.internalServerError().build();
