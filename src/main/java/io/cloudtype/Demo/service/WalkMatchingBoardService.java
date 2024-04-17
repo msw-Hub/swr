@@ -66,6 +66,12 @@ public class WalkMatchingBoardService {
     //신청글 거리계산(1/3/5km)
     public List<Map<String, Object>> getWalkPostListWithDistance(double clientLatitude, double clientLongitude, double maxDistance) {
         List<Map<String, Object>> walkPostList = getWalkPostList();
+
+        // If the list is empty, return it immediately
+        if (walkPostList.isEmpty()) {
+            log.info("No walk post found");
+            return walkPostList;
+        }
         List<Map<String, Object>> filteredWalkPostList = new ArrayList<>();
         for (Map<String, Object> walkPost : walkPostList) {
             double postLatitude = (double) walkPost.get("latitude");
@@ -78,7 +84,6 @@ public class WalkMatchingBoardService {
         }
         return filteredWalkPostList;
     }
-
     private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
         final int R = 6371; // Radius of the earth in km
         double latDistance = Math.toRadians(lat2 - lat1);
