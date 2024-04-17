@@ -77,22 +77,17 @@ public class WalkMatchingBoardService {
     public List<Map<String, Object>> getWalkPostListWithDistance(Integer page, double clientLatitude, double clientLongitude, double maxDistance) {
         List<Map<String, Object>> walkPostList = getWalkPostList(page);
         if (walkPostList.isEmpty()) {
-            log.info("No walk post found");
+            System.out.println("No walk post found");
             return walkPostList;
         }
         List<Map<String, Object>> filteredWalkPostList = new ArrayList<>();
         for (Map<String, Object> walkPost : walkPostList) {
-            double postLatitude = Optional.ofNullable((double) walkPost.get("latitude")).orElse(Double.NaN);
-            double postLongitude = Optional.ofNullable((double) walkPost.get("longitude")).orElse(Double.NaN);
-
-            if (!Double.isNaN(postLatitude) && !Double.isNaN(postLongitude)) {
-                double distance = calculateDistance(clientLatitude, clientLongitude, postLatitude, postLongitude);
-                if (distance <= maxDistance) {
-                    walkPost.put("distance", distance);
-                    filteredWalkPostList.add(walkPost);
-                }
-            } else {
-                log.info("Invalid latitude or longitude values for post");
+            double postLatitude = (double) walkPost.get("latitude");
+            double postLongitude = (double) walkPost.get("longitude");
+            double distance = calculateDistance(clientLatitude, clientLongitude, postLatitude, postLongitude);
+            if (distance <= maxDistance) {
+                walkPost.put("distance", distance);
+                filteredWalkPostList.add(walkPost);
             }
         }
         return filteredWalkPostList;
@@ -107,6 +102,5 @@ public class WalkMatchingBoardService {
                 * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c; // convert to km
-
     }
 }

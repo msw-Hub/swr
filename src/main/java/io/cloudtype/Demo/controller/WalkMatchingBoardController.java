@@ -149,7 +149,7 @@ public class WalkMatchingBoardController {
                 return ResponseEntity.ok(response.toString());
             }
             //산책 신청글 목록 반환 / 위치 계산
-            List<Map<String, Object>> response = walkMatchingBoardService.getWalkPostListWithDistance( (Integer) requestBody.get("page"),
+            List<Map<String, Object>> response = walkMatchingBoardService.getWalkPostListWithDistance( (int) requestBody.get("page"),
                     (Double) requestBody.get("now_latitude"), (Double) requestBody.get("now_longitude"), (Double) requestBody.get("max_distance"));
             return ResponseEntity.ok(response.toString());
         } catch (IOException e) {
