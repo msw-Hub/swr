@@ -122,6 +122,7 @@ public class WalkMatchingBoardController {
     }
     @Operation(summary = "매칭-산책 글 목록반환, 파트너만 볼 수 있도록", description = "매칭 게시판에 산책 요청글을 작성합니다.")
     @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
+    @Parameter(name = "page", description = "페이지 번호 / Integer", required = true)
     @Parameter(name = "now_latitude", description = "현재 위도 / Double", required = true)
     @Parameter(name = "now_longitude",description = "현재 경도 / Double", required = true)
     @Parameter(name = "max_distance",description = "최대 거리 / Double(1/3/5)", required = true)
@@ -148,7 +149,7 @@ public class WalkMatchingBoardController {
                 return ResponseEntity.ok(response.toString());
             }
             //산책 신청글 목록 반환 / 위치 계산
-            List<Map<String, Object>> response = walkMatchingBoardService.getWalkPostListWithDistance(
+            List<Map<String, Object>> response = walkMatchingBoardService.getWalkPostListWithDistance( (Integer) requestBody.get("page"),
                     (Double) requestBody.get("now_latitude"), (Double) requestBody.get("now_longitude"), (Double) requestBody.get("max_distance"));
             return ResponseEntity.ok(response.toString());
         } catch (IOException e) {

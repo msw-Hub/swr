@@ -40,15 +40,16 @@ public class WalkMatchingBoardService {
 
     @Autowired
     public WalkMatchingBoardService(@Value("${spring.cloud.gcp.storage.credentials.location}") String keyFileName,
-                           @Value("${spring.cloud.gcp.storage.bucket}") String bucketName,
-                           @Value("${spring.cloud.gcp.storage.project-id}") String projectId,
-                           JdbcTemplate jdbcTemplate) {
+                                    @Value("${spring.cloud.gcp.storage.bucket}") String bucketName,
+                                    @Value("${spring.cloud.gcp.storage.project-id}") String projectId,
+                                    JdbcTemplate jdbcTemplate) {
         this.keyFileName = keyFileName;
         this.bucketName = bucketName;
         this.projectId = projectId;
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    //신청글 작성하기
     //받을데이터 nickname=owner_nickname,pet_id=choosing_pet, walk_time, walk_date, latitude, longitude, title,content, status=0
     public void writeWalkPost(String owner_nickname, Long choosing_pet, Integer walk_time, Date walk_date,
                               Double latitude, Double longitude, String title, String content) {
@@ -57,34 +58,47 @@ public class WalkMatchingBoardService {
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, owner_nickname, choosing_pet, walk_time, walk_date, latitude, longitude, title, content, 0);
     }
-    //신청글 목록 반환하기
-    public List<Map<String, Object>> getWalkPostList() {
-        //현재 날짜 이후의 신청글만 반환 + 신청글이 아직 매칭이 안된 것만 반환
-        String sql = "SELECT * FROM mydb.walk_matching_board WHERE walk_date >= CURRENT_DATE() AND status = 0";
-        return jdbcTemplate.queryForList(sql);
-    }
-    //신청글 거리계산(1/3/5km)
-    public List<Map<String, Object>> getWalkPostListWithDistance(double clientLatitude, double clientLongitude, double maxDistance) {
-        List<Map<String, Object>> walkPostList = getWalkPostList();
 
-        // If the list is empty, return it immediately
+    //신청글 목록 반환하기
+    //신청글 목록 반환하기 (페이지네이션 추가)
+    public List<Map<String, Object>> getWalkPostList(int page) {
+        // 한 페이지에 표시할 게시글 수
+        int pageSize = 10;
+        // 페이지 번호에 따라 시작 게시글의 인덱스 계산
+        int start = (page - 1) * pageSize;
+
+        // 현재 날짜 이후의 신청글만 반환 + 신청글이 아직 매칭이 안된 것만 반환
+        String sql = "SELECT * FROM mydb.walk_matching_board WHERE walk_date >= CURRENT_DATE() AND status = 0 ORDER BY walk_date DESC LIMIT ?, ?";
+        // SQL 쿼리 실행
+        return jdbcTemplate.queryForList(sql, start, pageSize);
+    }
+
+    //신청글 거리계산(1/3/5km)한뒤 목록을 반환하는 메서드
+    public List<Map<String, Object>> getWalkPostListWithDistance(Integer page, double clientLatitude, double clientLongitude, double maxDistance) {
+        List<Map<String, Object>> walkPostList = getWalkPostList(page);
         if (walkPostList.isEmpty()) {
             log.info("No walk post found");
             return walkPostList;
         }
         List<Map<String, Object>> filteredWalkPostList = new ArrayList<>();
         for (Map<String, Object> walkPost : walkPostList) {
-            double postLatitude = (double) walkPost.get("latitude");
-            double postLongitude = (double) walkPost.get("longitude");
-            double distance = calculateDistance(clientLatitude, clientLongitude, postLatitude, postLongitude);
-            if (distance <= maxDistance) {
-                walkPost.put("distance", distance);
-                filteredWalkPostList.add(walkPost);
+            double postLatitude = Optional.ofNullable((double) walkPost.get("latitude")).orElse(Double.NaN);
+            double postLongitude = Optional.ofNullable((double) walkPost.get("longitude")).orElse(Double.NaN);
+
+            if (!Double.isNaN(postLatitude) && !Double.isNaN(postLongitude)) {
+                double distance = calculateDistance(clientLatitude, clientLongitude, postLatitude, postLongitude);
+                if (distance <= maxDistance) {
+                    walkPost.put("distance", distance);
+                    filteredWalkPostList.add(walkPost);
+                }
+            } else {
+                log.info("Invalid latitude or longitude values for post");
             }
         }
         return filteredWalkPostList;
     }
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    //거리계산 매서드
+    public double calculateDistance ( double lat1, double lon1, double lat2, double lon2){
         final int R = 6371; // Radius of the earth in km
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
@@ -93,5 +107,6 @@ public class WalkMatchingBoardService {
                 * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c; // convert to km
+
     }
 }
