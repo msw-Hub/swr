@@ -106,8 +106,8 @@ public class WalkMatchingBoardController {
 
             Integer walk_time = (Integer) requestBody.get("walk_time");
             Date walk_date = (Date) requestBody.get("walk_date");
-            Double latitude = (Double) requestBody.get("latitude");
-            Double longitude = (Double) requestBody.get("longitude");
+            double latitude = ((Number) requestBody.get("latitude")).doubleValue();
+            double longitude = ((Number) requestBody.get("longitude")).doubleValue();
             String title = (String) requestBody.get("title");
             String content = (String) requestBody.get("content");
             walkMatchingBoardService.writeWalkPost(nickname, choosing_pet, walk_time, walk_date, latitude, longitude, title, content);

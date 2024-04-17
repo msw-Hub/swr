@@ -52,7 +52,7 @@ public class WalkMatchingBoardService {
     //신청글 작성하기
     //받을데이터 nickname=owner_nickname,pet_id=choosing_pet, walk_time, walk_date, latitude, longitude, title,content, status=0
     public void writeWalkPost(String owner_nickname, Long choosing_pet, Integer walk_time, Date walk_date,
-                              Double latitude, Double longitude, String title, String content) {
+                              double latitude, double longitude, String title, String content) {
         String sql = "INSERT INTO mydb.walk_matching_board (owner_nickname, choosing_pet, walk_time, walk_date," +
                 "latitude, longitude, title, content, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
