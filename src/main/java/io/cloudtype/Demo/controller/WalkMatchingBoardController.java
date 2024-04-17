@@ -143,14 +143,17 @@ public class WalkMatchingBoardController {
             // 가져온 유저 정보에서 고유 ID를 확인. 해당 ID를 가진 유저가 파트너권한이 있는지를 확인
             Long userId = (Long) userInfo.get("userId");
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
-            if((Integer) dbUserInfo.get("partnership") == 0){
+            if ((int) dbUserInfo.get("partnership") == 0) {
                 Map<String, Object> response = new HashMap<>();
                 response.put("message", "파트너 권한이 없습니다.");
                 return ResponseEntity.ok(response.toString());
             }
             //산책 신청글 목록 반환 / 위치 계산
-            List<Map<String, Object>> response = walkMatchingBoardService.getWalkPostListWithDistance( (int) requestBody.get("page"),
-                    (Double) requestBody.get("now_latitude"), (Double) requestBody.get("now_longitude"), (Double) requestBody.get("max_distance"));
+            double now_latitude = ((Number) requestBody.get("now_latitude")).doubleValue();
+            double now_longitude = ((Number) requestBody.get("now_longitude")).doubleValue();
+            double max_distance = ((Number) requestBody.get("max_distance")).doubleValue();
+            List<Map<String, Object>> response = walkMatchingBoardService.getWalkPostListWithDistance((int) requestBody.get("page"),
+                    now_latitude, now_longitude, max_distance);
             return ResponseEntity.ok(response.toString());
         } catch (IOException e) {
             log.error("Failed to fetch user info from Kakao API", e);
