@@ -93,7 +93,7 @@ public class WalkMatchingBoardController {
 
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             String nickname = (String) dbUserInfo.get("nickname");
-            Long petId = (Long) requestBody.get("pet_id");
+            Long petId = Long.valueOf(requestBody.get("pet_id").toString());
             Map<String,Object> petInfo = userInfoService.getPetInfoByPetId(petId);
             String ownerNickname = (String) petInfo.get("owner_nickname");
             if(!nickname.equals(ownerNickname)){
