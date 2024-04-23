@@ -151,7 +151,8 @@ public class UserInfoService {
         //ownerNickname과 ownerNicknameFromDB가 같으면 petInfo를 업데이트
         if(ownerNickname.equals(ownerNicknameFromDB)){
             String updateSql = "UPDATE mydb.pet_info SET weight=?, neutering = ?, animal_hospital=?,vaccination=?,etc=? WHERE pet_info_id = ?";
-            jdbcTemplate.update(updateSql, petInfo.get("pet_name"), petInfo.get("pet_age"), petInfo.get("species"), petInfo.get("pet_info_id"));
+            jdbcTemplate.update(updateSql, petInfo.get("weight"), petInfo.get("neutering"),
+                    petInfo.get("animal_hospital"), petInfo.get("vaccination"), petInfo.get("etc"), petInfo.get("pet_info_id"));
             return "success";
         }else {
             return "해당 pet_info_id의 주인이 아닙니다.";
