@@ -54,7 +54,7 @@ public class WalkMatchingBoardService {
     //받을데이터 nickname=owner_nickname,pet_id=choosing_pet, walk_time, walk_date, latitude, longitude, title,content, status=0
     public void writeWalkPost(String writerNickname, Long petInfoId, Integer walkTime,
                               double latitude, double longitude, String title, String content) {
-        String sql = "INSERT INTO mydb.walk_matching_board (writer_nickname, choosing_pet, walk_time," +
+        String sql = "INSERT INTO mydb.walk_matching_board (writer_nickname, choosing_pet, walk_time,walk_date," +
                 "latitude, longitude, title, content, status) "
                 + "VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql, writerNickname, petInfoId, walkTime, latitude, longitude, title, content, 0);
