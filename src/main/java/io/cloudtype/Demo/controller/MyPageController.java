@@ -326,7 +326,7 @@ public class MyPageController {
     @Parameter(name = "species", description = "반려동물 종", required = true)
     @Parameter(name = "pet_profile_image", description = "이미지파일", required = true)
     @Parameter(name = "pet_info_id",description = "반려동물 고유id / Long", required = true)
-    @Parameter(name = "imageChangeCheck",description = "이미지 변경 여부 / Boolean", required = true)
+    @Parameter(name = "image_change_check",description = "이미지 변경 여부 / Boolean", required = true)
     @ApiResponse(responseCode = "200", description = "반려동물 기초 정보 등록완료", content = @Content(mediaType = "application/json",schema = @Schema(implementation = String.class)))
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/pet-info/profile/edit")
@@ -336,7 +336,7 @@ public class MyPageController {
             @ModelAttribute("pet_age") Integer petAge,
             @ModelAttribute("species") String species,
             @ModelAttribute("pet_info_id") Long petInfoId,
-            @ModelAttribute("imageChangeCheck") Boolean imageChangeCheck,
+            @ModelAttribute("image_change_check") Boolean imageChangeCheck,
             @RequestPart("pet_profile_image") MultipartFile petProfileImage
     ) {
         try {
@@ -390,7 +390,7 @@ public class MyPageController {
 
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             String nickname = (String) dbUserInfo.get("nickname");
-            Long petInfoId = (Long) requestBody.get("pet_info_id");
+            Long petInfoId = Long.valueOf(requestBody.get("pet_info_id").toString());
             Map<String,Object> petInfo = userInfoService.getPetInfoByPetId(petInfoId);
             String ownerNickname = (String) petInfo.get("owner_nickname");
             if(!nickname.equals(ownerNickname)){
