@@ -71,7 +71,6 @@ public class WalkMatchingBoardController {
     @Operation(summary = "매칭-산책 글 작성", description = "매칭 게시판에 산책 요청글을 작성합니다.")
     @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "walk_time", description = "산책시간 / INT(30/60/90/120)", required = true)
-    @Parameter(name = "walk_date", description = "산책예약날짜 / DATE(yyyy-mm-dd hh:mm:00)", required = true)
     @Parameter(name = "pet_info_id",description = "서비스 이용할 반려동물 고유id / Long", required = true)
     @Parameter(name = "latitude",description = "신청위치의 위도 / Double", required = true)
     @Parameter(name = "longitude",description = "신청위치의 경도 / Double", required = true)
@@ -104,13 +103,11 @@ public class WalkMatchingBoardController {
             //petId가 유효한지 검색
 
             Integer walkTime = (Integer) requestBody.get("walk_time");
-            String walkDateStr = (String) requestBody.get("walk_date");
-            Timestamp walkDate = Timestamp.valueOf(walkDateStr);
             double latitude = ((Number) requestBody.get("latitude")).doubleValue();
             double longitude = ((Number) requestBody.get("longitude")).doubleValue();
             String title = (String) requestBody.get("title");
             String content = (String) requestBody.get("content");
-            walkMatchingBoardService.writeWalkPost(nickname, petInfoId, walkTime, walkDate, latitude, longitude, title, content);
+            walkMatchingBoardService.writeWalkPost(nickname, petInfoId, walkTime, latitude, longitude, title, content);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", "산책글 작성 성공");
