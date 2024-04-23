@@ -104,7 +104,8 @@ public class WalkMatchingBoardController {
             //petId가 유효한지 검색
 
             Integer walkTime = (Integer) requestBody.get("walk_time");
-            Timestamp walkDate = (Timestamp) requestBody.get("walk_date");
+            String walkDateStr = (String) requestBody.get("walk_date");
+            Timestamp walkDate = Timestamp.valueOf(walkDateStr);
             double latitude = ((Number) requestBody.get("latitude")).doubleValue();
             double longitude = ((Number) requestBody.get("longitude")).doubleValue();
             String title = (String) requestBody.get("title");
