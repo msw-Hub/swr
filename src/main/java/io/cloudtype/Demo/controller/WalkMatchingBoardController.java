@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,8 +45,7 @@ public class WalkMatchingBoardController {
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @PostMapping("/post1")
     public ResponseEntity<String> walkPost1(
-            @RequestHeader("Authorization") String accessToken,
-            @RequestBody Map<String, Object> requestBody
+            @RequestHeader("Authorization") String accessToken
     ) {
         try {
             // 가입된 사람만 사용하도록 확인
@@ -71,7 +71,7 @@ public class WalkMatchingBoardController {
     @Operation(summary = "매칭-산책 글 작성", description = "매칭 게시판에 산책 요청글을 작성합니다.")
     @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "walk_time", description = "산책시간 / INT(30/60/90/120)", required = true)
-    @Parameter(name = "walk_date", description = "산책예약날짜 / DATE(yyyy-mm-dd)", required = true)
+    @Parameter(name = "walk_date", description = "산책예약날짜 / DATE(yyyy-mm-dd hh:mm:00)", required = true)
     @Parameter(name = "pet_id",description = "서비스 이용할 반려동물 고유id / Long", required = true)
     @Parameter(name = "latitude",description = "신청위치의 위도 / Double", required = true)
     @Parameter(name = "longitude",description = "신청위치의 경도 / Double", required = true)
@@ -105,7 +105,7 @@ public class WalkMatchingBoardController {
             //petId가 유효한지 검색
 
             Integer walk_time = (Integer) requestBody.get("walk_time");
-            Date walk_date = (Date) requestBody.get("walk_date");
+            Timestamp walk_date = (Timestamp) requestBody.get("walk_date");
             double latitude = ((Number) requestBody.get("latitude")).doubleValue();
             double longitude = ((Number) requestBody.get("longitude")).doubleValue();
             String title = (String) requestBody.get("title");
