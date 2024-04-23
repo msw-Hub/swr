@@ -72,7 +72,7 @@ public class WalkMatchingBoardController {
     @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "walk_time", description = "산책시간 / INT(30/60/90/120)", required = true)
     @Parameter(name = "walk_date", description = "산책예약날짜 / DATE(yyyy-mm-dd hh:mm:00)", required = true)
-    @Parameter(name = "pet_id",description = "서비스 이용할 반려동물 고유id / Long", required = true)
+    @Parameter(name = "pet_info_id",description = "서비스 이용할 반려동물 고유id / Long", required = true)
     @Parameter(name = "latitude",description = "신청위치의 위도 / Double", required = true)
     @Parameter(name = "longitude",description = "신청위치의 경도 / Double", required = true)
     @Parameter(name = "title", description = "신청글제목 / String", required = true)
@@ -93,24 +93,23 @@ public class WalkMatchingBoardController {
 
             Map<String, Object> dbUserInfo = userInfoService.getUserInfoById(userId);
             String nickname = (String) dbUserInfo.get("nickname");
-            Long petId = Long.valueOf(requestBody.get("pet_id").toString());
-            Map<String,Object> petInfo = userInfoService.getPetInfoByPetId(petId);
+            Long petInfoId = Long.valueOf(requestBody.get("pet_info_id").toString());
+            Map<String,Object> petInfo = userInfoService.getPetInfoByPetId(petInfoId);
             String ownerNickname = (String) petInfo.get("owner_nickname");
             if(!nickname.equals(ownerNickname)){
                 return ResponseEntity.badRequest().build();
             }
             //산책글 작성 서비스 호출
-            //넘길데이터 nickname=owner_nickname,pet_id=choosing_pet, walk_time, walk_date, latitude, longitude, title,content, status=0
-            Long choosing_pet = (Long) requestBody.get("pet_id");
+            //넘길데이터 nickname=owner_nickname,pet_info_id, walk_time, walk_date, latitude, longitude, title,content, status=0
             //petId가 유효한지 검색
 
-            Integer walk_time = (Integer) requestBody.get("walk_time");
-            Timestamp walk_date = (Timestamp) requestBody.get("walk_date");
+            Integer walkTime = (Integer) requestBody.get("walk_time");
+            Timestamp walkDate = (Timestamp) requestBody.get("walk_date");
             double latitude = ((Number) requestBody.get("latitude")).doubleValue();
             double longitude = ((Number) requestBody.get("longitude")).doubleValue();
             String title = (String) requestBody.get("title");
             String content = (String) requestBody.get("content");
-            walkMatchingBoardService.writeWalkPost(nickname, choosing_pet, walk_time, walk_date, latitude, longitude, title, content);
+            walkMatchingBoardService.writeWalkPost(nickname, petInfoId, walkTime, walkDate, latitude, longitude, title, content);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", "산책글 작성 성공");

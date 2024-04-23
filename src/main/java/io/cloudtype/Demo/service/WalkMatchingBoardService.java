@@ -52,12 +52,12 @@ public class WalkMatchingBoardService {
 
     //신청글 작성하기
     //받을데이터 nickname=owner_nickname,pet_id=choosing_pet, walk_time, walk_date, latitude, longitude, title,content, status=0
-    public void writeWalkPost(String owner_nickname, Long choosing_pet, Integer walk_time, Timestamp walk_date,
+    public void writeWalkPost(String ownerNickname, Long petInfoId, Integer walkTime, Timestamp walkDate,
                               double latitude, double longitude, String title, String content) {
         String sql = "INSERT INTO mydb.walk_matching_board (owner_nickname, choosing_pet, walk_time, walk_date," +
                 "latitude, longitude, title, content, status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sql, owner_nickname, choosing_pet, walk_time, walk_date, latitude, longitude, title, content, 0);
+        jdbcTemplate.update(sql, ownerNickname, petInfoId, walkTime, walkDate, latitude, longitude, title, content, 0);
     }
 
     //신청글 목록 반환하기
