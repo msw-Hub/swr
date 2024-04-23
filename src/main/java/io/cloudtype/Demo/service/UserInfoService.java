@@ -1,9 +1,9 @@
 package io.cloudtype.Demo.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import java.time.Year;
@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class UserInfoService {
 
@@ -253,6 +254,25 @@ public class UserInfoService {
         } catch (EmptyResultDataAccessException e) {
             // 검색 결과가 없을 경우 빈 리스트반환
             return new HashMap<>();
+        }
+    }
+    //petInfoId로 petInfo 테이블에서 해당 행의 정보가 모두 기입되었는지 확인하는 매서드
+    public boolean checkPetInfo(Long petInfoId) {
+        try {
+            String sql = "SELECT * FROM mydb.pet_info WHERE pet_id = ?";
+            Map<String, Object> petInfo = jdbcTemplate.queryForMap(sql, petInfoId);
+
+            // 각 열의 값을 확인하여 null이 없는지 확인
+            for (Map.Entry<String, Object> entry : petInfo.entrySet()) {
+                // etc 열은 확인하지 않음
+                if (!entry.getKey().equals("etc") && entry.getValue() == null) {
+                    log.info("null 값이 있습니다: " + entry.getKey());
+                    return false; // null 값이 하나라도 있으면 false 반환
+                }
+            }
+            return true; // 모든 열에 값이 있으면 true 반환
+        } catch (EmptyResultDataAccessException e) {
+            return false; // 해당하는 행이 없는 경우
         }
     }
 }

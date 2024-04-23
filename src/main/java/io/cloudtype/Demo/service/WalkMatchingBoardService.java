@@ -67,17 +67,6 @@ public class WalkMatchingBoardService {
         jdbcTemplate.update(sql, writerNickname, petInfoId, walkTime, latitude, longitude, title, content, 0);
         return "신청글 작성 완료";
     }
-    //petId의 정보가 빠짐없이 기입되었는지를 확인하는 메서드
-    public boolean checkPetInfo(Long petInfoId) {
-        try {
-            String sql = "SELECT COUNT(*) FROM mydb.pet_info WHERE pet_id = ?";
-            int count = jdbcTemplate.queryForObject(sql, Integer.class, petInfoId);
-            return count == 1;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
-    }
-
     //신청글 목록 반환하기 (페이지네이션 추가)
     public List<Map<String, Object>> getWalkPostList(int page) {
         // 한 페이지에 표시할 게시글 수

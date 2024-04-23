@@ -68,7 +68,7 @@ public class WalkMatchingBoardController {
         }
     }
 
-    @Operation(summary = "매칭-산책 글 작성", description = "매칭 게시판에 산책 요청글을 작성합니다./post1을 먼저 거친후 와주세요")
+    @Operation(summary = "매칭-산책 글 작성", description = "/post1을 먼저 거친후 와주세요 + etc를 제외한 정보가 모두 기입된 반려동물만 이용가능합니다.")
     @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @Parameter(name = "walk_time", description = "산책시간 / INT(30/60/90/120)", required = true)
     @Parameter(name = "pet_info_id",description = "서비스 이용할 반려동물 고유id / Long", required = true)
@@ -99,8 +99,9 @@ public class WalkMatchingBoardController {
             }
             //산책글 작성 서비스 호출
             //넘길데이터 nickname=writerNickname,pet_info_id, walk_time, walk_date, latitude, longitude, title,content, status=0
-            //petId가 유효한지 검색
-
+            //petInfoId로 선택한 반려동물의 정보가 모두 기입이 되었는지 확인
+            if(!userInfoService.checkPetInfo(petInfoId))
+                return ResponseEntity.badRequest().build();
             Integer walkTime = (Integer) requestBody.get("walk_time");
             double latitude = ((Number) requestBody.get("latitude")).doubleValue();
             double longitude = ((Number) requestBody.get("longitude")).doubleValue();
