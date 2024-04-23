@@ -146,15 +146,15 @@ public class UserInfoService {
     }
     public String savePetInfo2(String ownerNickname, Map<String, Object> petInfo){
         //petInfo로 받은 petId로 ownerNickname을 찾아서 인자로 받은 ownerNickname과 비교
-        String sql = "SELECT owner_nickname FROM mydb.pet_info WHERE pet_id = ?";
-        String ownerNicknameFromDB = jdbcTemplate.queryForObject(sql, String.class, petInfo.get("petId"));
+        String sql = "SELECT owner_nickname FROM mydb.pet_info WHERE pet_info_id = ?";
+        String ownerNicknameFromDB = jdbcTemplate.queryForObject(sql, String.class, petInfo.get("pet_info_id"));
         //ownerNickname과 ownerNicknameFromDB가 같으면 petInfo를 업데이트
         if(ownerNickname.equals(ownerNicknameFromDB)){
             String updateSql = "UPDATE mydb.pet_info SET weight=?, neutering = ?, animal_hospital=?,vaccination=?,etc=? WHERE pet_info_id = ?";
-            jdbcTemplate.update(updateSql, petInfo.get("petName"), petInfo.get("petAge"), petInfo.get("species"), petInfo.get("petId"));
+            jdbcTemplate.update(updateSql, petInfo.get("pet_name"), petInfo.get("pet_age"), petInfo.get("species"), petInfo.get("pet_info_id"));
             return "success";
         }else {
-            return "해당 petId의 주인이 아닙니다.";
+            return "해당 pet_info_id의 주인이 아닙니다.";
         }
     }
     public Map<String, Object> petInfoList(String ownerNickname) {
@@ -166,18 +166,18 @@ public class UserInfoService {
             return new HashMap<>();
         }
     }
-    public  Map<String, Object> getPetInfoByPetId(Long petId){
+    public  Map<String, Object> getPetInfoByPetId(Long petInfoId){
         String sql = "SELECT * FROM mydb.pet_info WHERE pet_info_id = ?";
-        return jdbcTemplate.queryForMap(sql, petId);
+        return jdbcTemplate.queryForMap(sql, petInfoId);
     }
-    public String getImageUrlByPetId(Long petId){
+    public String getImageUrlByPetId(Long petInfoId){
         String sql = "SELECT pet_profile_image FROM mydb.pet_info WHERE pet_info_id = ?";
-        return jdbcTemplate.queryForObject(sql, String.class, petId);
+        return jdbcTemplate.queryForObject(sql, String.class, petInfoId);
     }
-    public void deletePetInfo(Long petId, String imageUrl){
+    public void deletePetInfo(Long petInfoId, String imageUrl){
         communityBoardService.deleteImageGcs(imageUrl);
         String sql = "DELETE FROM mydb.pet_info WHERE pet_info_id = ?";
-        jdbcTemplate.update(sql, petId);
+        jdbcTemplate.update(sql, petInfoId);
     }
     public Map<String, Object> getPetInfoByOwnerNickname(String ownerNickname) {
         try {
