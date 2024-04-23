@@ -100,7 +100,7 @@ public class WalkMatchingBoardController {
                 return ResponseEntity.badRequest().build();
             }
             //산책글 작성 서비스 호출
-            //넘길데이터 nickname=owner_nickname,pet_info_id, walk_time, walk_date, latitude, longitude, title,content, status=0
+            //넘길데이터 nickname=writerNickname,pet_info_id, walk_time, walk_date, latitude, longitude, title,content, status=0
             //petId가 유효한지 검색
 
             Integer walkTime = (Integer) requestBody.get("walk_time");
