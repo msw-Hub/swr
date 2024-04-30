@@ -43,6 +43,7 @@ public class KakaoLoginController {
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     @GetMapping("/callback")
     public ResponseEntity<String> callback(@RequestParam("code") String code) throws IOException {
+        log.info("Received code: " + code);
         Map<String, String> tokens = kakaoService.getTokensFromKakao(client_id, code);
         String accessToken = tokens.get("access_token");
         String expiresInStr = tokens.get("expires_in");
