@@ -122,7 +122,6 @@ public class MyPageController {
         try {
             //주인인지 체크
             myPageService.checkOwner(accessToken, petId);
-
             String imageUrl = myPageService.findImageUrlById(petId);
             if(imageChangeCheck && image == null){
                 throw new IllegalArgumentException("이미지 변경시 반드시 이미지를 첨부해야 합니다.");
