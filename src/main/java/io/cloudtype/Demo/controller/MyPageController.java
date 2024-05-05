@@ -28,7 +28,7 @@ public class MyPageController {
         this.myPageService = myPageService;
         this.communityBoardService = communityBoardService;
     }
-    @GetMapping("")
+    @PostMapping("")
     public ResponseEntity<?> myPage(@RequestHeader("Authorization") String accessToken,
                                     @RequestBody @NotNull Map<String, String> requestBody
     ) {
