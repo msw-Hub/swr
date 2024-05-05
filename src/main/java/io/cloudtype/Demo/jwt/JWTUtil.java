@@ -3,6 +3,7 @@ package io.cloudtype.Demo.jwt;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -10,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
+@CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 public class JWTUtil {
     private SecretKey accessSecretKey;
     private  SecretKey refreshSecretKey;

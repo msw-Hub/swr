@@ -12,8 +12,6 @@ public class CorsMvcConfig implements WebMvcConfigurer {
 
         corsRegistry.addMapping("/**")
                 .allowedOrigins(
-                        "http://localhost:3000",
-                        "https://port-0-swr-17xco2nlst8pr67.sel5.cloudtype.app",
                         "https://teamswr.store",
                         "http://localhost:5173"
                 );

@@ -23,8 +23,8 @@ public class JoinController {
         this.joinService = joinService;
     }
 
-    @PostMapping("")
     @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
+    @PostMapping("")
     public ResponseEntity<?> joinProcess(@RequestBody JoinDTO joinDTO) {
         boolean result = joinService.joinProcess(joinDTO);
         if (result) {
