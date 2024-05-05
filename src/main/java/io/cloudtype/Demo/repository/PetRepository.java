@@ -13,7 +13,7 @@ import java.util.List;
 public interface PetRepository extends JpaRepository<PetEntity, Long> {
     PetEntity findById(int petId);
 
-    @Query("SELECT p.imageUrl FROM PetEntity p WHERE p.id = :petId")
+    @Query("SELECT p.imgUrl FROM PetEntity p WHERE p.id = :petId")
     String findImageUrlById(int petId);
 
     List<PetEntity> findByOwner(UserEntity owner);
