@@ -37,8 +37,8 @@ public class WalkMatchingBoardController {
     public WalkMatchingBoardController(WalkMatchingBoardService walkMatchingBoardService) {
         this.walkMatchingBoardService = walkMatchingBoardService;
     }
-
-
+}
+/*
     @Operation(summary = "매칭-산책 글 작성전, 반려동물 id, name, profile 전달하며 반려동물 고르기", description = "매칭을 위한 반려동물 정보반환")
     @Parameter(name = "Authorization", description = "Access Token", required = true, in = ParameterIn.HEADER)
     @ApiResponse(responseCode = "200", description = "반려동물 id, name, profile 반환")
@@ -336,3 +336,4 @@ public class WalkMatchingBoardController {
         }
     }
 }
+*/
