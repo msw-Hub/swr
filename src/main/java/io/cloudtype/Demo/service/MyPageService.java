@@ -1,5 +1,6 @@
 package io.cloudtype.Demo.service;
 
+import io.cloudtype.Demo.Dto.JoinDetailsDTO;
 import io.cloudtype.Demo.Dto.PetDTO;
 import io.cloudtype.Demo.entity.PetEntity;
 import io.cloudtype.Demo.entity.UserEntity;
@@ -37,9 +38,22 @@ public class MyPageService {
         String username = jwtUtil.getUsername(accessToken,1);
         return userRepository.findByUsername(username).getPinNumber() == pinNumber;
     }
-    //username을 받아 nickname, phoneNumber, pinNumber를 반환하여 json 형태로 리턴
-    public String getUserInfoByUsername(String username) {
-        return "{\"nickname\":\""+userRepository.findByUsername(username).getNickname()+"\",\"phoneNumber\":\""+userRepository.findByUsername(username).getPhoneNumber()+"\",\"pinNumber\":"+userRepository.findByUsername(username).getPinNumber()+"}";
+    //username을 받아 nickname, phoneNumber, pinNumber를 가져와서 DTO로 반환
+    public List<JoinDetailsDTO> getUserInfoByUsername(String accessToken) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+        }
+        return List.of(mapToDTO4(user));
+    }
+    private JoinDetailsDTO mapToDTO4(UserEntity entity) {
+        JoinDetailsDTO dto = new JoinDetailsDTO();
+        dto.setNickname(entity.getNickname());
+        dto.setPinNumber(entity.getPinNumber());
+        dto.setPhoneNumber(entity.getPhoneNumber());
+        return dto;
     }
     @Transactional
     public void editInfo(String accessToken, String nickname, String phoneNumber, int pinNumber) {
