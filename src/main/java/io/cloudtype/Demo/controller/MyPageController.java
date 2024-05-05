@@ -86,7 +86,10 @@ public class MyPageController {
             }
             // 유저의 반려동물 정보 추가
             int petId = myPageService.addPetStep1(accessToken, petName, petAge, species, imageUrl);
-            return ResponseEntity.ok("반려동물 기본정보 등록 완료, 추가 정보 입력으로 이동");
+            //petId를 반환
+            Map<String, Object> response = new HashMap<>();
+            response.put("petId", petId);
+            return ResponseEntity.ok(response.toString());
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
