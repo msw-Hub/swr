@@ -15,7 +15,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;

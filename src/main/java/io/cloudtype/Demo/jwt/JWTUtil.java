@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
-@CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 public class JWTUtil {
     private SecretKey accessSecretKey;
     private  SecretKey refreshSecretKey;

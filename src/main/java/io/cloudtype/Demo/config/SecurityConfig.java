@@ -5,7 +5,6 @@ import io.cloudtype.Demo.jwt.JWTFilter;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.jwt.LoginFilter;
 import io.cloudtype.Demo.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +27,6 @@ import java.util.Collections;
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
-    //JWTUtil 주입
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
 
@@ -39,62 +38,44 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-
         return configuration.getAuthenticationManager();
     }
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
-
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        /*
-        http
-                .cors((corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+        http.cors().configurationSource(corsConfigurationSource());
 
-                    @Override
-                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+        http.csrf().disable();
+        http.formLogin().disable();
+        http.httpBasic().disable();
 
-                        CorsConfiguration configuration = new CorsConfiguration();
-                        configuration.setAllowedOrigins(Arrays.asList("https://teamswr.store", "http://localhost:5173"));
-                        configuration.setAllowedMethods(Collections.singletonList("*"));
-                        configuration.setAllowCredentials(true);
-                        configuration.setAllowedHeaders(Collections.singletonList("*"));
-                        configuration.setMaxAge(3600L);
-                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/login", "/", "/join", "/join/email-check", "/callback", "/code").permitAll()
+                .anyRequest().authenticated());
 
-                        return configuration;
-                    }
-                })));
-*/
-        http
-                .csrf((auth) -> auth.disable());
+        http.addFilterBefore(new JWTFilter(jwtUtil, userRepository), LoginFilter.class);
+        http.addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class);
 
-        http
-                .formLogin((auth) -> auth.disable());
-
-        http
-                .httpBasic((auth) -> auth.disable());
-
-        http
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join","/join/email-check","/callback","/code").permitAll()
-                        .anyRequest().authenticated());
-        //JWTFilter 등록
-        http
-                .addFilterBefore(new JWTFilter(jwtUtil, userRepository), LoginFilter.class);
-
-        //AuthenticationManager()와 JWTUtil 인수 전달
-        http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil,userRepository), UsernamePasswordAuthenticationFilter.class);
-
-        http
-                .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
+    }
+
+    private CorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(Arrays.asList("https://teamswr.store", "http://localhost:5173"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        config.setAllowCredentials(true);
+        config.setMaxAge(3600L);  // 1 hour
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
