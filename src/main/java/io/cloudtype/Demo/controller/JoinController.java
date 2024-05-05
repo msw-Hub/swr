@@ -14,7 +14,6 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/join")
-@CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 public class JoinController {
 
     private final JoinService joinService;
@@ -25,6 +24,7 @@ public class JoinController {
     }
 
     @PostMapping("")
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     public ResponseEntity<?> joinProcess(@RequestBody JoinDTO joinDTO) {
         boolean result = joinService.joinProcess(joinDTO);
         if (result) {
@@ -34,6 +34,7 @@ public class JoinController {
         }
     }
     @PostMapping("/email-check")
+    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
     public ResponseEntity<?> emailCheck(@RequestBody Map<String, String> requestBody) {
         String email = requestBody.get("email");
         if (joinService.usernameCheck(email)==0) {
