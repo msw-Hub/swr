@@ -7,6 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsMvcConfig implements WebMvcConfigurer {
 
+    /*
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry) {
 
@@ -14,6 +15,10 @@ public class CorsMvcConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "https://teamswr.store",
                         "http://localhost:5173"
-                );
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowCredentials(true)
+                .maxAge(3000);
     }
+    */
 }
