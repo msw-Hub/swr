@@ -96,7 +96,7 @@ public class MyPageService {
         if (bCryptPasswordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("새 비밀번호는 이전 비밀번호와 달라야 합니다.");
         }
-        user.setPassword(password);
+        user.setPassword(bCryptPasswordEncoder.encode(password));
         userRepository.save(user);
     }
     @Transactional
