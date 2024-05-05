@@ -60,11 +60,13 @@ public class SecurityConfig {
                         CorsConfiguration configuration = new CorsConfiguration();
 
                         configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        configuration.setAllowedOrigins(Collections.singletonList("https://port-0-swr-17xco2nlst8pr67.sel5.cloudtype.app"));
+                        configuration.setAllowedOrigins(Collections.singletonList("https://teamswr.store"));
+                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
                         configuration.setAllowedMethods(Collections.singletonList("*"));
                         configuration.setAllowCredentials(true);
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setMaxAge(3600L);
-
                         configuration.setExposedHeaders(Collections.singletonList("Authorization"));
 
                         return configuration;
