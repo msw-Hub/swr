@@ -25,6 +25,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/walk")
+@CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 @Tag(name = "matching-walk", description = "매칭 게시판 관련 API")
 public class WalkMatchingBoardController {
     private final WalkMatchingBoardService walkMatchingBoardService;

@@ -20,6 +20,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("")
+@CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 @Tag(name = "kakao", description = "카카오 로그인 관련 API")
 public class KakaoLoginController {
 

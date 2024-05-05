@@ -19,6 +19,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/mypage")
+@CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 public class MyPageController {
 
     private final MyPageService myPageService;

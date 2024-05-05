@@ -14,6 +14,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/join")
+@CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 public class JoinController {
 
     private final JoinService joinService;
