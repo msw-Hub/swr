@@ -126,7 +126,7 @@ public class MyPageController {
             if(imageChangeCheck && image == null){
                 throw new IllegalArgumentException("이미지 변경시 반드시 이미지를 첨부해야 합니다.");
             } else if (imageChangeCheck) {  //이미지 삭제후 새로운 이미지 등록후 url받아오기
-                communityBoardService.deleteImageGcs(imageUrl);
+                if(imageUrl != null) communityBoardService.deleteImageGcs(imageUrl);
                 imageUrl = communityBoardService.uploadImage(image);
             }
             // 반려동물 정보 수정
