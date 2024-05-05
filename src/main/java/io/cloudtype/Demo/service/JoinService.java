@@ -50,6 +50,9 @@ public class JoinService {
         userRepository.save(data);
         return true;
     }
+    public int usernameCheck(String username) {
+        return kakaoService.isUsernameTaken(username);
+    }
     public int nicknameCheck(String nickname) {
         return userRepository.countByNickname(nickname);
     }

@@ -38,12 +38,12 @@ public class MyPageController {
             // 핀 번호 검증
             boolean result = myPageService.checkPinNumber(accessToken, pinNumber);
             if (!result) {
-                return ResponseEntity.badRequest().body("핀번호가 일치하지 않습니다.");
+                return ResponseEntity.badRequest().body("핀번호가 일치하지 않습니다");
             }
             // 유저 정보 반환
             return ResponseEntity.ok(myPageService.getUserInfoByUsername(accessToken));
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body("핀번호는 숫자로 입력해주세요.");
+            return ResponseEntity.badRequest().body("핀번호는 숫자로 입력해주세요");
         }
     }
     @PostMapping("/edit/info")

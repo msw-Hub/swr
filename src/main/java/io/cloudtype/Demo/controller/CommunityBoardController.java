@@ -91,7 +91,7 @@ public class CommunityBoardController {
         try {
             int communityBoardId = requestBody.get("community_board_id");
             communityBoardService.likePost(accessToken, communityBoardId);
-            return ResponseEntity.ok().body("좋아요를 성공적으로 등록했습니다.");
+            return ResponseEntity.ok().body("좋아요를 성공적으로 등록했습니다");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -103,7 +103,7 @@ public class CommunityBoardController {
         try {
             int commentId = requestBody.get("comment_id");
             communityBoardService.likeComment(accessToken, commentId);
-            return ResponseEntity.ok().body("댓글 좋아요를 성공적으로 등록했습니다.");
+            return ResponseEntity.ok().body("댓글 좋아요를 성공적으로 등록했습니다");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -115,7 +115,7 @@ public class CommunityBoardController {
         try {
             int commentId = requestBody.get("comment_id");
             communityBoardService.removeComment(accessToken, commentId);
-            return ResponseEntity.ok().body("댓글 삭제를 성공적으로 완료했습니다.");
+            return ResponseEntity.ok().body("댓글 삭제를 성공적으로 완료했습니다");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -127,7 +127,7 @@ public class CommunityBoardController {
         try {
             int communityBoardId = requestBody.get("community_board_id");
             communityBoardService.removePost(accessToken, communityBoardId);
-            return ResponseEntity.ok().body("게시글 삭제를 성공적으로 완료했습니다.");
+            return ResponseEntity.ok().body("게시글 삭제를 성공적으로 완료했습니다");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -156,7 +156,7 @@ public class CommunityBoardController {
                 imgUrl = communityBoardService.uploadImage(image);  //변경된url임
             }
             communityBoardService.editPost(accessToken, communityBoardId, title, content, imgUrl);
-            return ResponseEntity.ok().body("게시글 수정을 성공적으로 완료했습니다.");
+            return ResponseEntity.ok().body("게시글 수정을 성공적으로 완료했습니다");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -169,7 +169,7 @@ public class CommunityBoardController {
             String content = requestBody.get("content");
             int commentId = Integer.parseInt(requestBody.get("comment_id"));
             communityBoardService.editComment(accessToken, commentId, content);
-            return ResponseEntity.ok().body("댓글 수정을 성공적으로 완료했습니다.");
+            return ResponseEntity.ok().body("댓글 수정을 성공적으로 완료했습니다");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

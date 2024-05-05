@@ -101,5 +101,5 @@ public class KakaoLoginController {
         // 프론트엔드에 전달할 응답 생성
         return ResponseEntity.ok().headers(headers).body(jsonString);
     }
-    //https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=REMOVED_KAKAO_CLIENT_ID&redirect_uri=http://localhost:8080/callback
+    //https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=REMOVED_KAKAO_CLIENT_ID&redirect_uri=https://port-0-swr-17xco2nlst8pr67.sel5.cloudtype.app/callback
 }

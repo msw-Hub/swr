@@ -216,7 +216,7 @@ public class CommunityBoardService {
 
             commentRepository.save(comment);
         } else {
-            throw new IllegalStateException("게시글이 존재하지 않습니다.");
+            throw new IllegalStateException("게시글이 존재하지 않습니다");
         }
     }
 
@@ -228,10 +228,10 @@ public class CommunityBoardService {
         // 댓글 ID를 사용하여 해당 댓글을 찾습니다.
         Optional<CommentEntity> commentOptional = Optional.ofNullable(commentRepository.findById(commentId));
         // 옵셔널에서 댓글을 가져오거나 댓글이 없는 경우 예외
-        CommentEntity comment = commentOptional.orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다. ID: " + commentId));
+        CommentEntity comment = commentOptional.orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다 ID: " + commentId));
         // 자신만이 삭제가능
         if (comment.getUser().getId() != user.getId()) {
-            throw new IllegalStateException("본인 댓글만 삭제할 수 있습니다.");
+            throw new IllegalStateException("본인 댓글만 삭제할 수 있습니다");
         }
         // 댓글 삭제하기 전에 좋아요를 누른 사용자들을 목록에서 삭제
         likeRepository.deleteByComment_Id(commentId);
@@ -253,10 +253,10 @@ public class CommunityBoardService {
         // 게시글 ID를 사용하여 해당 게시글을 찾습니다.
         Optional<CommunityBoardEntity> postOptional = Optional.ofNullable(communityBoardRepository.findById(postId));
         // 옵셔널에서 게시글을 가져오거나 게시글이 없는 경우 예외를 던집니다.
-        CommunityBoardEntity post = postOptional.orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. ID: " + postId));
+        CommunityBoardEntity post = postOptional.orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다 ID: " + postId));
         // 자신만이 삭제가능
         if (post.getUser().getId() != user.getId()) {
-            throw new IllegalStateException("본인 게시글만 삭제할 수 있습니다.");
+            throw new IllegalStateException("본인 게시글만 삭제할 수 있습니다");
         }
         // 게시글 삭제하기 전에 해당 게시글의 좋아요를 누른 사용자들을 목록에서 삭제
         likeRepository.deleteByCommunityBoard_Id(postId);
@@ -276,15 +276,15 @@ public class CommunityBoardService {
         // 게시글 ID를 사용하여 해당 게시글을 찾습니다.
         Optional<CommunityBoardEntity> postOptional = Optional.ofNullable(communityBoardRepository.findById(postId));
         // 옵셔널에서 게시글을 가져오거나 게시글이 없는 경우 예외를 던집니다.
-        CommunityBoardEntity post = postOptional.orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. ID: " + postId));
+        CommunityBoardEntity post = postOptional.orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다 ID: " + postId));
         // 자추 안됌
         if (post.getUser().getId() == user.getId()) {
-            throw new IllegalStateException("본인 게시글에는 좋아요를 누를 수 없습니다.");
+            throw new IllegalStateException("본인 게시글에는 좋아요를 누를 수 없습니다");
         }
         // 좋아요를 누른 사용자 목록에 사용자가 이미 있는지 확인, user.getId()와 post.getId()를 이용하여 LikeEntity를 조회
         boolean liked = likeRepository.existsByUser_IdAndCommunityBoard_Id(user.getId(), post.getId());
         if (liked) {
-            throw new IllegalStateException("이미 좋아요를 누른 게시글입니다.");
+            throw new IllegalStateException("이미 좋아요를 누른 게시글입니다");
         }
         // 좋아요를 누른 사용자 목록에 사용자 추가
         LikeEntity like = new LikeEntity();
@@ -305,15 +305,15 @@ public class CommunityBoardService {
         // 댓글 ID를 사용하여 해당 댓글을 찾습니다.
         Optional<CommentEntity> commentOptional = Optional.ofNullable(commentRepository.findById(commentId));
         // 옵셔널에서 댓글을 가져오거나 댓글이 없는 경우 예외
-        CommentEntity comment = commentOptional.orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다. ID: " + commentId));
+        CommentEntity comment = commentOptional.orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다 ID: " + commentId));
         // 자신의 댓글에는 좋아요를 누를 수 없음
         if (comment.getUser().getId() == user.getId()) {
-            throw new IllegalStateException("본인 댓글에는 좋아요를 누를 수 없습니다.");
+            throw new IllegalStateException("본인 댓글에는 좋아요를 누를 수 없습니다");
         }
         // 좋아요를 누른 사용자 목록에 사용자가 이미 있는지 확인
         boolean liked = likeRepository.existsByUser_IdAndComment_Id(user.getId(), comment.getId());
         if (liked) {
-            throw new IllegalStateException("이미 좋아요를 누른 댓글입니다.");
+            throw new IllegalStateException("이미 좋아요를 누른 댓글입니다");
         }
         // 좋아요를 누른 사용자 목록에 사용자 추가
         LikeEntity like = new LikeEntity();
@@ -334,10 +334,10 @@ public class CommunityBoardService {
         // 게시글 ID를 사용하여 해당 게시글을 찾습니다.
         Optional<CommunityBoardEntity> postOptional = Optional.ofNullable(communityBoardRepository.findById(postId));
         // 옵셔널에서 게시글을 가져오거나 게시글이 없는 경우 예외를 던집니다.
-        CommunityBoardEntity post = postOptional.orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다. ID: " + postId));
+        CommunityBoardEntity post = postOptional.orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다 ID: " + postId));
         // 자신만이 수정가능
         if (post.getUser().getId() != user.getId()) {
-            throw new IllegalStateException("본인 게시글만 수정할 수 있습니다.");
+            throw new IllegalStateException("본인 게시글만 수정할 수 있습니다");
         }
         // 게시글 수정
         post.setTitle(title);
@@ -355,10 +355,10 @@ public class CommunityBoardService {
         // 댓글 ID를 사용하여 해당 댓글을 찾습니다.
         Optional<CommentEntity> commentOptional = Optional.ofNullable(commentRepository.findById(commentId));
         // 옵셔널에서 댓글을 가져오거나 댓글이 없는 경우 예외
-        CommentEntity comment = commentOptional.orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다. ID: " + commentId));
+        CommentEntity comment = commentOptional.orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다 ID: " + commentId));
         // 자신만이 수정가능
         if (comment.getUser().getId() != user.getId()) {
-            throw new IllegalStateException("본인 댓글만 수정할 수 있습니다.");
+            throw new IllegalStateException("본인 댓글만 수정할 수 있습니다");
         }
         // 댓글 수정
         comment.setContent(content);
