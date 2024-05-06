@@ -18,7 +18,7 @@ spring:
         project-id: ${gcp_project_id}
         bucket: ${gcp_bucket}
   jpa:
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
