@@ -1,4 +1,3 @@
-/*
 package io.cloudtype.Demo.config;
 
 import io.cloudtype.Demo.jwt.JWTFilter;
@@ -46,7 +45,8 @@ public class SecurityConfig {
 
         return new BCryptPasswordEncoder();
     }
-
+}
+    /*
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
