@@ -25,8 +25,6 @@ public class JWTFilter extends OncePerRequestFilter {
         this.userRepository = userRepository;
     }
 
-    boolean change = false;
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
