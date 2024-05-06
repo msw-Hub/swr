@@ -1,3 +1,4 @@
+/*
 package io.cloudtype.Demo.config;
 
 import io.cloudtype.Demo.jwt.JWTFilter;
@@ -78,3 +79,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+ */
