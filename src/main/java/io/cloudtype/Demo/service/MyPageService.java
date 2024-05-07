@@ -61,19 +61,19 @@ public class MyPageService {
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
         // 닉네임 중복 체크 및 설정
         if (nickname != null && !nickname.isEmpty() && joinService.nicknameCheck(nickname) > 0) {
-            throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
+            throw new IllegalArgumentException("이미 사용중인 닉네임입니다");
         }
         // 현재 사용 중인 핀번호인지 체크 및 설정
-        if (pinNumber == user.getPinNumber()) {
-            throw new IllegalArgumentException("현재 사용중인 핀번호입니다.");
+        if (pinNumber !=0 && pinNumber == user.getPinNumber()) {
+            throw new IllegalArgumentException("현재 사용중인 핀번호입니다");
         }
         // 현재 사용 중인 전화번호인지 체크 및 설정
         if (phoneNumber != null && !phoneNumber.isEmpty() && phoneNumber.equals(user.getPhoneNumber())) {
-            throw new IllegalArgumentException("현재 사용중인 전화번호입니다.");
+            throw new IllegalArgumentException("현재 사용중인 전화번호입니다");
         }
         // 수정사항 적용
         if (nickname != null && !nickname.isEmpty()) {
@@ -82,7 +82,7 @@ public class MyPageService {
         if (phoneNumber != null && !phoneNumber.isEmpty()) {
             user.setPhoneNumber(phoneNumber);
         }
-        if (pinNumber != user.getPinNumber()) {
+        if (pinNumber != 0 && pinNumber != user.getPinNumber()) {
             user.setPinNumber(pinNumber);
         }
         userRepository.save(user);
