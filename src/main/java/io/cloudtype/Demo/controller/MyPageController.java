@@ -69,7 +69,7 @@ public class MyPageController {
         }
     }
     @PostMapping("/pet/add/step1")
-    public ResponseEntity<String> petAddStep1(
+    public ResponseEntity<?> petAddStep1(
             @RequestHeader("Authorization") String accessToken,
             @ModelAttribute("pet_name") String petName,
             @ModelAttribute("pet_age") Integer petAge,
@@ -88,7 +88,7 @@ public class MyPageController {
             //petId를 반환
             Map<String, Object> response = new HashMap<>();
             response.put("petId", petId);
-            return ResponseEntity.ok(response.toString());
+            return ResponseEntity.ok(response);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
