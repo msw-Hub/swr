@@ -16,7 +16,6 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/community")
-@CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 public class CommunityBoardController {
     private final CommunityBoardService communityBoardService;
 

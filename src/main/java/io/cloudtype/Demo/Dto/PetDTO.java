@@ -1,6 +1,5 @@
 package io.cloudtype.Demo.Dto;
 
-import io.cloudtype.Demo.entity.UserEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +11,8 @@ public class PetDTO {
     private String petName;
     private String petImage;
     private int birthYear;
+    private String gender;
+
     private String species;
     private double weight;
     private boolean neutering; // 중성화 여부

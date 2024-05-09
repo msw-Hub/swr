@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Setter
 @Getter
@@ -34,9 +32,15 @@ public class UserEntity {
 
     private boolean kakaoLogin;     //카카오로그인 여부
 
+    //추가사항
+    private double rating;          //평점
+    private int reviewCount;        //리뷰수
+
     @PrePersist
     public void prePersist() {
         this.kakaoLogin = false;    //카카오로그인 여부 설정
         this.partnership = 0;        //제휴사 설정
+        this.rating = 0.0;            //평점 설정
+        this.reviewCount = 0;        //리뷰수 설정
     }
 }

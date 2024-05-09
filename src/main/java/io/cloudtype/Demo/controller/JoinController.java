@@ -6,7 +6,6 @@ import io.cloudtype.Demo.service.JoinService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -32,7 +31,7 @@ public class JoinController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("사용자가 이미 존재합니다");
         }
     }
-    @PostMapping("/email-check")
+    @PostMapping("/emailCheck")
     public ResponseEntity<?> emailCheck(@RequestBody Map<String, String> requestBody) {
         String email = requestBody.get("email");
         if (joinService.usernameCheck(email)==0) {

@@ -18,4 +18,6 @@ public interface PetRepository extends JpaRepository<PetEntity, Long> {
 
     List<PetEntity> findByOwner(UserEntity owner);
     void delete(@NotNull PetEntity petEntity);
+
+
 }

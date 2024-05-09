@@ -19,6 +19,8 @@ public class PetEntity {
     private String petName;
     private String petImage;
     private int birthYear;
+    private String gender;
+
     private String species;
     private double weight;
     private boolean neutering; // 중성화 여부

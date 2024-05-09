@@ -100,7 +100,7 @@ public class MyPageService {
         userRepository.save(user);
     }
     @Transactional
-    public int addPetStep1(String accessToken, String petName, int petAge, String species, String imgURL) {
+    public int addPetStep1(String accessToken, String petName, int petAge, String species,String gender, String imgURL) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
@@ -117,6 +117,7 @@ public class MyPageService {
         pet.setPetName(petName);
         pet.setPetImage(imgURL);
         pet.setBirthYear(birthYear);
+        pet.setGender(gender);
         pet.setSpecies(species);
         petRepository.save(pet);
 
@@ -128,7 +129,7 @@ public class MyPageService {
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
         double weight = petDTO.getWeight();
         boolean neutering = petDTO.isNeutering();
@@ -139,7 +140,7 @@ public class MyPageService {
 
         PetEntity pet = petRepository.findById(petId);
         if (pet == null) {
-            throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다." + petId);
+            throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다" + petId);
         }
 
         // 반려동물 추가 정보 저장
@@ -159,14 +160,14 @@ public class MyPageService {
         UserEntity user = userRepository.findByUsername(username);
         PetEntity pet = petRepository.findById(petId);
         if (pet == null) {
-            throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다.");
+            throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다");
         }
         if (pet.getOwner().getId() != user.getId()) {
-            throw new IllegalArgumentException("해당 반려동물의 주인이 아닙니다.");
+            throw new IllegalArgumentException("해당 반려동물의 주인이 아닙니다");
         }
     }
     @Transactional
-    public void editPetStep1(int petId, String petName, int petAge, String species, String imageUrl) {
+    public void editPetStep1(int petId, String petName, int petAge, String species,String gender, String imageUrl) {
         PetEntity pet = petRepository.findById(petId);
         if (pet == null) {
             throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다.");
@@ -180,6 +181,7 @@ public class MyPageService {
         pet.setPetImage(imageUrl);
         pet.setBirthYear(birthYear);
         pet.setSpecies(species);
+        pet.setGender(gender);
         petRepository.save(pet);
     }
     public List<PetDTO> getPetList(String accessToken) {
@@ -201,6 +203,7 @@ public class MyPageService {
         dto.setPetImage(entity.getPetImage());
         dto.setBirthYear(entity.getBirthYear());
         dto.setSpecies(entity.getSpecies());
+        dto.setGender(entity.getGender());
         dto.setWeight(entity.getWeight());
         dto.setNeutering(entity.isNeutering());
         dto.setAnimalHospital(entity.getAnimalHospital());

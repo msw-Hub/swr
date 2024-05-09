@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -17,6 +16,5 @@ public interface CommunityBoardRepository extends JpaRepository<CommunityBoardEn
     //게시글 번호로 게시글 삭제
     void delete(@NotNull CommunityBoardEntity communityBoardEntity);
     //게시글 번호로 imageUrl 조회
-    @Query("SELECT p.imgUrl FROM CommunityBoardEntity p WHERE p.id = :boardId")
     String findImageUrlById(int boardId);
 }

@@ -1,0 +1,148 @@
+package io.cloudtype.Demo.controller;
+
+import io.cloudtype.Demo.Dto.WaiterDTO;
+import io.cloudtype.Demo.Dto.WalkMatchingDTO;
+import io.cloudtype.Demo.entity.WalkMatchingEntity;
+import io.cloudtype.Demo.service.WalkMatchingService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
+@RestController
+@RequestMapping("/walk")
+public class WalkMatchingController {
+    private final WalkMatchingService walkMatchingService;
+
+    @Autowired
+    public WalkMatchingController(WalkMatchingService walkMatchingService) {
+        this.walkMatchingService = walkMatchingService;
+    }
+
+
+    //  /mypage/pet/list에서 펫정보를 받아온 이후 고른 펫을 받음
+    //저장되면 DB 트리거에 의해서 자동 5분이 지나면 삭제, 단 status가 0인 경우에만 해당. 1로 바뛰면 유지
+    @PostMapping("/create/post")
+    public ResponseEntity<?> createPost(@RequestHeader("Authorization") String accessToken,
+                                        @RequestBody WalkMatchingEntity walkMatchingEntity
+    ) {
+        try {
+            walkMatchingService.createPost(accessToken, walkMatchingEntity,0);
+            return ResponseEntity.ok("게시글 작성 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/list")
+    public ResponseEntity<?> getList(@RequestHeader("Authorization") String accessToken,
+                                          @RequestBody Map<String, Object> requestBody
+    ) {
+        try {
+            int page = (int) requestBody.get("page");
+            double nowLatitude = ((Number) requestBody.get("now_latitude")).doubleValue();
+            double nowLongitude = ((Number) requestBody.get("now_longitude")).doubleValue();
+            double maxDistance = ((Number) requestBody.get("max_distance")).doubleValue();
+
+            Page<WalkMatchingDTO> pageResult = walkMatchingService.getList(accessToken, page - 1, nowLatitude, nowLongitude, maxDistance);
+            Map<String, Object> response = new HashMap<>();
+            response.put("posts", pageResult);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/edit/post")
+    public ResponseEntity<?> editPost(@RequestHeader("Authorization") String accessToken,
+                                      @RequestBody WalkMatchingEntity walkMatchingEntity
+    ) {
+        try {
+            walkMatchingService.createPost(accessToken, walkMatchingEntity,1);
+            return ResponseEntity.ok("게시글 수정 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/apply/{postId}")
+    public ResponseEntity<?> apply(@RequestHeader("Authorization") String accessToken,
+                                      @PathVariable int postId
+    ) {
+        try {
+            walkMatchingService.apply(accessToken, postId);
+            return ResponseEntity.ok("신청 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/delete/apply/{postId}")
+    public ResponseEntity<?> deleteApply(@RequestHeader("Authorization") String accessToken,
+                                      @PathVariable int postId
+    ) {
+        try {
+            walkMatchingService.deleteApply(accessToken, postId);
+            return ResponseEntity.ok("신청 취소 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/myPost")
+    public ResponseEntity<?> myPost(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            List<WaiterDTO> applierList = walkMatchingService.getApplierList(accessToken);
+            WalkMatchingDTO myPost = walkMatchingService.myPost(accessToken);
+            Map<String, Object> response = new HashMap<>();
+            response.put("myPost", myPost);
+            response.put("applierList", applierList);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/myApply")
+    public ResponseEntity<?> myApply(@RequestHeader("Authorization") String accessToken,
+                                        @RequestBody Map<String, Object> requestBody
+    ) {
+        try {
+            double nowLatitude = (double) requestBody.get("now_latitude");
+            double nowLongitude = (double) requestBody.get("now_longitude");
+
+            List<WalkMatchingDTO> myApply = walkMatchingService.myApply(accessToken, nowLatitude, nowLongitude);
+            return ResponseEntity.ok(myApply);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/accept")
+    public ResponseEntity<?> accept(@RequestHeader("Authorization") String accessToken,
+                                   @RequestBody Map<String, Object> requestBody
+    ) {
+        try {
+            int waiterListId = (int) requestBody.get("waiter_list_id");
+            int postId = (int) requestBody.get("post_id");
+            int waiterId = (int) requestBody.get("waiter_id");
+            walkMatchingService.accept(accessToken, waiterListId, postId, waiterId);
+            return ResponseEntity.ok("수락 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/delete/{postId}")
+    public ResponseEntity<?> delete(@RequestHeader("Authorization") String accessToken,
+                                   @PathVariable int postId
+    ) {
+        try {
+            walkMatchingService.deletePost(accessToken, postId);
+            return ResponseEntity.ok("삭제 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //과거 산책이용 기록 소환 - 이용완료 누르면
+}

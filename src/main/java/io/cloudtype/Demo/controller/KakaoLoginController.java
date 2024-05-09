@@ -11,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,7 +23,6 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("")
-@CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173"})
 @Tag(name = "kakao", description = "카카오 로그인 관련 API")
 public class KakaoLoginController {
 
@@ -41,7 +43,6 @@ public class KakaoLoginController {
     }
 
 
-    @CrossOrigin(origins = {"https://teamswr.store", "http://localhost:5173", "http://localhost:3000", "http://localhost:8080"})
     @GetMapping("/callback")
     public ResponseEntity<String> callback(@RequestParam("code") String code) throws IOException {
         Map<String, String> tokens = kakaoService.getTokensFromKakao(client_id, code);
