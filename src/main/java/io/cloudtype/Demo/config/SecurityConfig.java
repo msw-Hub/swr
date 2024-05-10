@@ -67,7 +67,7 @@ public class SecurityConfig {
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setMaxAge(3600L);
 
-                        configuration.setExposedHeaders(Arrays.asList("Authorization","refresh_Token","JoinDetails"));
+                        configuration.setExposedHeaders(Arrays.asList("Authorization","refresh_Token"));
 
                         return configuration;
                     }
@@ -84,7 +84,7 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join","/join/email-check","/callback","/code").permitAll()
+                        .requestMatchers("/login", "/", "/join","/join/emailCheck","/callback","/code").permitAll()
                         .anyRequest().authenticated());
         //JWTFilter 등록
         http
