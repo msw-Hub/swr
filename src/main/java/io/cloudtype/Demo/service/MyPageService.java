@@ -100,6 +100,13 @@ public class MyPageService {
         userRepository.save(user);
     }
     @Transactional
+    public boolean checkPassword(String accessToken, String password) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        return bCryptPasswordEncoder.matches(password, user.getPassword());
+    }
+    @Transactional
     public int addPetStep1(String accessToken, String petName, int petAge, String species,String gender, String imgURL) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
@@ -223,5 +230,18 @@ public class MyPageService {
             throw new IllegalArgumentException("해당 반려동물의 주인이 아닙니다.");
         }
         petRepository.delete(pet);
+    }
+    public PetDTO getPet(String accessToken, int petId) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        PetEntity pet = petRepository.findById(petId);
+        if (pet == null) {
+            throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다.");
+        }
+        if (pet.getOwner().getId() != user.getId()) {
+            throw new IllegalArgumentException("해당 반려동물의 주인이 아닙니다.");
+        }
+        return mapToDTO3(pet);
     }
 }
