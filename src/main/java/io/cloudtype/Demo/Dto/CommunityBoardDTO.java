@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 public class CommunityBoardDTO {
     private int id;
+    private String nickname;
     private String title;
     private String content;
     private LocalDateTime createDate;
