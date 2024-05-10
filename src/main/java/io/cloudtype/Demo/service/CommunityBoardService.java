@@ -208,17 +208,19 @@ public class CommunityBoardService {
         UserEntity user = userRepository.findByUsername(username);  //댓글 작성자
 
         Optional<CommunityBoardEntity> board = Optional.ofNullable(communityBoardRepository.findById(communityBoardId));
+        // 옵셔널에서 게시글을 가져오거나 게시글이 없는 경우 예외를 던집니다.
+        CommunityBoardEntity post = board.orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다 ID: " +communityBoardId));
 
-        if (board.isPresent()) {
-            CommentEntity comment = new CommentEntity();
-            comment.setUser(user);
-            comment.setCommunityBoard(board.get());
-            comment.setContent(content);
+        // 게시글의 댓글 수 증가
+        post.setCommentCount(post.getCommentCount() + 1);
+        communityBoardRepository.save(post);
 
-            commentRepository.save(comment);
-        } else {
-            throw new IllegalStateException("게시글이 존재하지 않습니다");
-        }
+        //댓글 저장
+        CommentEntity comment = new CommentEntity();
+        comment.setUser(user);
+        comment.setCommunityBoard(post);
+        comment.setContent(content);
+        commentRepository.save(comment);
     }
 
     @Transactional
