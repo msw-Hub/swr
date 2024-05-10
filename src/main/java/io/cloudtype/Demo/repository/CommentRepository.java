@@ -11,4 +11,5 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
     List<CommentEntity> findAllByCommunityBoard_Id(int communityBoardId);
 
     void delete(@NotNull CommentEntity commentEntity);
+    List<CommentEntity> findByCommunityBoard_Id(int postId);
 }

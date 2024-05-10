@@ -245,7 +245,6 @@ public class CommunityBoardService {
         // 댓글 삭제
         commentRepository.delete(comment);
     }
-
     @Transactional
     public void removePost(String accessToken, int postId) {
         accessToken = accessToken.split(" ")[1]; // Remove Bearer prefix
@@ -263,10 +262,25 @@ public class CommunityBoardService {
         }
         // 게시글 삭제하기 전에 해당 게시글의 좋아요를 누른 사용자들을 목록에서 삭제
         likeRepository.deleteByCommunityBoard_Id(postId);
-        // 게시글의 댓글 삭제
-        removeComment(accessToken, postId);
+        // 게시글에 있는 모든 댓글 삭제
+        List<CommentEntity> comments = commentRepository.findByCommunityBoard_Id(postId);
+        comments.forEach(comment -> removeCommentForPost(comment.getId()));
         // 게시글 삭제
         communityBoardRepository.delete(post);
+    }
+    public void removeCommentForPost(int commentId) {
+        // 댓글 ID를 사용하여 해당 댓글을 찾습니다.
+        Optional<CommentEntity> commentOptional = Optional.ofNullable(commentRepository.findById(commentId));
+        // 옵셔널에서 댓글을 가져오거나 댓글이 없는 경우 예외
+        CommentEntity comment = commentOptional.orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다 ID: " + commentId));
+        // 댓글 삭제하기 전에 좋아요를 누른 사용자들을 목록에서 삭제
+        likeRepository.deleteByComment_Id(commentId);
+        // 게시글의 댓글 수 감소
+        CommunityBoardEntity post = comment.getCommunityBoard();
+        post.setCommentCount(post.getCommentCount() - 1);
+        communityBoardRepository.save(post);
+        // 댓글 삭제
+        commentRepository.delete(comment);
     }
 
     @Transactional
