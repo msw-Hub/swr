@@ -2,10 +2,7 @@ package io.cloudtype.Demo.service;
 
 import io.cloudtype.Demo.Dto.WaiterDTO;
 import io.cloudtype.Demo.Dto.WalkMatchingDTO;
-import io.cloudtype.Demo.entity.PetEntity;
-import io.cloudtype.Demo.entity.UserEntity;
-import io.cloudtype.Demo.entity.WaiterEntity;
-import io.cloudtype.Demo.entity.WalkMatchingEntity;
+import io.cloudtype.Demo.entity.*;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.repository.PetRepository;
 import io.cloudtype.Demo.repository.UserRepository;
@@ -14,10 +11,7 @@ import io.cloudtype.Demo.repository.WalkMatchingRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +43,7 @@ public class WalkMatchingService {
     @Autowired
     public WalkMatchingService(@Value("${spring.cloud.gcp.storage.credentials.location}") String keyFileName,
                                @Value("${spring.cloud.gcp.storage.bucket}") String bucketName,
-                                 @Value("${spring.cloud.gcp.storage.project-id}") String projectId,
+                               @Value("${spring.cloud.gcp.storage.project-id}") String projectId,
                                UserRepository userRepository, PetRepository petRepository, JWTUtil jwtUtil,
                                WalkMatchingRepository walkMatchingRepository,
                                WaiterRepository waiterRepository
@@ -82,7 +76,7 @@ public class WalkMatchingService {
         }
         //etc를 제외한 값이  모두 들어가야함
         if (pet.getOwner().getId() == 0 || pet.getPetName() == null || pet.getPetImage()== null || pet.getBirthYear()==0 || pet.getWeight() == 0
-            || pet.getSpecies()==null || pet.getAnimalHospital()==null || pet.getVaccination()==null) {
+                || pet.getSpecies()==null || pet.getAnimalHospital()==null || pet.getVaccination()==null) {
             throw new IllegalArgumentException("필수 펫 정보가 누락 되어 신청글 작성이 불가능 합니다");
         }
         //산책글은 1개만 작성가능
@@ -310,7 +304,10 @@ public class WalkMatchingService {
         post.setStatus(1);
         walkMatchingRepository.save(post);
 
+        //해당글의 신청자들 삭제
         waiterRepository.deleteByWalkMatchingId(postId);
+        //매칭이 된 신청자의 다른 신청들삭제
+        waiterRepository.deleteByWaiterId(waiterId);
     }
     @Transactional
     public void deletePost(String accessToken, int postId) {
@@ -327,7 +324,7 @@ public class WalkMatchingService {
         if (post.getUser().getId() != user.getId()) {
             throw new IllegalArgumentException("해당 게시글의 작성자가 아닙니다");
         }
-        if(post.getStatus()==1) {
+        if(post.getStatus()==1||post.getStatus()==2) {
             throw new IllegalArgumentException("이미 수락된 게시글입니다");
         }
         walkMatchingRepository.delete(post);

@@ -1,6 +1,7 @@
 package io.cloudtype.Demo.repository;
 
 import io.cloudtype.Demo.entity.WaiterEntity;
+import io.cloudtype.Demo.entity.WalkMatchingEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +15,5 @@ public interface WaiterRepository extends JpaRepository<WaiterEntity, Long> {
     List<WaiterEntity> findByWalkMatchingId(int walkMatchingId);
     WaiterEntity findById(int id);
     void deleteByWalkMatchingId(int walkMatchingId);
+    void deleteByWaiterId(int waiterId);
 }
