@@ -18,6 +18,7 @@ public class UserEntity {
 
     private String role;        //기본역할
     private String refreshToken;    //JWT Refresh Token
+    private String refreshTokenSub; //서브 서버의 리프레시토큰
 
     private String profileImage;    //프로필 이미지(일반로그인시, 기본이미지)
     private String name;            //실명 (카카오로그인시, 카카오에서 받아온 실명)
@@ -33,14 +34,19 @@ public class UserEntity {
     private boolean kakaoLogin;     //카카오로그인 여부
 
     //추가사항
-    private double rating;          //평점
-    private int reviewCount;        //리뷰수
+    private double walkRating;          //산책서비스 평점
+    private int walkReviewCount;            //산책서비스 리뷰수
+
+    private double careRating;          //돌봄서비스 평점
+    private int careReviewCount;            //돌봄서비스 리뷰수
 
     @PrePersist
     public void prePersist() {
         this.kakaoLogin = false;    //카카오로그인 여부 설정
         this.partnership = 0;        //제휴사 설정
-        this.rating = 0.0;            //평점 설정
-        this.reviewCount = 0;        //리뷰수 설정
+        this.walkRating = 0.0;            //산책서비스 평점 설정
+        this.walkReviewCount = 0;        //산책서비스 리뷰수 설정
+        this.careRating = 0.0;            //돌봄서비스 평점 설정
+        this.careReviewCount = 0;        //돌봄서비스 리뷰수 설정
     }
 }

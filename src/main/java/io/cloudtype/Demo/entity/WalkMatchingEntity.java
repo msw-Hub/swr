@@ -24,7 +24,7 @@ public class WalkMatchingEntity {
     private int petId;  // 펫 ID - 첫요청 받을때만 쓰임
 
     private int walkTime;
-    private LocalDateTime walkDate;
+    private LocalDateTime startTime;
     private LocalDateTime createDate;
     private double latitude;
     private double longitude;

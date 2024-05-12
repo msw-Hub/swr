@@ -16,7 +16,6 @@ import io.cloudtype.Demo.repository.CommentRepository;
 import io.cloudtype.Demo.repository.CommunityBoardRepository;
 import io.cloudtype.Demo.repository.LikeRepository;
 import io.cloudtype.Demo.repository.UserRepository;
-import jakarta.servlet.http.PushBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -33,7 +32,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -186,7 +184,7 @@ public class CommunityBoardService {
         return List.of(mapToDTO(post));
     }
     public List<CommentDTO> getComments(int communityBoardId) {
-        List<CommentEntity> comments = commentRepository.findAllByCommunityBoard_Id(communityBoardId);
+        List<CommentEntity> comments = commentRepository.findAllByCommunityBoard_IdOrderByCreateDateDesc(communityBoardId);
         return comments.stream()
                 .map(this::mapToDTO2)
                 .collect(Collectors.toList());

@@ -3,6 +3,7 @@ package io.cloudtype.Demo.controller;
 import io.cloudtype.Demo.Dto.WaiterDTO;
 import io.cloudtype.Demo.Dto.WalkMatchingDTO;
 import io.cloudtype.Demo.entity.WalkMatchingEntity;
+import io.cloudtype.Demo.service.CommunityBoardService;
 import io.cloudtype.Demo.service.WalkMatchingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,14 @@ import java.util.Map;
 @RequestMapping("/walk")
 public class WalkMatchingController {
     private final WalkMatchingService walkMatchingService;
+    private final CommunityBoardService communityBoardService;
 
     @Autowired
-    public WalkMatchingController(WalkMatchingService walkMatchingService) {
+    public WalkMatchingController(WalkMatchingService walkMatchingService,
+                                  CommunityBoardService communityBoardService
+    ) {
         this.walkMatchingService = walkMatchingService;
+        this.communityBoardService = communityBoardService;
     }
 
 
@@ -144,5 +149,42 @@ public class WalkMatchingController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    //과거 산책이용 기록 소환 - 이용완료 누르면
+    @GetMapping("/start/{postId}")
+    public ResponseEntity<?> start(@RequestHeader("Authorization") String accessToken,
+                                   @PathVariable int postId
+    ) {
+        try {   //파트너의 산책시작버튼
+            walkMatchingService.start(accessToken, postId);
+            return ResponseEntity.ok("산책 시작");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/complete/{postId}")
+    public ResponseEntity<?> end(@RequestHeader("Authorization") String accessToken,
+                                   @PathVariable int postId
+    ) {
+        try {   //주인의 산책완료버튼
+            int walkRecodeId = walkMatchingService.end(accessToken, postId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("walk_recode_id", walkRecodeId);
+            response.put("message", "산책 정상종료, walkRecodeId를 이용하여 후기작성을 진행해주세요");
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/incomplete/{postId}")
+    public ResponseEntity<?> incomplete(@RequestHeader("Authorization") String accessToken,
+                                        @PathVariable int postId,
+                                        @RequestBody Map<String, Object> requestBody
+    ) {
+        try {   //주인의 산책미완료버튼   ex) 문제가 발생하여 해당 산책건에 대하여 문제발생버튼을 누름 -> 산책 레코드로 넘김
+            String reason = (String) requestBody.get("reason");
+            walkMatchingService.incomplete(accessToken, postId, reason);
+            return ResponseEntity.ok("산책 문제발생 버튼을 눌렀습니다 고객센터로 연결해주세요");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

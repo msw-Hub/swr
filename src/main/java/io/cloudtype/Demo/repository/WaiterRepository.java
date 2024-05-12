@@ -1,7 +1,6 @@
 package io.cloudtype.Demo.repository;
 
 import io.cloudtype.Demo.entity.WaiterEntity;
-import io.cloudtype.Demo.entity.WalkMatchingEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

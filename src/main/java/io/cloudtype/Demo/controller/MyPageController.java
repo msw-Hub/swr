@@ -1,7 +1,5 @@
 package io.cloudtype.Demo.controller;
 
-import io.cloudtype.Demo.Dto.CommentDTO;
-import io.cloudtype.Demo.Dto.CommunityBoardDTO;
 import io.cloudtype.Demo.Dto.JoinDetailsDTO;
 import io.cloudtype.Demo.Dto.PetDTO;
 import io.cloudtype.Demo.service.CommunityBoardService;
@@ -164,7 +162,6 @@ public class MyPageController {
             @RequestParam("pet_id") int petId
     ) {
         try {
-            if(petId == 0) throw new IllegalArgumentException("반려동물 id를 다시확인해주세요");
             PetDTO pet = myPageService.getPet(accessToken,petId);
             Map<String, Object> response = new HashMap<>();
             response.put("pet_info", pet);

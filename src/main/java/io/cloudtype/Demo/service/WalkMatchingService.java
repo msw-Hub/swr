@@ -4,19 +4,20 @@ import io.cloudtype.Demo.Dto.WaiterDTO;
 import io.cloudtype.Demo.Dto.WalkMatchingDTO;
 import io.cloudtype.Demo.entity.*;
 import io.cloudtype.Demo.jwt.JWTUtil;
-import io.cloudtype.Demo.repository.PetRepository;
-import io.cloudtype.Demo.repository.UserRepository;
-import io.cloudtype.Demo.repository.WaiterRepository;
-import io.cloudtype.Demo.repository.WalkMatchingRepository;
+import io.cloudtype.Demo.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -39,14 +40,16 @@ public class WalkMatchingService {
     private final JWTUtil jwtUtil;
     private final WalkMatchingRepository walkMatchingRepository;
     private final WaiterRepository waiterRepository;
+    private final WalkRecodeRepository walkRecodeRepository;
 
     @Autowired
     public WalkMatchingService(@Value("${spring.cloud.gcp.storage.credentials.location}") String keyFileName,
                                @Value("${spring.cloud.gcp.storage.bucket}") String bucketName,
-                               @Value("${spring.cloud.gcp.storage.project-id}") String projectId,
+                                 @Value("${spring.cloud.gcp.storage.project-id}") String projectId,
                                UserRepository userRepository, PetRepository petRepository, JWTUtil jwtUtil,
                                WalkMatchingRepository walkMatchingRepository,
-                               WaiterRepository waiterRepository
+                               WaiterRepository waiterRepository,
+                               WalkRecodeRepository walkRecodeRepository
     ) {
         this.keyFileName = keyFileName;
         this.projectId = projectId;
@@ -56,6 +59,7 @@ public class WalkMatchingService {
         this.jwtUtil = jwtUtil;
         this.walkMatchingRepository = walkMatchingRepository;
         this.waiterRepository = waiterRepository;
+        this.walkRecodeRepository = walkRecodeRepository;
     }
 
     @Transactional
@@ -76,7 +80,7 @@ public class WalkMatchingService {
         }
         //etc를 제외한 값이  모두 들어가야함
         if (pet.getOwner().getId() == 0 || pet.getPetName() == null || pet.getPetImage()== null || pet.getBirthYear()==0 || pet.getWeight() == 0
-                || pet.getSpecies()==null || pet.getAnimalHospital()==null || pet.getVaccination()==null) {
+            || pet.getSpecies()==null || pet.getAnimalHospital()==null || pet.getVaccination()==null) {
             throw new IllegalArgumentException("필수 펫 정보가 누락 되어 신청글 작성이 불가능 합니다");
         }
         //산책글은 1개만 작성가능
@@ -247,8 +251,8 @@ public class WalkMatchingService {
         dto.setUserId(user.getId());
         dto.setName(user.getName());
         dto.setProfileImage(user.getProfileImage());
-        dto.setRating(user.getRating());
-        dto.setReviewCount(user.getReviewCount());
+        dto.setRating(user.getWalkRating());
+        dto.setReviewCount(user.getWalkReviewCount());
         return dto;
     }
     public List<WalkMatchingDTO> myApply(String accessToken,double nowLatitude, double nowLongitude) {
@@ -308,6 +312,8 @@ public class WalkMatchingService {
         waiterRepository.deleteByWalkMatchingId(postId);
         //매칭이 된 신청자의 다른 신청들삭제
         waiterRepository.deleteByWaiterId(waiterId);
+        //서브 서버에게 매칭완료 메세지와 채팅방 개설 요청을 보내야함
+        //양쪽에게 매칭완료 메세지를 보내야함
     }
     @Transactional
     public void deletePost(String accessToken, int postId) {
@@ -324,7 +330,7 @@ public class WalkMatchingService {
         if (post.getUser().getId() != user.getId()) {
             throw new IllegalArgumentException("해당 게시글의 작성자가 아닙니다");
         }
-        if(post.getStatus()==1||post.getStatus()==2) {
+        if(post.getStatus()==1 || post.getStatus()==2) {
             throw new IllegalArgumentException("이미 수락된 게시글입니다");
         }
         walkMatchingRepository.delete(post);
@@ -350,5 +356,113 @@ public class WalkMatchingService {
             throw new IllegalArgumentException("신청한 게시글이 없습니다");
         }
         waiterRepository.delete(waiter);
+    }
+    @Transactional
+    public void start(String accessToken, int postId) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        WalkMatchingEntity post = walkMatchingRepository.findById(postId);
+        if (post == null) {
+            throw new IllegalArgumentException("해당 게시글을 찾을 수 없습니다");
+        }
+        if (post.getWalker().getId() != user.getId()) {
+            throw new IllegalArgumentException("해당 게시글의 파트너가 아닙니다");
+        }
+        if (post.getStatus() != 1) {
+            throw new IllegalArgumentException("매칭된 게시글이 아닙니다");
+        }
+        post.setStatus(2);
+        post.setStartTime(LocalDateTime.now());
+        walkMatchingRepository.save(post);
+        //주인에게 산책 시작 알람을 보내야함
+    }
+    @Transactional
+    public int end(String accessToken, int postId) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        WalkMatchingEntity post = walkMatchingRepository.findById(postId);
+        if (post == null) {
+            throw new IllegalArgumentException("해당 게시글을 찾을 수 없습니다");
+        }
+        if (post.getUser().getId() != user.getId()) {
+            throw new IllegalArgumentException("해당 게시글의 작성자가 아닙니다");
+        }
+        if (post.getStatus() != 2) {
+            throw new IllegalArgumentException("산책중인 게시글이 아닙니다");
+        }
+        //산책 시작 시간과 현재 시간을 빼서 실제 산책 시간을 계산하여, 처음 요구한 walkTime을 넘었는지를 비교
+        int walkTime = post.getWalkTime();
+        LocalDateTime startTime = post.getStartTime();  // 산책 시작 시간
+        LocalDateTime now = LocalDateTime.now();  // 현재 시간
+        long minutesBetween = Duration.between(startTime, now).toMinutes();  // 시작 시간과 현재 시간의 차이 (분)
+
+        if(minutesBetween < walkTime) { // 계산된 시간이 주어진 walkTime보다 큰지 비교
+            throw new IllegalArgumentException("산책 시간을 충족하지 못하였습니다");
+        }
+        //고객의 토큰 계산내용 들가야함.
+
+        //파트너에게 산책 종료 알람을 보내야함
+        int status = 3; // 산책 완료
+        String reason = "no problem"; // 문제가 없을 경우
+        //레코드 테이블로 이동
+        int recodeId = createRecode(post, now, status, reason);
+        walkMatchingRepository.delete(post);
+
+        return recodeId;
+    }
+    private int createRecode(WalkMatchingEntity post, LocalDateTime now, int status, String reason) {
+        WalkRecodeEntity walkRecode = new WalkRecodeEntity();
+        walkRecode.setUser(post.getUser());
+        walkRecode.setPet(post.getPet());
+        walkRecode.setWalkTime(post.getWalkTime());
+        walkRecode.setStartTime(post.getStartTime());
+        walkRecode.setEndTime(now);
+        walkRecode.setCreateDate(post.getCreateDate());
+        walkRecode.setLatitude(post.getLatitude());
+        walkRecode.setLongitude(post.getLongitude());
+        walkRecode.setDetailLocation(post.getDetailLocation());
+        walkRecode.setTitle(post.getTitle());
+        walkRecode.setContent(post.getContent());
+        walkRecode.setWalker(post.getWalker());
+        if(status == 3) {
+            walkRecode.setStatus(3);
+        } else if(status == 4) {
+            walkRecode.setStatus(4);
+            walkRecode.setReason(reason);
+        }
+        walkRecodeRepository.save(walkRecode);
+        return walkRecode.getId();
+    }
+    @Transactional
+    public void incomplete(String accessToken, int postId, String reason) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        WalkMatchingEntity post = walkMatchingRepository.findById(postId);
+        if (post == null) {
+            throw new IllegalArgumentException("해당 게시글을 찾을 수 없습니다");
+        }
+        if (post.getUser().getId() != user.getId()) {
+            throw new IllegalArgumentException("해당 게시글의 작성자가 아닙니다");
+        }
+        if (post.getStatus() != 2) {
+            throw new IllegalArgumentException("산책중인 게시글이 아닙니다");
+        }
+        //파트너에게 산책 비정상종료 알람을 보내야함
+        int status = 4; // 산책 미완료
+        //레코드 테이블로 이동
+        int walkRecodeId = createRecode(post, LocalDateTime.now(), status, reason);
+        walkMatchingRepository.delete(post);
     }
 }
