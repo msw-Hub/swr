@@ -20,14 +20,10 @@ import java.util.Map;
 @RequestMapping("/walk")
 public class WalkMatchingController {
     private final WalkMatchingService walkMatchingService;
-    private final CommunityBoardService communityBoardService;
 
     @Autowired
-    public WalkMatchingController(WalkMatchingService walkMatchingService,
-                                  CommunityBoardService communityBoardService
-    ) {
+    public WalkMatchingController(WalkMatchingService walkMatchingService){
         this.walkMatchingService = walkMatchingService;
-        this.communityBoardService = communityBoardService;
     }
 
 

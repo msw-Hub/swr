@@ -60,7 +60,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 return;
             }
 
-            String newAccessToken = jwtUtil.createAccessToken(username, user.getRole(), 60 * 60 * 10L);
+            String newAccessToken = jwtUtil.createAccessToken(username, user.getRole(), 36000000L);
 
             response.setHeader("Authorization", "Bearer " + newAccessToken);
             response.setHeader("refresh_token", refreshToken);
