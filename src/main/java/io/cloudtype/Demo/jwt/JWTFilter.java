@@ -30,12 +30,12 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-//        // CORS Preflight 요청을 위한 처리
-//        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-//            response.setStatus(HttpServletResponse.SC_OK);
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
+        // 모든 헤더 로깅
+        java.util.Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            log.info("Header: " + headerName + " Value: " + request.getHeader(headerName));
+        }
 
         //request에서 Authorization 헤더를 찾음
         String authorization= request.getHeader("Authorization");
@@ -94,7 +94,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
             // 새로운 엑세스 토큰을 클라이언트에게 전달
             response.setHeader("Authorization", "Bearer " + newAccessToken);
-            response.setHeader("refresh_Token", refreshToken);
+            response.setHeader("refresh_token", refreshToken);
 
             log.info("newAccessToken: " + newAccessToken);
             log.info("refreshToken: " + refreshToken);
