@@ -27,7 +27,7 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
     //유저의 산책리뷰쓰기
-    @PostMapping("create/walk")
+    @PostMapping("/create/walk")
     public ResponseEntity<?> createWalkReview(@RequestHeader("Authorization") String accessToken,
                                           @ModelAttribute("walk_recode_id") int walkRecodeId,
                                           @ModelAttribute("content") String content,
@@ -48,7 +48,7 @@ public class ReviewController {
         }
     }
     //유저의 산책 리뷰내역 보기
-    @GetMapping("user/walk/list")
+    @GetMapping("/user/walk/list")
     public ResponseEntity<?> getUserWalkReviewList(@RequestHeader("Authorization") String accessToken) {
         try {
             List<WalkReviewDTO> walkReviewList = reviewService.getUserWalkReviewList(accessToken);
@@ -60,7 +60,7 @@ public class ReviewController {
         }
     }
     //유저의 특정 산책 리뷰 삭제
-    @GetMapping("delete/walk")
+    @GetMapping("/delete/walk")
     public ResponseEntity<?> deleteWalkReview(@RequestHeader("Authorization") String accessToken,
                                              @RequestParam("walk_review_id") int walkReviewId
     ) {
@@ -72,7 +72,7 @@ public class ReviewController {
         }
     }
     //파트너의 산책 리뷰 내역보기
-    @GetMapping("partner/walk/list")
+    @GetMapping("/partner/walk/list")
     public ResponseEntity<?> getPartnerWalkReviewList(@RequestHeader("Authorization") String accessToken) {
         try {
             List<WalkReviewDTO> walkReviewList = reviewService.getPartnerWalkReviewList(accessToken);
