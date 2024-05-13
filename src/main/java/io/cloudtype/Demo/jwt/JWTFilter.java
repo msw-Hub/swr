@@ -65,7 +65,7 @@ public class JWTFilter extends OncePerRequestFilter {
             response.setHeader("Authorization", "Bearer " + newAccessToken);
             response.setHeader("X-Refresh-Token", refreshToken);
             response.setHeader("Access-Control-Expose-Headers", "Authorization, X-Refresh-Token");
-            response.setStatus(HttpServletResponse.SC_OK);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write("{\"message\":\"New access token issued. Retry with the new token.\"}");
