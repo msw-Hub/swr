@@ -1,6 +1,7 @@
 package io.cloudtype.Demo.service;
 
-import io.cloudtype.Demo.Dto.WalkUsageDTO;
+import io.cloudtype.Demo.Dto.WalkUsageDetailsDTO;
+import io.cloudtype.Demo.Dto.WalkUsageSimpleDTO;
 import io.cloudtype.Demo.entity.UserEntity;
 import io.cloudtype.Demo.entity.WalkRecodeEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
@@ -26,7 +27,7 @@ public class UsageDetailsService {
         this.walkRecodeRepository = walkRecodeRepository;
     }
     //유저의 산책이용내역보기
-    public List<WalkUsageDTO> getUserWalkUsageList(String accessToken) {
+    public List<WalkUsageSimpleDTO> getUserWalkUsageList(String accessToken) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
@@ -38,8 +39,8 @@ public class UsageDetailsService {
                 .map(this::getWalkUsageDetailSimplified)
                 .collect(Collectors.toList());
     }
-    private WalkUsageDTO getWalkUsageDetailSimplified(WalkRecodeEntity walkRecodeEntity) {
-        WalkUsageDTO walkUsageDTO = new WalkUsageDTO();
+    private WalkUsageSimpleDTO getWalkUsageDetailSimplified(WalkRecodeEntity walkRecodeEntity) {
+        WalkUsageSimpleDTO walkUsageDTO = new WalkUsageSimpleDTO();
         walkUsageDTO.setId(walkRecodeEntity.getId());
         walkUsageDTO.setUserNickname(walkRecodeEntity.getUser().getNickname());
         walkUsageDTO.setUserImage(walkRecodeEntity.getUser().getProfileImage());
@@ -52,7 +53,7 @@ public class UsageDetailsService {
         return walkUsageDTO;
     }
 
-    public WalkUsageDTO getUserWalkUsageDetail(String accessToken, int walkRecodeId) {
+    public WalkUsageDetailsDTO getUserWalkUsageDetail(String accessToken, int walkRecodeId) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
@@ -68,8 +69,8 @@ public class UsageDetailsService {
         }
         return getWalkUsageDetail(walkRecode);
     }
-    private WalkUsageDTO getWalkUsageDetail(WalkRecodeEntity walkRecodeEntity) {
-        WalkUsageDTO walkUsageDTO = new WalkUsageDTO();
+    private WalkUsageDetailsDTO getWalkUsageDetail(WalkRecodeEntity walkRecodeEntity) {
+        WalkUsageDetailsDTO walkUsageDTO = new WalkUsageDetailsDTO();
         walkUsageDTO.setId(walkRecodeEntity.getId());
         walkUsageDTO.setUserNickname(walkRecodeEntity.getUser().getNickname());
         walkUsageDTO.setUserImage(walkRecodeEntity.getUser().getProfileImage());

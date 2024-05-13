@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Setter
 @Getter
-public class WalkUsageDTO {
+public class WalkUsageSimpleDTO {
     private int id;
     private String userNickname;
     private String userImage;

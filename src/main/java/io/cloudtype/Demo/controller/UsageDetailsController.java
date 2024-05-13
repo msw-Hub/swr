@@ -1,6 +1,6 @@
 package io.cloudtype.Demo.controller;
 
-import io.cloudtype.Demo.Dto.WalkUsageDTO;
+import io.cloudtype.Demo.Dto.WalkUsageDetailsDTO;
 import io.cloudtype.Demo.service.UsageDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +21,10 @@ public class UsageDetailsController {
         this.usageDetailsService = usageDetailsService;
     }
     //유저의 산책이용내역보기
-    @GetMapping("/user/walk/list")
+    @GetMapping("/walk/list")
     public ResponseEntity<?> getUserWalkList(@RequestHeader("Authorization") String accessToken) {
         try {
-            List<WalkUsageDTO> walkUsageList = usageDetailsService.getUserWalkUsageList(accessToken);
+            List<WalkUsageDetailsDTO> walkUsageList = usageDetailsService.getUserWalkUsageList(accessToken);
             Map<String, Object> response = new HashMap<>();
             response.put("walkUsageList", walkUsageList);
             return ResponseEntity.ok(response);
@@ -33,12 +33,12 @@ public class UsageDetailsController {
         }
     }
     //유저의 산책이용상세내역보기
-    @PostMapping("/user/walk/detail")
+    @PostMapping("/walk/detail")
     public ResponseEntity<?> getUserWalkDetail(@RequestHeader("Authorization") String accessToken,
                                                @RequestParam("walk_recode_id") int walkRecodeId
     ) {
         try {
-            WalkUsageDTO walkUsage = usageDetailsService.getUserWalkUsageDetail(accessToken, walkRecodeId);
+            WalkUsageDetailsDTO walkUsage = usageDetailsService.getUserWalkUsageDetail(accessToken, walkRecodeId);
             return ResponseEntity.ok(walkUsage);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
