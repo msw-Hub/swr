@@ -25,7 +25,6 @@ public class WalkReviewEntity {
 
     @PrePersist
     public void prePersist() {
-        this.rating = 0.0;            //평점 설정
         this.createDate = LocalDateTime.now();  // 현재 시간을 설정
     }
 }

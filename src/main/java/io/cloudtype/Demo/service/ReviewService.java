@@ -25,12 +25,17 @@ public class ReviewService {
     private final JWTUtil jwtUtil;
     private final WalkRecodeRepository walkRecodeRepository;
     private final WalkReviewRepository walkReviewRepository;
+    private final CommunityBoardService communityBoardService;
     @Autowired
-    public ReviewService(UserRepository userRepository, JWTUtil jwtUtil, WalkRecodeRepository walkRecodeRepository, WalkReviewRepository walkReviewRepository) {
+    public ReviewService(UserRepository userRepository, JWTUtil jwtUtil,
+                         WalkRecodeRepository walkRecodeRepository, WalkReviewRepository walkReviewRepository,
+                         CommunityBoardService communityBoardService
+    ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.walkRecodeRepository = walkRecodeRepository;
         this.walkReviewRepository = walkReviewRepository;
+        this.communityBoardService = communityBoardService;
     }
     @Transactional
     public void createReview(String accessToken, int walkRecodeId, String content, double rating, String imgUrl) {
@@ -99,6 +104,7 @@ public class ReviewService {
         walkReviewDTO.setWalkRecodeId(walkReview.getWalkRecode().getId());
         walkReviewDTO.setUserNickname(walkReview.getWalkRecode().getUser().getNickname());
         walkReviewDTO.setWalkerNickname(walkReview.getWalkRecode().getWalker().getNickname());
+        walkReviewDTO.setWalkTime(walkReview.getWalkRecode().getWalkTime());
         walkReviewDTO.setRating(walkReview.getRating());
         walkReviewDTO.setContent(walkReview.getContent());
         walkReviewDTO.setReviewDate(walkReview.getCreateDate());
@@ -131,6 +137,10 @@ public class ReviewService {
         }
         if (walkReview.getWalkRecode().getUser().getId() != user.getId()) {
             throw new IllegalArgumentException("해당 리뷰의 작성자가 아닙니다");
+        }
+        String imgUrl = walkReview.getImgUrl();
+        if (imgUrl != null) {
+            communityBoardService.deleteImageGcs(imgUrl);
         }
         //파트너의 산책 평점 및 리뷰수 업데이트
         UserEntity walker = walkReview.getWalkRecode().getWalker();
