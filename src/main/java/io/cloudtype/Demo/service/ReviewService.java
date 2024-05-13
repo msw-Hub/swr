@@ -147,8 +147,13 @@ public class ReviewService {
         int reviewCount = walker.getWalkReviewCount();
         double walkRating = walker.getWalkRating();
         int newReviewCount = reviewCount - 1;
-        double newRating = (walkRating * reviewCount - walkReview.getRating()) / newReviewCount;
-        walker.setWalkRating(newRating);
+        if (newReviewCount > 0) {
+            double newRating = (walkRating * reviewCount - walkReview.getRating()) / newReviewCount;
+            walker.setWalkRating(newRating);
+        } else {
+            // 리뷰가 더 이상 없을 때 평점을 초기화하거나 기본 값으로 설정
+            walker.setWalkRating(0);  // 예를 들어 0 또는 다른 기본값으로 설정할 수 있습니다.
+        }
         walker.setWalkReviewCount(newReviewCount);
         userRepository.save(walker);
         //리뷰 삭제
