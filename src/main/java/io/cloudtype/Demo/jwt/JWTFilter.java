@@ -47,7 +47,11 @@ public class JWTFilter extends OncePerRequestFilter {
             }
 
             if(jwtUtil.isExpired(refreshToken, 2)) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "RefreshToken expired");
+                response.setStatus(402);
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"message\":\"RefreshToken expired. Retry Login\"}");
+                response.getWriter().flush();
                 return;
             }
 
