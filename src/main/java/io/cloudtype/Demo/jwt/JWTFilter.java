@@ -64,7 +64,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
             response.setHeader("Authorization", "Bearer " + newAccessToken);
             response.setHeader("refresh_token", refreshToken);
-            response.setHeader("Access-Control-Expose-Headers", "Authorization, X-Refresh-Token");
+            response.setHeader("Access-Control-Expose-Headers", "Authorization, refresh_token");
             response.setStatus(401);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
