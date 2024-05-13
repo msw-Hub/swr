@@ -1,6 +1,7 @@
 package io.cloudtype.Demo.controller;
 
 import io.cloudtype.Demo.Dto.WalkUsageDetailsDTO;
+import io.cloudtype.Demo.Dto.WalkUsageSimpleDTO;
 import io.cloudtype.Demo.service.UsageDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class UsageDetailsController {
     @GetMapping("/walk/list")
     public ResponseEntity<?> getUserWalkList(@RequestHeader("Authorization") String accessToken) {
         try {
-            List<WalkUsageDetailsDTO> walkUsageList = usageDetailsService.getUserWalkUsageList(accessToken);
+            List<WalkUsageSimpleDTO> walkUsageList = usageDetailsService.getUserWalkUsageList(accessToken);
             Map<String, Object> response = new HashMap<>();
             response.put("walkUsageList", walkUsageList);
             return ResponseEntity.ok(response);
