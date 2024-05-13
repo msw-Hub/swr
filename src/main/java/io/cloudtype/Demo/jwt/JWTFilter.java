@@ -58,7 +58,7 @@ public class JWTFilter extends OncePerRequestFilter {
             System.out.println("accessToken expired");
 
             //엑세스 토큰의 만료 시간이 지났을 경우 리프레시 토큰을 확인
-            String refreshToken = request.getHeader("refresh_Token");
+            String refreshToken = request.getHeader("refresh_token");
             log.info("refreshToken: " + refreshToken);
 
             if(refreshToken == null) {
