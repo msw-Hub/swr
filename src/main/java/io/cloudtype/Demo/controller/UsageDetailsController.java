@@ -21,7 +21,7 @@ public class UsageDetailsController {
         this.usageDetailsService = usageDetailsService;
     }
     //유저의 산책이용내역보기
-    @GetMapping("user/walk/list")
+    @GetMapping("/user/walk/list")
     public ResponseEntity<?> getUserWalkList(@RequestHeader("Authorization") String accessToken) {
         try {
             List<WalkUsageDTO> walkUsageList = usageDetailsService.getUserWalkUsageList(accessToken);
@@ -33,7 +33,7 @@ public class UsageDetailsController {
         }
     }
     //유저의 산책이용상세내역보기
-    @PostMapping("user/walk/detail")
+    @PostMapping("/user/walk/detail")
     public ResponseEntity<?> getUserWalkDetail(@RequestHeader("Authorization") String accessToken,
                                                @RequestParam("walk_recode_id") int walkRecodeId
     ) {
