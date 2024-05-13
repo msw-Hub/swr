@@ -64,7 +64,7 @@ public class UsageDetailsService {
         if (walkRecode == null) {
             throw new IllegalArgumentException("해당 산책기록을 찾을 수 없습니다");
         }
-        if (walkRecode.getUser().getId() != user.getId() || walkRecode.getWalker().getId() != user.getId()){
+        if (walkRecode.getUser().getId() != user.getId() && walkRecode.getWalker().getId() != user.getId()){
             throw new IllegalArgumentException("해당 산책기록의 작성자가 혹은 산책러가 아닙니다");
         }
         return getWalkUsageDetail(walkRecode);
