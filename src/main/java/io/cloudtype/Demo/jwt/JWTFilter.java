@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
@@ -57,6 +59,8 @@ public class JWTFilter extends OncePerRequestFilter {
 
             //엑세스 토큰의 만료 시간이 지났을 경우 리프레시 토큰을 확인
             String refreshToken = request.getHeader("refresh_Token");
+            log.info("refreshToken: " + refreshToken);
+
             if(refreshToken == null) {
                 // 리프레시 토큰이 없는 경우 클라이언트로부터 새로운 토큰 요청
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "RefreshToken not found");
@@ -80,6 +84,7 @@ public class JWTFilter extends OncePerRequestFilter {
             if (!refreshToken.equals(refreshTokenDB)) {
                 // 리프레시 토큰이 일치하지 않는 경우 처리
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "RefreshToken 불일치");
+                log.info("dbRefreshToken 불일치");
                 return;
             }
 
@@ -90,6 +95,9 @@ public class JWTFilter extends OncePerRequestFilter {
             // 새로운 엑세스 토큰을 클라이언트에게 전달
             response.setHeader("Authorization", "Bearer " + newAccessToken);
             response.setHeader("refresh_Token", refreshToken);
+
+            log.info("newAccessToken: " + newAccessToken);
+            log.info("refreshToken: " + refreshToken);
 
             // 새로운 엑세스 토큰과 리프레시 토큰을 클라이언트에게 전달
             // 클라이언트에게 현재 요청을 재시도하도록 지시
