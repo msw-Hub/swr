@@ -93,10 +93,13 @@ public class JWTFilter extends OncePerRequestFilter {
 
             // 새로운 엑세스 토큰과 리프레시 토큰을 클라이언트에게 전달
             // 클라이언트에게 현재 요청을 재시도하도록 지시
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.getWriter().write("{\"message\":\"New access token issued. Please retry the request.\"}");
+
+            // 필터 체인 진행
+            filterChain.doFilter(request, response);
             return;
         }
 
