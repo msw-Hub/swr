@@ -67,7 +67,7 @@ public class SecurityConfig {
                         configuration.setAllowedHeaders(Collections.singletonList("*"));
                         configuration.setMaxAge(3600L);
 
-                        configuration.setExposedHeaders(Arrays.asList("Authorization","refresh_token","JoinDetails"));
+                        configuration.setExposedHeaders(Arrays.asList("Authorization","refresh_token","JoinDetails","X-Refresh-Token"));
 
                         return configuration;
                     }
