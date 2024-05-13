@@ -15,23 +15,9 @@ public class WalkUsageSimpleDTO {
     private String walkerImage;
 
     private String petName;
-    private String petImage;
-    private String petGender;
-    private String petSpecies;
-    private int petBirthYear;
 
     private int walkTime;
-    private LocalDateTime startTime;
     private LocalDateTime endTime;
-
-    private double latitude;
-    private double longitude;
-    private String detailLocation;
-
-    private String title;
-    private String content;
-    private int status;
-    private String reason;
-
+    
     private int amount;
 }
