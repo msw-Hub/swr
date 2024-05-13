@@ -17,6 +17,5 @@ public class CareMatchingController {
         this.careMatchingService = careMatchingService;
     }
     //  /mypage/pet/list에서 펫정보를 받아온 이후 고른 펫을 받음
-    @PostMapping("/create/post")
 
 }
