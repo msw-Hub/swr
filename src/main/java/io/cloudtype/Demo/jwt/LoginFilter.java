@@ -68,6 +68,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // 리프레시 토큰을 데이터베이스에 저장
         UserEntity user = userRepository.findByUsername(username);
+        int partner = user.getPartnership();
+        String nickname = user.getNickname();
+        String profileImage = user.getProfileImage();
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
 
@@ -81,9 +84,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             response.addHeader("JoinDetails", "true");
         }
 
-
         response.addHeader("Authorization", "Bearer " + accessToken);
         response.addHeader("refresh_token", refreshToken);
+        response.addHeader("partnership", String.valueOf(partner));
+        response.addHeader("nickname", nickname);
+        response.addHeader("profileImage", profileImage);
     }
 
     //로그인 실패시 실행하는 메소드
