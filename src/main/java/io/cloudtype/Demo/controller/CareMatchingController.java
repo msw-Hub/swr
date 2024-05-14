@@ -1,10 +1,8 @@
 package io.cloudtype.Demo.controller;
 
-import io.cloudtype.Demo.entity.CareMatchingEntity;
 import io.cloudtype.Demo.service.CareMatchingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j

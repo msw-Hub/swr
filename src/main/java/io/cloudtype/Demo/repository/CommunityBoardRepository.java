@@ -1,6 +1,6 @@
 package io.cloudtype.Demo.repository;
 
-import io.cloudtype.Demo.entity.CommunityBoardEntity;
+import io.cloudtype.Demo.entity.community.CommunityBoardEntity;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

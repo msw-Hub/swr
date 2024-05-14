@@ -7,9 +7,9 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import io.cloudtype.Demo.Dto.CommentDTO;
 import io.cloudtype.Demo.Dto.CommunityBoardDTO;
-import io.cloudtype.Demo.entity.CommentEntity;
-import io.cloudtype.Demo.entity.CommunityBoardEntity;
-import io.cloudtype.Demo.entity.LikeEntity;
+import io.cloudtype.Demo.entity.community.CommentEntity;
+import io.cloudtype.Demo.entity.community.CommunityBoardEntity;
+import io.cloudtype.Demo.entity.community.LikeEntity;
 import io.cloudtype.Demo.entity.UserEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.repository.CommentRepository;
@@ -184,7 +184,7 @@ public class CommunityBoardService {
         return List.of(mapToDTO(post));
     }
     public List<CommentDTO> getComments(int communityBoardId) {
-        List<CommentEntity> comments = commentRepository.findAllByCommunityBoard_IdOrderByCreateDateDesc(communityBoardId);
+        List<CommentEntity> comments = commentRepository.findAllByCommunityBoard_Id(communityBoardId);
         return comments.stream()
                 .map(this::mapToDTO2)
                 .collect(Collectors.toList());

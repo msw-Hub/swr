@@ -1,6 +1,6 @@
 package io.cloudtype.Demo.repository;
 
-import io.cloudtype.Demo.entity.LikeEntity;
+import io.cloudtype.Demo.entity.community.LikeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

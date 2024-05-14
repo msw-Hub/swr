@@ -1,6 +1,6 @@
 package io.cloudtype.Demo.repository;
 
-import io.cloudtype.Demo.entity.WalkReviewEntity;
+import io.cloudtype.Demo.entity.Walk.WalkReviewEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

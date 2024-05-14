@@ -1,4 +1,4 @@
-package io.cloudtype.Demo.entity;
+package io.cloudtype.Demo.entity.Care;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,14 +9,14 @@ import java.time.LocalDateTime;
 @Entity
 @Setter
 @Getter
-public class WalkReviewEntity {
+public class CareReviewEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @OneToOne
-    @JoinColumn(name = "walk_recode_id")  // 외래 키 컬럼 이름 지정
-    private WalkRecodeEntity walkRecode;  // 연관된 WalkRecodeEntity 객체
+    @JoinColumn(name = "care_recode_id")  // 외래 키 컬럼 이름 지정
+    private CareRecodeEntity careRecode;  // 연관된 CareRecodeEntity 객체
 
     private double rating;          //평점
     private String content;         //리뷰 내용

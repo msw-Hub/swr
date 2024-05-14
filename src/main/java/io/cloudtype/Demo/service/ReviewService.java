@@ -3,8 +3,8 @@ package io.cloudtype.Demo.service;
 
 import io.cloudtype.Demo.Dto.WalkReviewDTO;
 import io.cloudtype.Demo.entity.UserEntity;
-import io.cloudtype.Demo.entity.WalkRecodeEntity;
-import io.cloudtype.Demo.entity.WalkReviewEntity;
+import io.cloudtype.Demo.entity.Walk.WalkRecodeEntity;
+import io.cloudtype.Demo.entity.Walk.WalkReviewEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.repository.UserRepository;
 import io.cloudtype.Demo.repository.WalkRecodeRepository;

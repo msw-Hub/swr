@@ -1,5 +1,7 @@
-package io.cloudtype.Demo.entity;
+package io.cloudtype.Demo.entity.Care;
 
+import io.cloudtype.Demo.entity.PetEntity;
+import io.cloudtype.Demo.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,10 +24,16 @@ public class CareMatchingEntity {
     @JoinColumn(name = "pet_entity_id")  // 외래 키 컬럼 이름 지정
     private PetEntity pet;  // 연관된 PetEntity 객체
 
-    private int status;  // 0: 신청중(매칭전), 1: 매칭완료 2:돌봄시작 3:돌봄정상종료 4:문제발생(비정상종료)
-
     @ManyToOne
     @JoinColumn(name = "owner_id")    // 외래 키 컬럼 이름 지정
     private UserEntity owner;  // 산책 동행자
 
+    private int status;  // 0: 신청중(매칭전), 1: 매칭완료 2:돌봄시작 3:돌봄정상종료 4:문제발생(비정상종료)
+
+    private int amount;  // 돌봄비용
+
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+
+    private String requestMessage;
 }

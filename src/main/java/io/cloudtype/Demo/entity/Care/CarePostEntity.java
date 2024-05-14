@@ -1,5 +1,6 @@
-package io.cloudtype.Demo.entity;
+package io.cloudtype.Demo.entity.Care;
 
+import io.cloudtype.Demo.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,4 +28,6 @@ public class CarePostEntity {
     private String administrativeAddress3;
     private String streetNameAddress;
     private String detailAddress;
+
+    private int amount;  // 돌봄비용
 }

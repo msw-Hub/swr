@@ -3,6 +3,8 @@ package io.cloudtype.Demo.service;
 import io.cloudtype.Demo.Dto.WaiterDTO;
 import io.cloudtype.Demo.Dto.WalkMatchingDTO;
 import io.cloudtype.Demo.entity.*;
+import io.cloudtype.Demo.entity.Walk.WalkMatchingEntity;
+import io.cloudtype.Demo.entity.Walk.WalkRecodeEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.repository.*;
 import lombok.extern.slf4j.Slf4j;

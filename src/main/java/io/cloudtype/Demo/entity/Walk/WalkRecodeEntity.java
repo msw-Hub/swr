@@ -1,5 +1,7 @@
-package io.cloudtype.Demo.entity;
+package io.cloudtype.Demo.entity.Walk;
 
+import io.cloudtype.Demo.entity.PetEntity;
+import io.cloudtype.Demo.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
