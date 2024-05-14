@@ -1,4 +1,4 @@
-package io.cloudtype.Demo.entity.community;
+package io.cloudtype.Demo.entity.Community;
 
 import io.cloudtype.Demo.entity.UserEntity;
 import jakarta.persistence.*;

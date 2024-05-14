@@ -1,6 +1,6 @@
 package io.cloudtype.Demo.repository;
 
-import io.cloudtype.Demo.entity.community.CommentEntity;
+import io.cloudtype.Demo.entity.Community.CommentEntity;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 
