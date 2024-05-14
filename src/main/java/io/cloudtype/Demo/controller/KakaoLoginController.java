@@ -78,18 +78,18 @@ public class KakaoLoginController {
         if(isExist == 0) {  //회원가입
             kakaoService.signUp(email,role,profileImage, name, gender, jwtRefreshToken);
         }else if(isExist == 2) {    //일반로그인하도록 유도
-            return ResponseEntity.badRequest().body("login1");   //이후 에러코드정렬
+            return ResponseEntity.badRequest().body("일반로그인");   //이후 에러코드정렬
         }else if(isExist == 1) {    //카카오로그인
             UserEntity user = userRepository.findByUsername(email);
             user.setRefreshToken(jwtRefreshToken);
         }else {
-            return ResponseEntity.badRequest().body("error2");
+            return ResponseEntity.badRequest().body("error");
         }
 
         // 응답 헤더에 토큰 추가
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + jwtAccessToken);
-        headers.add("Refresh-Token", jwtRefreshToken);
+        headers.add("refresh_token", jwtRefreshToken);
 
         // JSON 응답에 포함할 데이터 준비
         Map<String, Object> jsonResponse = new HashMap<>();
