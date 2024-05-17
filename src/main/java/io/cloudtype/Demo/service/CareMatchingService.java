@@ -1,20 +1,13 @@
 package io.cloudtype.Demo.service;
 
 import io.cloudtype.Demo.entity.Care.CareImgEntity;
-import io.cloudtype.Demo.entity.Care.CareMatchingEntity;
 import io.cloudtype.Demo.entity.Care.CarePostEntity;
-import io.cloudtype.Demo.entity.PetEntity;
 import io.cloudtype.Demo.entity.UserEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.repository.Care.CareImgRepository;
 import io.cloudtype.Demo.repository.Care.CarePostRepository;
-import io.cloudtype.Demo.repository.PetRepository;
 import io.cloudtype.Demo.repository.UserRepository;
-import io.cloudtype.Demo.repository.WaiterRepository;
-import io.cloudtype.Demo.repository.Walk.WalkMatchingRepository;
-import io.cloudtype.Demo.repository.Walk.WalkRecodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,41 +16,18 @@ import java.time.LocalDateTime;
 @Service
 public class CareMatchingService {
 
-    @Value("${spring.cloud.gcp.storage.credentials.location}")
-    private final String keyFileName;
-
-    @Value("${spring.cloud.gcp.storage.project-id}")
-    private final String projectId;
-
-    @Value("${spring.cloud.gcp.storage.bucket}")
-    private final String bucketName;
-
     private final UserRepository userRepository;
     private final CarePostRepository carePostRepository;
     private final CareImgRepository careImgRepository;
-    private final PetRepository petRepository;
     private final JWTUtil jwtUtil;
-    private final WalkMatchingRepository walkMatchingRepository;
-    private final WaiterRepository waiterRepository;
-    private final WalkRecodeRepository walkRecodeRepository;
 
     @Autowired
-    public CareMatchingService(String keyFileName, String projectId, String bucketName,
-                               UserRepository userRepository, PetRepository petRepository, JWTUtil jwtUtil,
-                               WalkMatchingRepository walkMatchingRepository, WaiterRepository waiterRepository,
-                               WalkRecodeRepository walkRecodeRepository,
-                                 CarePostRepository carePostRepository,
-                                 CareImgRepository careImgRepository
+    public CareMatchingService(UserRepository userRepository, JWTUtil jwtUtil,
+            CarePostRepository carePostRepository,
+            CareImgRepository careImgRepository
     ) {
-        this.keyFileName = keyFileName;
-        this.projectId = projectId;
-        this.bucketName = bucketName;
         this.userRepository = userRepository;
-        this.petRepository = petRepository;
         this.jwtUtil = jwtUtil;
-        this.walkMatchingRepository = walkMatchingRepository;
-        this.waiterRepository = waiterRepository;
-        this.walkRecodeRepository = walkRecodeRepository;
         this.carePostRepository = carePostRepository;
         this.careImgRepository = careImgRepository;
     }
