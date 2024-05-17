@@ -7,6 +7,8 @@ import io.cloudtype.Demo.entity.Walk.WalkMatchingEntity;
 import io.cloudtype.Demo.entity.Walk.WalkRecodeEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.repository.*;
+import io.cloudtype.Demo.repository.Walk.WalkMatchingRepository;
+import io.cloudtype.Demo.repository.Walk.WalkRecodeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

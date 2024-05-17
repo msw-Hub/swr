@@ -1,4 +1,4 @@
-package io.cloudtype.Demo.repository;
+package io.cloudtype.Demo.repository.Walk;
 
 import io.cloudtype.Demo.entity.Walk.WalkRecodeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

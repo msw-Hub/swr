@@ -6,7 +6,7 @@ import io.cloudtype.Demo.entity.UserEntity;
 import io.cloudtype.Demo.entity.Walk.WalkRecodeEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.repository.UserRepository;
-import io.cloudtype.Demo.repository.WalkRecodeRepository;
+import io.cloudtype.Demo.repository.Walk.WalkRecodeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

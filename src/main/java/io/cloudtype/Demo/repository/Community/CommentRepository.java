@@ -1,4 +1,4 @@
-package io.cloudtype.Demo.repository;
+package io.cloudtype.Demo.repository.Community;
 
 import io.cloudtype.Demo.entity.Community.CommentEntity;
 import org.jetbrains.annotations.NotNull;

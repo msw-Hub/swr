@@ -1,4 +1,4 @@
-package io.cloudtype.Demo.repository;
+package io.cloudtype.Demo.repository.Community;
 
 import io.cloudtype.Demo.entity.Community.LikeEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
