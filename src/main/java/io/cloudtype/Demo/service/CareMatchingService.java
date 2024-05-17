@@ -1,13 +1,18 @@
 package io.cloudtype.Demo.service;
 
+import io.cloudtype.Demo.Dto.Care.CareApplyDTO;
 import io.cloudtype.Demo.entity.Care.CareImgEntity;
+import io.cloudtype.Demo.entity.Care.CareMatchingEntity;
 import io.cloudtype.Demo.entity.Care.CarePostEntity;
 import io.cloudtype.Demo.entity.Care.UnavailableDatesEntity;
+import io.cloudtype.Demo.entity.PetEntity;
 import io.cloudtype.Demo.entity.UserEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.repository.Care.CareImgRepository;
+import io.cloudtype.Demo.repository.Care.CareMatchingRepository;
 import io.cloudtype.Demo.repository.Care.CarePostRepository;
 import io.cloudtype.Demo.repository.Care.UnavailableDatesRepository;
+import io.cloudtype.Demo.repository.PetRepository;
 import io.cloudtype.Demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +37,8 @@ public class CareMatchingService {
     private final CareImgRepository careImgRepository;
     private final JWTUtil jwtUtil;
     private final UnavailableDatesRepository unavailableDatesRepository;
+    private final PetRepository petRepository;
+    private final CareMatchingRepository careMatchingRepository;
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -39,13 +46,17 @@ public class CareMatchingService {
     public CareMatchingService(UserRepository userRepository, JWTUtil jwtUtil,
             CarePostRepository carePostRepository,
             CareImgRepository careImgRepository,
-            UnavailableDatesRepository unavailableDatesRepository
+            UnavailableDatesRepository unavailableDatesRepository,
+            PetRepository petRepository,
+            CareMatchingRepository careMatchingRepository
     ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.carePostRepository = carePostRepository;
         this.careImgRepository = careImgRepository;
         this.unavailableDatesRepository = unavailableDatesRepository;
+        this.petRepository = petRepository;
+        this.careMatchingRepository = careMatchingRepository;
     }
 
     @Transactional
@@ -120,5 +131,43 @@ public class CareMatchingService {
             unavailableDateEntity.setUnavailableDate(unavailableDate);
             unavailableDatesRepository.save(unavailableDateEntity);
         }
+    }
+    @Transactional
+    public void applyCare(String accessToken, CareApplyDTO careApplyDTO) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        CarePostEntity carePost = carePostRepository.findById(careApplyDTO.getCarePostId());
+        if (carePost == null) {
+            throw new IllegalArgumentException("돌봄글을 찾을 수 없습니다");
+        }
+        if (carePost.getCaregiver().getId() == user.getId()) {
+            throw new IllegalStateException("자신의 글에는 신청할 수 없습니다");
+        }
+        if (carePost.getReservations() >= 2) {
+            throw new IllegalStateException("예약이 불가능한 날짜입니다");
+        }
+        PetEntity pet = petRepository.findById(careApplyDTO.getPetId());
+        if(pet == null) {
+            throw new IllegalArgumentException("펫을 찾을 수 없습니다");
+        }
+        int dtoPetOwnerId = pet.getOwner().getId();
+        if(dtoPetOwnerId != user.getId()) {
+            throw new IllegalArgumentException("자신의 펫이 아닙니다");
+        }
+
+        CareMatchingEntity careMatching = new CareMatchingEntity();
+        careMatching.setCarePost(carePost);
+        careMatching.setPet(pet);
+        careMatching.setOwner(user);
+        careMatching.setAmount(careApplyDTO.getAmount());
+        careMatching.setApplyDate(LocalDateTime.now());
+        careMatching.setReservationStartDate(careApplyDTO.getReservationStartDate());
+        careMatching.setReservationEndDate(careApplyDTO.getReservationEndDate());
+        careMatching.setRequestMessage(careApplyDTO.getRequestMessage());
+        careMatchingRepository.save(careMatching);
     }
 }

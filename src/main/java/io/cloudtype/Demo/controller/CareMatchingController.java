@@ -1,5 +1,6 @@
 package io.cloudtype.Demo.controller;
 
+import io.cloudtype.Demo.Dto.Care.CareApplyDTO;
 import io.cloudtype.Demo.entity.Care.CareMatchingEntity;
 import io.cloudtype.Demo.entity.Care.CarePostEntity;
 import io.cloudtype.Demo.service.CareMatchingService;
@@ -54,6 +55,17 @@ public class CareMatchingController {
                 careMatchingService.addUnavailableDates(carePostId, unavailableDates, accessToken);
             }
             return ResponseEntity.ok("돌봄글 작성 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/apply")
+    public ResponseEntity<?> applyCare(@RequestHeader("Authorization") String accessToken,
+                                       @RequestBody CareApplyDTO careApplyDTO
+    ) {
+        try {
+            careMatchingService.applyCare(accessToken, careApplyDTO);
+            return ResponseEntity.ok("돌봄 신청 완료");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

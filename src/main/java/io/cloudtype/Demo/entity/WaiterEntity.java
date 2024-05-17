@@ -26,8 +26,4 @@ public class WaiterEntity {
     @JoinColumn(name = "waiter_id")  // 외래 키 컬럼 이름 지정
     private UserEntity waiter;  // 연관된 UserEntity 객체
 
-    @ManyToOne
-    @JoinColumn(name = "care_post_id")  // 외래 키 컬럼 이름 지정
-    private CarePostEntity carePost;  // 연관된 CarePostEntity 객체
-
 }

@@ -32,6 +32,8 @@ public class CareMatchingEntity {
 
     private int amount;  // 총 돌봄비용
 
+    private LocalDateTime applyDate;  // 신청일
+
     private LocalDateTime reservationStartDate;
     private LocalDateTime reservationEndDate;
 
