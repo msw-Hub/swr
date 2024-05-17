@@ -65,7 +65,7 @@ public class CareMatchingController {
     ) {
         try {
             careMatchingService.applyCare(accessToken, careApplyDTO);
-            return ResponseEntity.ok("돌봄 신청 완료");
+            return ResponseEntity.ok("돌봄 예약 신청");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
