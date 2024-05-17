@@ -30,10 +30,13 @@ public class CareRecodeEntity {
 
     private int status;  //3:돌봄정상종료 4:문제발생(비정상종료)
 
-    private int amount;  // 돌봄비용
+    private int amount;  // 계산된 돌봄비용
 
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private LocalDateTime reservationStartDate;     //예약 시작일시
+    private LocalDateTime reservationEndDate;       //예약 종료일시
+
+    private LocalDateTime startDate;                //실제돌봄 시작일시
+    private LocalDateTime endDate;                  //실제돌봄 종료일시
 
     private String requestMessage;
 

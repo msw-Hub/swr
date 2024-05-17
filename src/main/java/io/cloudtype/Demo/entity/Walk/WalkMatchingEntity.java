@@ -33,6 +33,7 @@ public class WalkMatchingEntity {
     private String detailLocation;
     private String title;
     private String content;
+    private int amount;  //산책비용
     private int status;  // 0: 신청중(매칭전), 1: 매칭완료 산책진행중, 2: 산책완료
 
     @OneToOne

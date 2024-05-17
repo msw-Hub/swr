@@ -18,5 +18,5 @@ public class UnavailableDatesEntity {
     @JoinColumn(name = "care_post_id")  // 외래 키 컬럼 이름 지정
     private CarePostEntity carePost;
 
-    private Date unavailableDate;
+    private Date unavailableDate;   // 돌봄 불가능 날짜
 }

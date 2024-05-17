@@ -30,10 +30,18 @@ public class CareMatchingEntity {
 
     private int status;  // 0: 신청중(매칭전), 1: 매칭완료 2:돌봄시작 3:돌봄정상종료 4:문제발생(비정상종료)
 
-    private int amount;  // 돌봄비용
+    private int amount;  // 총 돌봄비용
+
+    private LocalDateTime reservationStartDate;
+    private LocalDateTime reservationEndDate;
 
     private LocalDateTime startDate;
     private LocalDateTime endDate;
 
-    private String requestMessage;
+    private String requestMessage;  // 요청 메시지
+
+    @PrePersist
+    public void prePersist() {
+        this.status = 0;  // 초기 상태 설정
+    }
 }

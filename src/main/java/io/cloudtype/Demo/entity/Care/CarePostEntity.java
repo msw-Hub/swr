@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -23,11 +25,19 @@ public class CarePostEntity {
     private String title;
     private String content;
 
-    private String administrativeAddress1;
-    private String administrativeAddress2;
-    private String administrativeAddress3;
-    private String streetNameAddress;
-    private String detailAddress;
+    private String administrativeAddress1;      //행정주소1 - 시도
+    private String administrativeAddress2;      //행정주소2 - 시군구
+    private String administrativeAddress3;      //행정주소3 - 읍면동
+    private String streetNameAddress;           //도로명주소
+    private String detailAddress;               //상세주소
 
-    private int amount;  // 돌봄비용
+    private int reservations;  // 예약수 >> 하루 예약수가 2건이 넘어가면 예약 불가능 날짜에 추가
+
+    @OneToMany(mappedBy = "carePost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<CareImgEntity> careImages = new HashSet<>();
+
+    @PrePersist
+    public void prePersist() {
+        this.createDate = LocalDateTime.now();  // 현재 시간을 설정
+    }
 }
