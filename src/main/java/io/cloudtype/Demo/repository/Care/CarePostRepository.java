@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CarePostRepository extends JpaRepository<CarePostEntity, Long> {
+    CarePostEntity findByCaregiver_Id(int caregiverId);
+    CarePostEntity findById(int id);
 }

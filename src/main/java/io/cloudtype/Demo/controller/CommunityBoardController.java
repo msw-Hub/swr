@@ -1,7 +1,7 @@
 package io.cloudtype.Demo.controller;
 
-import io.cloudtype.Demo.Dto.CommentDTO;
-import io.cloudtype.Demo.Dto.CommunityBoardDTO;
+import io.cloudtype.Demo.Dto.Community.CommentDTO;
+import io.cloudtype.Demo.Dto.Community.CommunityBoardDTO;
 import io.cloudtype.Demo.service.CommunityBoardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

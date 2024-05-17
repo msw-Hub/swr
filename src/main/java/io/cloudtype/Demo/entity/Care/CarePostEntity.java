@@ -39,5 +39,6 @@ public class CarePostEntity {
     @PrePersist
     public void prePersist() {
         this.createDate = LocalDateTime.now();  // 현재 시간을 설정
+        this.reservations = 0;  // 초기 예약수 설정
     }
 }

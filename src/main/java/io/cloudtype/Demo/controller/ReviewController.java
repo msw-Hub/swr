@@ -1,6 +1,6 @@
 package io.cloudtype.Demo.controller;
 
-import io.cloudtype.Demo.Dto.WalkReviewDTO;
+import io.cloudtype.Demo.Dto.Walk.WalkReviewDTO;
 import io.cloudtype.Demo.service.CommunityBoardService;
 import io.cloudtype.Demo.service.ReviewService;
 import lombok.extern.slf4j.Slf4j;

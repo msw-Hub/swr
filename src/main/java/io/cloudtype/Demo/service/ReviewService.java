@@ -1,7 +1,7 @@
 package io.cloudtype.Demo.service;
 
 
-import io.cloudtype.Demo.Dto.WalkReviewDTO;
+import io.cloudtype.Demo.Dto.Walk.WalkReviewDTO;
 import io.cloudtype.Demo.entity.UserEntity;
 import io.cloudtype.Demo.entity.Walk.WalkRecodeEntity;
 import io.cloudtype.Demo.entity.Walk.WalkReviewEntity;

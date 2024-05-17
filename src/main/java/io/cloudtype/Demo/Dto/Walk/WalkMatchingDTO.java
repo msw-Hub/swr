@@ -1,4 +1,4 @@
-package io.cloudtype.Demo.Dto;
+package io.cloudtype.Demo.Dto.Walk;
 
 import lombok.Getter;
 import lombok.Setter;

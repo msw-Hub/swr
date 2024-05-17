@@ -1,7 +1,7 @@
 package io.cloudtype.Demo.service;
 
-import io.cloudtype.Demo.Dto.WalkUsageDetailsDTO;
-import io.cloudtype.Demo.Dto.WalkUsageSimpleDTO;
+import io.cloudtype.Demo.Dto.Walk.WalkUsageDetailsDTO;
+import io.cloudtype.Demo.Dto.Walk.WalkUsageSimpleDTO;
 import io.cloudtype.Demo.entity.UserEntity;
 import io.cloudtype.Demo.entity.Walk.WalkRecodeEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;

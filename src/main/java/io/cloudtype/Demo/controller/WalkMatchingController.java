@@ -1,7 +1,7 @@
 package io.cloudtype.Demo.controller;
 
 import io.cloudtype.Demo.Dto.WaiterDTO;
-import io.cloudtype.Demo.Dto.WalkMatchingDTO;
+import io.cloudtype.Demo.Dto.Walk.WalkMatchingDTO;
 import io.cloudtype.Demo.entity.Walk.WalkMatchingEntity;
 import io.cloudtype.Demo.service.WalkMatchingService;
 import lombok.extern.slf4j.Slf4j;
