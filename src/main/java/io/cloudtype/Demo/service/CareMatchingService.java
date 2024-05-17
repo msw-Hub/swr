@@ -2,16 +2,20 @@ package io.cloudtype.Demo.service;
 
 import io.cloudtype.Demo.entity.Care.CareImgEntity;
 import io.cloudtype.Demo.entity.Care.CarePostEntity;
+import io.cloudtype.Demo.entity.Care.UnavailableDatesEntity;
 import io.cloudtype.Demo.entity.UserEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.repository.Care.CareImgRepository;
 import io.cloudtype.Demo.repository.Care.CarePostRepository;
+import io.cloudtype.Demo.repository.Care.UnavailableDatesRepository;
 import io.cloudtype.Demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
 
 @Service
 public class CareMatchingService {
@@ -20,16 +24,19 @@ public class CareMatchingService {
     private final CarePostRepository carePostRepository;
     private final CareImgRepository careImgRepository;
     private final JWTUtil jwtUtil;
+    private final UnavailableDatesRepository unavailableDatesRepository;
 
     @Autowired
     public CareMatchingService(UserRepository userRepository, JWTUtil jwtUtil,
             CarePostRepository carePostRepository,
-            CareImgRepository careImgRepository
+            CareImgRepository careImgRepository,
+            UnavailableDatesRepository unavailableDatesRepository
     ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.carePostRepository = carePostRepository;
         this.careImgRepository = careImgRepository;
+        this.unavailableDatesRepository = unavailableDatesRepository;
     }
 
     @Transactional
@@ -77,5 +84,23 @@ public class CareMatchingService {
         careImg.setImgUrl(imageUrl);
         careImg.setUploadDate(LocalDateTime.now());
         careImgRepository.save(careImg);
+    }
+    @Transactional
+    public void addUnavailableDates(int carePostId, List<Date> unavailableDates, String accessToken) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+
+        CarePostEntity carePost = carePostRepository.findById(carePostId);
+
+        for (Date unavailableDate : unavailableDates) {
+            UnavailableDatesEntity unavailableDateEntity = new UnavailableDatesEntity();
+            unavailableDateEntity.setCarePost(carePost);
+            unavailableDateEntity.setUnavailableDate(unavailableDate);
+            unavailableDatesRepository.save(unavailableDateEntity);
+        }
     }
 }

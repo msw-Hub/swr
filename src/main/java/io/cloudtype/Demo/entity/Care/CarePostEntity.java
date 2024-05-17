@@ -36,6 +36,9 @@ public class CarePostEntity {
     @OneToMany(mappedBy = "carePost", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CareImgEntity> careImages = new HashSet<>();
 
+    @OneToMany(mappedBy = "carePost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<UnavailableDatesEntity> unavailableDates = new HashSet<>();
+
     @PrePersist
     public void prePersist() {
         this.createDate = LocalDateTime.now();  // 현재 시간을 설정

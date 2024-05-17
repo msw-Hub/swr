@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -34,8 +35,8 @@ public class CareMatchingController {
                                         @ModelAttribute("administrativeAddress3") String administrativeAddress3,
                                         @ModelAttribute("streetNameAddress") String streetNameAddress,
                                         @ModelAttribute("detailAddress") String detailAddress,
-                                        @RequestPart(value = "images", required = false) List<MultipartFile> images
-
+                                        @RequestPart(value = "images", required = false) List<MultipartFile> images,
+                                        @RequestPart(value = "unavailableDates", required = false) List<Date> unavailableDates
     ) {
         try {
             int carePostId = careMatchingService.createPost(accessToken, title, content,
@@ -49,10 +50,12 @@ public class CareMatchingController {
                     }
                 }
             }
+            if (unavailableDates != null) {
+                careMatchingService.addUnavailableDates(carePostId, unavailableDates, accessToken);
+            }
             return ResponseEntity.ok("돌봄글 작성 완료");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 }
