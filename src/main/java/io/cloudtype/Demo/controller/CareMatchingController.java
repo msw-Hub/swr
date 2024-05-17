@@ -36,7 +36,7 @@ public class CareMatchingController {
                                         @ModelAttribute("streetNameAddress") String streetNameAddress,
                                         @ModelAttribute("detailAddress") String detailAddress,
                                         @RequestPart(value = "images", required = false) List<MultipartFile> images,
-                                        @RequestPart(value = "unavailableDates", required = false) List<Date> unavailableDates
+                                        @RequestPart(value = "unavailableDates", required = false) List<String> unavailableDates
     ) {
         try {
             int carePostId = careMatchingService.createPost(accessToken, title, content,

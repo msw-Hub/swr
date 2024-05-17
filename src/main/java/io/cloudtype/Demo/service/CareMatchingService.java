@@ -13,9 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+
+
 
 @Service
 public class CareMatchingService {
@@ -25,6 +32,8 @@ public class CareMatchingService {
     private final CareImgRepository careImgRepository;
     private final JWTUtil jwtUtil;
     private final UnavailableDatesRepository unavailableDatesRepository;
+
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     public CareMatchingService(UserRepository userRepository, JWTUtil jwtUtil,
@@ -86,7 +95,7 @@ public class CareMatchingService {
         careImgRepository.save(careImg);
     }
     @Transactional
-    public void addUnavailableDates(int carePostId, List<Date> unavailableDates, String accessToken) {
+    public void addUnavailableDates(int carePostId, List<String> unavailableDates, String accessToken) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
@@ -96,7 +105,16 @@ public class CareMatchingService {
 
         CarePostEntity carePost = carePostRepository.findById(carePostId);
 
-        for (Date unavailableDate : unavailableDates) {
+        List<Date> dates = unavailableDates.stream().map(dateStr -> {
+            try {
+                LocalDate localDate = LocalDate.parse(dateStr, dateFormatter);
+                return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            } catch (DateTimeParseException e) {
+                throw new RuntimeException("Invalid date format", e);
+            }
+        }).toList();
+
+        for (Date unavailableDate : dates) {
             UnavailableDatesEntity unavailableDateEntity = new UnavailableDatesEntity();
             unavailableDateEntity.setCarePost(carePost);
             unavailableDateEntity.setUnavailableDate(unavailableDate);
