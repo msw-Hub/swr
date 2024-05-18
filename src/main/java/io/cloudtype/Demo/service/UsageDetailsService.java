@@ -86,7 +86,8 @@ public class UsageDetailsService {
         walkUsageDTO.setEndTime(walkRecodeEntity.getEndTime());
         walkUsageDTO.setLatitude(walkRecodeEntity.getLatitude());
         walkUsageDTO.setLongitude(walkRecodeEntity.getLongitude());
-        walkUsageDTO.setDetailLocation(walkRecodeEntity.getDetailLocation());
+        walkUsageDTO.setAddress(walkRecodeEntity.getAddress());
+        walkUsageDTO.setDetailAddress(walkRecodeEntity.getDetailAddress());
         walkUsageDTO.setTitle(walkRecodeEntity.getTitle());
         walkUsageDTO.setContent(walkRecodeEntity.getContent());
         walkUsageDTO.setStatus(walkRecodeEntity.getStatus());

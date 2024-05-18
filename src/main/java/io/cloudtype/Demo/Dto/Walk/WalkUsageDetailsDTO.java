@@ -26,7 +26,8 @@ public class WalkUsageDetailsDTO {
 
     private double latitude;
     private double longitude;
-    private String detailLocation;
+    private String address;           //도로명주소
+    private String detailAddress;
 
     private String title;
     private String content;
