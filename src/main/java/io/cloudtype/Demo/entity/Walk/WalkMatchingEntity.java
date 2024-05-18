@@ -30,7 +30,8 @@ public class WalkMatchingEntity {
     private LocalDateTime createDate;
     private double latitude;
     private double longitude;
-    private String detailLocation;
+    private String address;           //도로명주소
+    private String detailAddress;
     private String title;
     private String content;
     private int amount;  //산책비용

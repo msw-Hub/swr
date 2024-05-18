@@ -113,7 +113,8 @@ public class WalkMatchingService {
         post.setWalkTime(walkMatchingEntity.getWalkTime());
         post.setLatitude(walkMatchingEntity.getLatitude());
         post.setLongitude(walkMatchingEntity.getLongitude());
-        post.setDetailLocation(walkMatchingEntity.getDetailLocation());
+        post.setAddress(walkMatchingEntity.getAddress());
+        post.setDetailAddress(walkMatchingEntity.getDetailAddress());
         post.setTitle(walkMatchingEntity.getTitle());
         post.setContent(walkMatchingEntity.getContent());
 
@@ -167,7 +168,8 @@ public class WalkMatchingService {
         dto.setCreateDate(entity.getCreateDate());
         dto.setLatitude(entity.getLatitude());
         dto.setLongitude(entity.getLongitude());
-        dto.setDetailLocation(entity.getDetailLocation());
+        dto.setAddress(entity.getAddress());
+        dto.setDetailAddress(entity.getDetailAddress());
         dto.setTitle(entity.getTitle());
         dto.setContent(entity.getContent());
         if(nowLongitude == 0 && nowLatitude == 0) {
@@ -287,6 +289,8 @@ public class WalkMatchingService {
         dto.setPetId(petRepository.findById(walkMatching.getPet().getId()).getId());    //이게 맞나?
         dto.setWalkTime(walkMatching.getWalkTime());
         dto.setCreateDate(walkMatching.getCreateDate());
+        dto.setAddress(walkMatching.getAddress());
+        dto.setDetailAddress(walkMatching.getDetailAddress());
         dto.setTitle(walkMatching.getTitle());
         dto.setContent(walkMatching.getContent());
         double distance = getDistance(walkMatching.getLatitude(), walkMatching.getLongitude(), nowLatitude, nowLongitude);
@@ -432,7 +436,8 @@ public class WalkMatchingService {
         walkRecode.setCreateDate(post.getCreateDate());
         walkRecode.setLatitude(post.getLatitude());
         walkRecode.setLongitude(post.getLongitude());
-        walkRecode.setDetailLocation(post.getDetailLocation());
+        walkRecode.setAddress(post.getAddress());
+        walkRecode.setDetailAddress(post.getDetailAddress());
         walkRecode.setTitle(post.getTitle());
         walkRecode.setContent(post.getContent());
         walkRecode.setWalker(post.getWalker());

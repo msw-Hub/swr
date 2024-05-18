@@ -27,7 +27,6 @@ public class CarePostEntity {
 
     private String administrativeAddress1;      //행정주소1 - 시도
     private String administrativeAddress2;      //행정주소2 - 시군구
-    private String administrativeAddress3;      //행정주소3 - 읍면동
     private String streetNameAddress;           //도로명주소
     private String detailAddress;               //상세주소
 

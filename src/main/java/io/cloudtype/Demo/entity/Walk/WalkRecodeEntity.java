@@ -30,7 +30,8 @@ public class WalkRecodeEntity {
     private LocalDateTime createDate;
     private double latitude;
     private double longitude;
-    private String detailLocation;
+    private String address;           //도로명주소
+    private String detailAddress;
     private String title;
     private String content;
     private int status;  //3: 산책완료(정상종료) 4:산책미완료(비정상종료)-문제발생

@@ -33,7 +33,6 @@ public class CareMatchingController {
                                         @ModelAttribute("content") String content,
                                         @ModelAttribute("administrativeAddress1") String administrativeAddress1,
                                         @ModelAttribute("administrativeAddress2") String administrativeAddress2,
-                                        @ModelAttribute("administrativeAddress3") String administrativeAddress3,
                                         @ModelAttribute("streetNameAddress") String streetNameAddress,
                                         @ModelAttribute("detailAddress") String detailAddress,
                                         @RequestPart(value = "images", required = false) List<MultipartFile> images,
@@ -41,7 +40,7 @@ public class CareMatchingController {
     ) {
         try {
             int carePostId = careMatchingService.createPost(accessToken, title, content,
-                    administrativeAddress1, administrativeAddress2, administrativeAddress3, streetNameAddress, detailAddress);
+                    administrativeAddress1, administrativeAddress2, streetNameAddress, detailAddress);
 
             if (images != null) {
                 for (MultipartFile image : images) {

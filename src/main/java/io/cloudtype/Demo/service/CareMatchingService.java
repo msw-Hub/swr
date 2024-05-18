@@ -61,7 +61,7 @@ public class CareMatchingService {
 
     @Transactional
     public int createPost(String accessToken, String title, String content,
-                           String administrativeAddress1, String administrativeAddress2, String administrativeAddress3, String streetNameAddress, String detailAddress) {
+                           String administrativeAddress1, String administrativeAddress2, String streetNameAddress, String detailAddress) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
@@ -83,7 +83,6 @@ public class CareMatchingService {
         carePost.setContent(content);
         carePost.setAdministrativeAddress1(administrativeAddress1);
         carePost.setAdministrativeAddress2(administrativeAddress2);
-        carePost.setAdministrativeAddress3(administrativeAddress3);
         carePost.setStreetNameAddress(streetNameAddress);
         carePost.setDetailAddress(detailAddress);
         carePostRepository.save(carePost);
