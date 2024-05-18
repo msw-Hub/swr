@@ -76,9 +76,9 @@ public class CareMatchingController {
                                       @ModelAttribute("carePostId") int carePostId,
                                       @ModelAttribute("title") String title,
                                       @ModelAttribute("content") String content,
-                                      @ModelAttribute("image_change_check") boolean imageChangeCheck,
+                                      @ModelAttribute("imageChangeCheck") boolean imageChangeCheck,
                                       @RequestPart(value = "images", required = false) List<MultipartFile> images,
-                                      @ModelAttribute("dates_change_check") boolean datesChangeCheck,
+                                      @ModelAttribute("datesChangeCheck") boolean datesChangeCheck,
                                       @RequestPart(value = "unavailableDates", required = false) List<String> unavailableDates
     ) {
         try {
