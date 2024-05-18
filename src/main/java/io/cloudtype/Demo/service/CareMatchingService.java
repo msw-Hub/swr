@@ -14,15 +14,16 @@ import io.cloudtype.Demo.repository.Care.CarePostRepository;
 import io.cloudtype.Demo.repository.Care.ReservationSchedulerRepository;
 import io.cloudtype.Demo.repository.PetRepository;
 import io.cloudtype.Demo.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 public class CareMatchingService {
 
@@ -46,12 +48,12 @@ public class CareMatchingService {
 
     @Autowired
     public CareMatchingService(UserRepository userRepository, JWTUtil jwtUtil,
-            CarePostRepository carePostRepository,
-            CareImgRepository careImgRepository,
-            ReservationSchedulerRepository reservationSchedulerRepository,
-            PetRepository petRepository,
-            CareMatchingRepository careMatchingRepository,
-            CommunityBoardService communityBoardService
+                               CarePostRepository carePostRepository,
+                               CareImgRepository careImgRepository,
+                               ReservationSchedulerRepository reservationSchedulerRepository,
+                               PetRepository petRepository,
+                               CareMatchingRepository careMatchingRepository,
+                               CommunityBoardService communityBoardService
     ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
@@ -210,12 +212,14 @@ public class CareMatchingService {
         // 새로운 unavailableDates를 LocalDate 타입으로 변환
         List<LocalDate> newDates = newUnavailableDates.stream()
                 .map(dateStr -> LocalDate.parse(dateStr, dateFormatter))
-                .toList();
+                .collect(Collectors.toList());
 
         // 기존 unavailableDates를 조회
         CarePostEntity carePost = carePostRepository.findById(carePostId);
 
-        Set<LocalDate> existingDates = carePost.getUnavailableDates().stream()
+        List<ReservationSchedulerEntity> existingReservations = reservationSchedulerRepository.findByCarePost(carePost);
+
+        Set<LocalDate> existingDates = existingReservations.stream()
                 .map(reservation -> reservation.getUnavailableDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
                 .collect(Collectors.toSet());
 
@@ -232,12 +236,12 @@ public class CareMatchingService {
                 .collect(Collectors.toSet());
 
         // 이용불가 날짜 추가
-        for (LocalDate date : datesToAdd) {
-            Date dateToAdd = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        for (LocalDate localDate : datesToAdd) {
+            Date dateToAdd = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
             boolean isExist = reservationSchedulerRepository.existsByCarePostAndReservationDate(carePost, dateToAdd);
-            if(isExist){
+            if (isExist) {
                 throw new IllegalArgumentException("해당 날짜에 이미 예약이 있어서 이용불가날짜로의 변경이 불가능합니다");
-            }else{
+            } else {
                 ReservationSchedulerEntity reservation = new ReservationSchedulerEntity();
                 reservation.setCarePost(carePost);
                 reservation.setUnavailableDate(dateToAdd);
@@ -245,17 +249,16 @@ public class CareMatchingService {
             }
         }
 
-        // 이용불가 날짜 - > 이용가능 날짜 변경 (이용불가날짜 리스트에서 삭제)
-        for (LocalDate date : datesToRemove) {
-            Date dateToRemove = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            int reservations = reservationSchedulerRepository.findByCarePostAndReservationDate(carePost,dateToRemove).getReservations();
-            if(reservations == 2){
-                throw new IllegalArgumentException("해당 날짜에 이미 예약이 2건 있어서 이용가능날짜로의 변경이 불가능합니다");
-            }else{
-                reservationSchedulerRepository.deleteByCarePostAndUnavailableDate(carePost, dateToRemove);
+        // 이용불가 날짜 -> 이용가능 날짜 변경 (이용불가날짜 리스트에서 삭제)
+        for (LocalDate localDate : datesToRemove) {
+            Date dateToRemove = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            ReservationSchedulerEntity reservationEntity = reservationSchedulerRepository.findByCarePostAndUnavailableDate(carePost, dateToRemove);
+            if (reservationEntity != null) {
+                reservationSchedulerRepository.delete(reservationEntity);
             }
         }
     }
+
 
     @Transactional
     public void editPost(String accessToken, int carePostId, String title, String content) {

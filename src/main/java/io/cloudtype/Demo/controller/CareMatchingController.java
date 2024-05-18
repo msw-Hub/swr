@@ -1,8 +1,6 @@
 package io.cloudtype.Demo.controller;
 
 import io.cloudtype.Demo.Dto.Care.CareApplyDTO;
-import io.cloudtype.Demo.entity.Care.CareMatchingEntity;
-import io.cloudtype.Demo.entity.Care.CarePostEntity;
 import io.cloudtype.Demo.service.CareMatchingService;
 import io.cloudtype.Demo.service.CommunityBoardService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
 import java.util.List;
 
 @Slf4j

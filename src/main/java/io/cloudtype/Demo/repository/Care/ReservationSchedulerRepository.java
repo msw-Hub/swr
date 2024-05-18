@@ -11,8 +11,8 @@ import java.util.List;
 @Repository
 public interface ReservationSchedulerRepository extends JpaRepository<ReservationSchedulerEntity, Long> {
     List<ReservationSchedulerEntity> findByUnavailableDateBetween(Date start, Date end);
-    void deleteByCarePostAndUnavailableDate(CarePostEntity carePost, Date date);
+    ReservationSchedulerEntity findByCarePostAndUnavailableDate(CarePostEntity carePost, Date unavailableDate);
 
-    boolean existsByCarePostAndReservationDate(CarePostEntity carePost, Date reservationDate); // 특정 carePostId와 날짜 기준으로 예약 기록이 존재하는지 확인
-    ReservationSchedulerEntity findByCarePostAndReservationDate(CarePostEntity carePost, Date reservationDate); // 특정 carePostId와 날짜 기준으로 예약 기록을 가져옴
+    List<ReservationSchedulerEntity> findByCarePost(CarePostEntity carePost);
+    boolean existsByCarePostAndReservationDate(CarePostEntity carePost, Date date);
 }
