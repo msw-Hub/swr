@@ -36,7 +36,7 @@ public class CarePostEntity {
     private Set<CareImgEntity> careImages = new HashSet<>();
 
     @OneToMany(mappedBy = "carePost", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UnavailableDatesEntity> unavailableDates = new HashSet<>();
+    private Set<ReservationSchedulerEntity> unavailableDates = new HashSet<>();
 
     @PrePersist
     public void prePersist() {

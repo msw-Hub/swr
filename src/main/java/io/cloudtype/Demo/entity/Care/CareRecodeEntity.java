@@ -16,9 +16,9 @@ public class CareRecodeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne
-    @JoinColumn(name = "care_post_id")  // 외래 키 컬럼 이름 지정
-    private CarePostEntity carePost;  // 연관된 UserEntity 객체
+    @OneToOne
+    @JoinColumn(name = "caregiver_id")  // 외래 키 컬럼 이름 지정
+    private UserEntity caregiver;  // 연관된 UserEntity 객체
 
     @ManyToOne
     @JoinColumn(name = "pet_entity_id")  // 외래 키 컬럼 이름 지정
@@ -30,13 +30,13 @@ public class CareRecodeEntity {
 
     private int status;  //3:돌봄정상종료 4:문제발생(비정상종료)
 
-    private int amount;  // 계산된 돌봄비용
+    private int amount;  // 돌봄비용
 
     private LocalDateTime reservationStartDate;     //예약 시작일시
     private LocalDateTime reservationEndDate;       //예약 종료일시
 
-    private LocalDateTime startDate;                //실제돌봄 시작일시
-    private LocalDateTime endDate;                  //실제돌봄 종료일시
+    private LocalDateTime startDate;                //돌봄 시작일시
+    private LocalDateTime endDate;                   //돌봄 종료일시
 
     private String requestMessage;
 

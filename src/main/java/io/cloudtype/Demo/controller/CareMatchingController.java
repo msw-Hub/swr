@@ -35,7 +35,7 @@ public class CareMatchingController {
                                         @ModelAttribute("administrativeAddress2") String administrativeAddress2,
                                         @ModelAttribute("streetNameAddress") String streetNameAddress,
                                         @ModelAttribute("detailAddress") String detailAddress,
-                                        @RequestPart(value = "images", required = false) List<MultipartFile> images,
+                                        @RequestPart(value = "images", required = true) List<MultipartFile> images,
                                         @RequestPart(value = "unavailableDates", required = false) List<String> unavailableDates
     ) {
         try {
@@ -49,9 +49,10 @@ public class CareMatchingController {
                         careMatchingService.addImage(carePostId, imageUrl, accessToken); // 이미지 URL을 CareImgEntity에 저장
                     }
                 }
-            }
+            }else throw new IllegalArgumentException("돌봄 장소 이미지를 필수적으로 등록해주세요");
+
             if (unavailableDates != null) {
-                careMatchingService.addUnavailableDates(carePostId, unavailableDates, accessToken);
+                careMatchingService.addUnavailableDates(carePostId, unavailableDates);
             }
             return ResponseEntity.ok("돌봄글 작성 완료");
         } catch (IllegalStateException | IllegalArgumentException e) {
@@ -65,6 +66,40 @@ public class CareMatchingController {
         try {
             careMatchingService.applyCare(accessToken, careApplyDTO);
             return ResponseEntity.ok("돌봄 예약 신청");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //수정은 글제목, 내용, 돌봄이미지, 이용불가날짜만 가능 - 예약 신청이 없는 경우에만 수정 가능
+    @PostMapping("/edit/post")
+    public ResponseEntity<?> editPost(@RequestHeader("Authorization") String accessToken,
+                                      @ModelAttribute("carePostId") int carePostId,
+                                      @ModelAttribute("title") String title,
+                                      @ModelAttribute("content") String content,
+                                      @ModelAttribute("image_change_check") boolean imageChangeCheck,
+                                      @RequestPart(value = "images", required = false) List<MultipartFile> images,
+                                      @ModelAttribute("dates_change_check") boolean datesChangeCheck,
+                                      @RequestPart(value = "unavailableDates", required = false) List<String> unavailableDates
+    ) {
+        try {
+            //예약요청이 있는지를 확인해서 없으면 수정
+            if(careMatchingService.checkReservation(carePostId)) throw new IllegalStateException("예약신청이 있는 글은 수정할 수 없습니다 예약신청취소 후 다시 진행해주세요");
+            careMatchingService.editPost(accessToken,carePostId, title, content);
+            if(imageChangeCheck) { //기존 이미지 삭제후 재업로드
+                careMatchingService.deleteImages(carePostId, accessToken);
+                if (images != null) {
+                    for (MultipartFile image : images) {
+                        if (!image.isEmpty()) {
+                            String imageUrl = communityBoardService.uploadImage(image); // 이미지를 저장하고 URL을 반환하는 메서드
+                            careMatchingService.addImage(carePostId, imageUrl, accessToken); // 이미지 URL을 CareImgEntity에 저장
+                        }
+                    }
+                }else throw new IllegalArgumentException("이미지가 없어 이미지를 변경할 수 없습니다");
+            }
+            if (datesChangeCheck) { // 기존 날짜와 비교하여 변경된 부분만 업데이트
+                careMatchingService.updateUnavailableDates(carePostId, unavailableDates);
+            }
+            return ResponseEntity.ok("돌봄글 수정 완료");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

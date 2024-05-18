@@ -9,7 +9,7 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
-public class UnavailableDatesEntity {
+public class ReservationSchedulerEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -19,4 +19,12 @@ public class UnavailableDatesEntity {
     private CarePostEntity carePost;
 
     private Date unavailableDate;   // 돌봄 불가능 날짜
+
+    private Date reservationDate;   // 예약 날짜
+    private int reservations;       // 예약 수
+
+    @PrePersist
+    public void prePersist() {
+        this.reservations = 0;  // 초기 상태 설정
+    }
 }
