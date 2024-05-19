@@ -15,4 +15,5 @@ public interface ReservationSchedulerRepository extends JpaRepository<Reservatio
 
     List<ReservationSchedulerEntity> findByCarePost(CarePostEntity carePost);
     boolean existsByCarePostAndReservationDate(CarePostEntity carePost, Date date);
+    ReservationSchedulerEntity findByCarePostAndReservationDate(CarePostEntity carePost, Date date);
 }

@@ -1,6 +1,5 @@
 package io.cloudtype.Demo.entity;
 
-import io.cloudtype.Demo.entity.Care.CarePostEntity;
 import io.cloudtype.Demo.entity.Walk.WalkMatchingEntity;
 import jakarta.persistence.*;
 import lombok.Getter;

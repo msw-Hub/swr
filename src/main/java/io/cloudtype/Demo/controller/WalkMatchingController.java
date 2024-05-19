@@ -95,12 +95,18 @@ public class WalkMatchingController {
     public ResponseEntity<?> myPost(@RequestHeader("Authorization") String accessToken
     ) {
         try {
-            List<WaiterDTO> applierList = walkMatchingService.getApplierList(accessToken);
             WalkMatchingDTO myPost = walkMatchingService.myPost(accessToken);
-            Map<String, Object> response = new HashMap<>();
-            response.put("myPost", myPost);
-            response.put("applierList", applierList);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(myPost);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/myPost/applier")
+    public ResponseEntity<?> myPostApplier(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            List<WaiterDTO> applierList = walkMatchingService.getApplierList(accessToken);
+            return ResponseEntity.ok(applierList);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

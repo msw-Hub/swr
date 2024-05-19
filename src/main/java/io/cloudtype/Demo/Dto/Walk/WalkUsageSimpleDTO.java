@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 public class WalkUsageSimpleDTO {
-    private int id;
+    private int walkRecodeId;
     private String userNickname;
     private String userImage;
     private String walkerNickname;

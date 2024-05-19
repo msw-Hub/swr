@@ -41,6 +41,7 @@ public class CareRecodeEntity {
     private String requestMessage;
 
     private boolean review;  //리뷰 작성 여부
+    private String reason;  //문제 발생시 사유
 
     @PrePersist
     public void prePersist() {

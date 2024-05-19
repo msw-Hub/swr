@@ -1,5 +1,7 @@
 package io.cloudtype.Demo.controller;
 
+import io.cloudtype.Demo.Dto.Care.CareUsageDetailsDTO;
+import io.cloudtype.Demo.Dto.Care.CareUsageSimpleDTO;
 import io.cloudtype.Demo.Dto.Walk.WalkUsageDetailsDTO;
 import io.cloudtype.Demo.Dto.Walk.WalkUsageSimpleDTO;
 import io.cloudtype.Demo.service.UsageDetailsService;
@@ -33,7 +35,7 @@ public class UsageDetailsController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-    //유저의 산책이용상세내역보기
+    //유저의 산책이용상세내역보기 (파트너도 공용으로 사용)
     @PostMapping("/walk/detail")
     public ResponseEntity<?> getUserWalkDetail(@RequestHeader("Authorization") String accessToken,
                                                @RequestParam("walk_recode_id") int walkRecodeId
@@ -41,6 +43,54 @@ public class UsageDetailsController {
         try {
             WalkUsageDetailsDTO walkUsage = usageDetailsService.getUserWalkUsageDetail(accessToken, walkRecodeId);
             return ResponseEntity.ok(walkUsage);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //파트너의 산책이용내역보기
+    @GetMapping("/walk/partner/list")
+    public ResponseEntity<?> getPartnerWalkList(@RequestHeader("Authorization") String accessToken) {
+        try {
+            List<WalkUsageSimpleDTO> walkUsageList = usageDetailsService.getPartnerWalkUsageList(accessToken);
+            Map<String, Object> response = new HashMap<>();
+            response.put("walkUsageList", walkUsageList);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //유저의 돌봄 이용내역보기
+    @GetMapping("/care/list")
+    public ResponseEntity<?> getUserCareList(@RequestHeader("Authorization") String accessToken) {
+        try {
+            List<CareUsageSimpleDTO> careUsageList = usageDetailsService.getUserCareUsageList(accessToken);
+            Map<String, Object> response = new HashMap<>();
+            response.put("careUsageList", careUsageList);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //유저와 파트너의 돌봄 이용내역 상세보기
+    @GetMapping("/care/detail")
+    public ResponseEntity<?> geCareUsageDetail(@RequestHeader("Authorization") String accessToken,
+                                              @RequestParam("care_recode_id") int careRecodeId
+    ) {
+        try {
+            CareUsageDetailsDTO careUsage = usageDetailsService.getUserCareUsageDetail(accessToken, careRecodeId);
+            return ResponseEntity.ok(careUsage);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //파트너의 돌봄 이용내역보기
+    @GetMapping("/care/partner/list")
+    public ResponseEntity<?> getPartnerCareList(@RequestHeader("Authorization") String accessToken) {
+        try {
+            List<CareUsageSimpleDTO> careUsageList = usageDetailsService.getPartnerCareUsageList(accessToken);
+            Map<String, Object> response = new HashMap<>();
+            response.put("careUsageList", careUsageList);
+            return ResponseEntity.ok(response);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

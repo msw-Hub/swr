@@ -38,7 +38,6 @@ public class CareMatchingEntity {
     private LocalDateTime reservationEndDate;
 
     private LocalDateTime startDate;
-    private LocalDateTime endDate;
 
     private String requestMessage;  // 요청 메시지
 

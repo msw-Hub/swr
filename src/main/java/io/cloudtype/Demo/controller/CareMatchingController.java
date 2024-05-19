@@ -1,15 +1,21 @@
 package io.cloudtype.Demo.controller;
 
 import io.cloudtype.Demo.Dto.Care.CareApplyDTO;
+import io.cloudtype.Demo.Dto.Care.CareApplyDetailDTO;
+import io.cloudtype.Demo.Dto.Care.CarePostDetailsDTO;
+import io.cloudtype.Demo.Dto.Care.CarePostListDTO;
 import io.cloudtype.Demo.service.CareMatchingService;
 import io.cloudtype.Demo.service.CommunityBoardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -97,6 +103,230 @@ public class CareMatchingController {
                 careMatchingService.updateUnavailableDates(carePostId, unavailableDates);
             }
             return ResponseEntity.ok("돌봄글 수정 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/delete/post")
+    public ResponseEntity<?> deletePost(@RequestHeader("Authorization") String accessToken,
+                                        @RequestParam("carePostId") int carePostId
+    ) {
+        try {
+            careMatchingService.deletePost(accessToken, carePostId);
+            return ResponseEntity.ok("돌봄글 삭제 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/list")
+    public ResponseEntity<?> list(@RequestHeader("Authorization") String accessToken,
+                                  @RequestBody Map<String, Object> requestBody
+    ) {
+        try {
+            int page = (int) requestBody.get("page");
+            String administrativeAddress1 = (String) requestBody.get("administrativeAddress1"); // 시/도
+            String administrativeAddress2 = (String) requestBody.get("administrativeAddress2"); // 시/군/구
+            double homeLatitude = ((Number) requestBody.get("homeLatitude")).doubleValue();
+            double homeLongitude = ((Number) requestBody.get("homeLongitude")).doubleValue();
+
+            //주소로 필터링해서 거리가 가까운순으로 정렬
+            Page<CarePostListDTO> pageResult = careMatchingService.list(accessToken, page-1, administrativeAddress1,
+                    administrativeAddress2, homeLatitude, homeLongitude);
+            Map<String, Object> response = new HashMap<>();
+            response.put("posts", pageResult);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/detail")
+    public ResponseEntity<?> detail(@RequestHeader("Authorization") String accessToken,
+                                    @RequestBody Map<String, Object> requestBody
+    ) {
+        try {
+            int carePostId = (int) requestBody.get("carePostId");
+            double homeLatitude = ((Number) requestBody.get("homeLatitude")).doubleValue();
+            double homeLongitude = ((Number) requestBody.get("homeLongitude")).doubleValue();
+
+            CarePostDetailsDTO carePost = careMatchingService.detail(accessToken, carePostId, homeLatitude, homeLongitude);
+            return ResponseEntity.ok(carePost);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //내 돌봄글 보기
+    @GetMapping("/myPost")
+    public ResponseEntity<?> myPost(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            CarePostDetailsDTO myPost = careMatchingService.myPost(accessToken);
+            return ResponseEntity.ok(myPost);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //내 돌봄글의 신청자 목록
+    @GetMapping("/myPost/applier")
+    public ResponseEntity<?> myPostApplier(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            List<CareApplyDetailDTO> applierList = careMatchingService.getApplierList(accessToken);
+            return ResponseEntity.ok(applierList);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //내 돌봄글의 예약확정자 목록
+    @GetMapping("/myPost/reservation")
+    public ResponseEntity<?> myPostReservation(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            List<CareApplyDetailDTO> reservationList = careMatchingService.getReservationList(accessToken);
+            return ResponseEntity.ok(reservationList);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //나의 예약 대기 목록
+    @GetMapping("/myReservation/apply")
+    public ResponseEntity<?> myReservationApply(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            List<CareApplyDetailDTO> applyList = careMatchingService.myApplyList(accessToken);
+            return ResponseEntity.ok(applyList);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //careMatchingId(예약번호)로 해당 돌봄글 보기
+    @PostMapping("/reservation/post")
+    public ResponseEntity<?> reservationPost(@RequestHeader("Authorization") String accessToken,
+                                            @RequestBody Map<String, Object> requestBody
+    ) {
+        try {
+            int careMatchingId = (int) requestBody.get("careMatchingId");
+            double homeLatitude = ((Number) requestBody.get("homeLatitude")).doubleValue();
+            double homeLongitude = ((Number) requestBody.get("homeLongitude")).doubleValue();
+            CarePostDetailsDTO carePost = careMatchingService.reservationPost(accessToken, careMatchingId, homeLatitude,homeLongitude);
+            return ResponseEntity.ok(carePost);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //나의 예약 확정 목록
+    @GetMapping("/myReservation/confirmed")
+    public ResponseEntity<?> myReservationConfirmed(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            List<CareApplyDetailDTO> confirmedList = careMatchingService.myConfirmedList(accessToken);
+            return ResponseEntity.ok(confirmedList);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //현재 진행중인 돌봄 목록 - 일반유저
+    @GetMapping("/myReservation/progress")
+    public ResponseEntity<?> myReservationProgress(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            List<CareApplyDetailDTO> progressList = careMatchingService.myProgressList(accessToken);
+            return ResponseEntity.ok(progressList);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //현재 진행중인 돌봄 목록 - 파트너
+    @GetMapping("/myPost/progress")
+    public ResponseEntity<?> myPostProgress(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            List<CareApplyDetailDTO> progressList = careMatchingService.myProgressList(accessToken);
+            return ResponseEntity.ok(progressList);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //돌봄 예약 수락(파트너만) 예약확정 ->예약수도 증가해야함
+    @GetMapping("/accept")
+    public ResponseEntity<?> acceptCare(@RequestHeader("Authorization") String accessToken,
+                                        @RequestParam("careMatchingId") int careMatchingId
+    ) {
+        try {
+            careMatchingService.acceptCare(accessToken, careMatchingId);
+            return ResponseEntity.ok("돌봄 예약 수락 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //돌봄 예약신청 거절(파트너만)
+    @GetMapping("/reject")
+    public ResponseEntity<?> rejectCare(@RequestHeader("Authorization") String accessToken,
+                                        @RequestParam("careMatchingId") int careMatchingId
+    ) {
+        try {
+            careMatchingService.rejectCare(accessToken, careMatchingId);
+            return ResponseEntity.ok("돌봄 예약 거절 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //돌봄 예약신청 취소(일반유저)
+    @GetMapping("/cancel/apply")
+    public ResponseEntity<?> cancelApply(@RequestHeader("Authorization") String accessToken,
+                                        @RequestParam("careMatchingId") int careMatchingId
+    ) {
+        try {
+            careMatchingService.cancelApply(accessToken, careMatchingId);
+            return ResponseEntity.ok("돌봄 예약신청 취소 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //돌봄 예약확정 취소(일반유저)
+    @GetMapping("/cancel/reservation")
+    public ResponseEntity<?> cancelReservation(@RequestHeader("Authorization") String accessToken,
+                                        @RequestParam("careMatchingId") int careMatchingId
+    ) {
+        try {
+            careMatchingService.cancelReservation(accessToken, careMatchingId);
+            return ResponseEntity.ok("돌봄 예약확정 취소 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //돌봄 예약신청 수정은 없음
+    //돌봄 시작
+    @GetMapping("/start")
+    public ResponseEntity<?> startCare(@RequestHeader("Authorization") String accessToken,
+                                        @RequestParam("careMatchingId") int careMatchingId
+    ) {
+        try {
+            careMatchingService.startCare(accessToken, careMatchingId);
+            return ResponseEntity.ok("돌봄 시작 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //돌봄 종료 (정상)
+    @GetMapping("/complete")
+    public ResponseEntity<?> completeCare(@RequestHeader("Authorization") String accessToken,
+                                        @RequestParam("careMatchingId") int careMatchingId
+    ) {
+        try {
+            careMatchingService.completeCare(accessToken, careMatchingId);
+            return ResponseEntity.ok("돌봄 종료 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //돌봄 종료 (비정상)
+    @GetMapping("/incomplete")
+    public ResponseEntity<?> incompleteCare(@RequestHeader("Authorization") String accessToken,
+                                        @RequestParam("careMatchingId") int careMatchingId
+    ) {
+        try {
+            careMatchingService.incompleteCare(accessToken, careMatchingId);
+            return ResponseEntity.ok("돌봄 서비스 중 문제발생으로 인해 비정상종료");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

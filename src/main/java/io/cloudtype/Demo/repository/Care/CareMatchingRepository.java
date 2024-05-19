@@ -9,4 +9,7 @@ import java.util.List;
 @Repository
 public interface CareMatchingRepository extends JpaRepository<CareMatchingEntity, Long> {
     boolean existsByCarePost_IdAndStatus(int carePostId, int status);
+    List<CareMatchingEntity> findByCarePost_Caregiver_IdAndStatus(int caregiverId, int status);
+    List<CareMatchingEntity> findByOwner_IdAndStatus(int userId, int status);
+    CareMatchingEntity findById(int id);
 }

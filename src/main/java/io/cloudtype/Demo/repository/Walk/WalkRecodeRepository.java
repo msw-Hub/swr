@@ -10,4 +10,5 @@ import java.util.List;
 public interface WalkRecodeRepository extends JpaRepository<WalkRecodeEntity, Long> {
     WalkRecodeEntity findById(int id);
     List<WalkRecodeEntity> findByUser_IdOrderByCreateDateDesc(int userId);
+    List<WalkRecodeEntity> findByWalker_IdOrderByCreateDateDesc(int walkerId);
 }

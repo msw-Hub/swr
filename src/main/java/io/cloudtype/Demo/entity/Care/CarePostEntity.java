@@ -29,6 +29,8 @@ public class CarePostEntity {
     private String administrativeAddress2;      //행정주소2 - 시군구
     private String streetNameAddress;           //도로명주소
     private String detailAddress;               //상세주소
+    private double latitude;  // 위도
+    private double longitude;  // 경도
 
     private int reservations;  // 예약수 >> 하루 예약수가 2건이 넘어가면 예약 불가능 날짜에 추가
 

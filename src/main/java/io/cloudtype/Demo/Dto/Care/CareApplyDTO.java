@@ -9,8 +9,11 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 public class CareApplyDTO {
+
     private int carePostId;
+
     private int petId;
+
     private int amount;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")

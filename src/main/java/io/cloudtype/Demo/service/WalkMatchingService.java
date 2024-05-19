@@ -2,11 +2,15 @@ package io.cloudtype.Demo.service;
 
 import io.cloudtype.Demo.Dto.WaiterDTO;
 import io.cloudtype.Demo.Dto.Walk.WalkMatchingDTO;
-import io.cloudtype.Demo.entity.*;
+import io.cloudtype.Demo.entity.PetEntity;
+import io.cloudtype.Demo.entity.UserEntity;
+import io.cloudtype.Demo.entity.WaiterEntity;
 import io.cloudtype.Demo.entity.Walk.WalkMatchingEntity;
 import io.cloudtype.Demo.entity.Walk.WalkRecodeEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
-import io.cloudtype.Demo.repository.*;
+import io.cloudtype.Demo.repository.PetRepository;
+import io.cloudtype.Demo.repository.UserRepository;
+import io.cloudtype.Demo.repository.WaiterRepository;
 import io.cloudtype.Demo.repository.Walk.WalkMatchingRepository;
 import io.cloudtype.Demo.repository.Walk.WalkRecodeRepository;
 import lombok.extern.slf4j.Slf4j;

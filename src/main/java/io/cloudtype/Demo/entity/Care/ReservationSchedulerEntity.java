@@ -23,8 +23,4 @@ public class ReservationSchedulerEntity {
     private Date reservationDate;   // 예약 날짜
     private int reservations;       // 예약 수
 
-    @PrePersist
-    public void prePersist() {
-        this.reservations = 0;  // 초기 상태 설정
-    }
 }
