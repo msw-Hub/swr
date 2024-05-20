@@ -712,6 +712,10 @@ public class CareMatchingService {
         if (careMatching.getStatus() != 1) {
             throw new IllegalStateException("수락되지 않은 예약은 시작할 수 없습니다");
         }
+        //예약날짜의 당일 언제든 시작할 수 있습니다.
+        if(careMatching.getReservationStartDate().toLocalDate().isAfter(LocalDate.now())) {
+            throw new IllegalStateException("예약날짜의 당일에만 시작할 수 있습니다");
+        }
         careMatching.setStatus(2);
         careMatching.setStartDate(LocalDateTime.now());
         careMatchingRepository.save(careMatching);
