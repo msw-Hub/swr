@@ -50,9 +50,7 @@ public class WalkMatchingController {
             double maxDistance = ((Number) requestBody.get("max_distance")).doubleValue();
 
             Page<WalkMatchingDTO> pageResult = walkMatchingService.getList(accessToken, page - 1, nowLatitude, nowLongitude, maxDistance);
-            Map<String, Object> response = new HashMap<>();
-            response.put("posts", pageResult);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(pageResult);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
