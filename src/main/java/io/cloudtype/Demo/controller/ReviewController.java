@@ -120,7 +120,7 @@ public class ReviewController {
         }
     }
     //본인이 쓴 돌봄 리뷰 내역 보기
-    @GetMapping("care/myWrite")
+    @GetMapping("/care/myWrite")
     public ResponseEntity<?> getUserCareReviewList(@RequestHeader("Authorization") String accessToken) {
         try {
             List<CareReviewDTO> careReviewList = reviewService.getUserCareReviewList(accessToken);
