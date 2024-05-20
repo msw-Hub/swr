@@ -320,12 +320,14 @@ public class CareMatchingController {
         }
     }
     //돌봄 종료 (비정상)
-    @GetMapping("/incomplete")
+    @PostMapping("/incomplete")
     public ResponseEntity<?> incompleteCare(@RequestHeader("Authorization") String accessToken,
-                                        @RequestParam("careMatchingId") int careMatchingId
+                                        @RequestBody Map<String, Object> requestBody
     ) {
         try {
-            careMatchingService.incompleteCare(accessToken, careMatchingId);
+            int careMatchingId = (int) requestBody.get("careMatchingId");
+            String reason = (String) requestBody.get("reason");
+            careMatchingService.incompleteCare(accessToken, careMatchingId, reason);
             return ResponseEntity.ok("돌봄 서비스 중 문제발생으로 인해 비정상종료");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

@@ -757,7 +757,7 @@ public class CareMatchingService {
         //돌봄 완료 메세지 보내야함 양쪽
     }
     @Transactional
-    public void incompleteCare(String accessToken, int careMatchingId) {
+    public void incompleteCare(String accessToken, int careMatchingId,String reason) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
@@ -784,6 +784,7 @@ public class CareMatchingService {
         careRecode.setAmount(careMatching.getAmount());
         careRecode.setRequestMessage(careMatching.getRequestMessage());
         careRecode.setReview(false);
+        careRecode.setReason(reason);
         careRecodeRepository.save(careRecode);
         //돌봄 미완료 메세지 보내야함 양쪽
     }
