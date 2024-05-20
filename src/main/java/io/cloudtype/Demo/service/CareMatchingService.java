@@ -722,7 +722,7 @@ public class CareMatchingService {
         //돌봄 시작 메세지 보내야함 양쪽
     }
     @Transactional
-    public void completeCare(String accessToken, int careMatchingId) {
+    public int completeCare(String accessToken, int careMatchingId) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
@@ -755,6 +755,7 @@ public class CareMatchingService {
         careRecode.setReview(false);
         careRecodeRepository.save(careRecode);
         //돌봄 완료 메세지 보내야함 양쪽
+        return careRecode.getId();
     }
     @Transactional
     public void incompleteCare(String accessToken, int careMatchingId,String reason) {

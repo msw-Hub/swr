@@ -120,7 +120,7 @@ public class ReviewController {
         }
     }
     //본인이 쓴 돌봄 리뷰 내역 보기
-    @GetMapping("/user/care/list")
+    @GetMapping("care/myWrite")
     public ResponseEntity<?> getUserCareReviewList(@RequestHeader("Authorization") String accessToken) {
         try {
             List<CareReviewDTO> careReviewList = reviewService.getUserCareReviewList(accessToken);
@@ -144,7 +144,7 @@ public class ReviewController {
         }
     }
     //파트너 본인이 받은 돌봄 리뷰 내역 보기
-    @GetMapping("/partner/care/list")
+    @GetMapping("/care/partner/list")
     public ResponseEntity<?> getPartnerCareReviewList(@RequestHeader("Authorization") String accessToken) {
         try {
             List<CareReviewDTO> careReviewList = reviewService.getPartnerCareReviewList(accessToken);

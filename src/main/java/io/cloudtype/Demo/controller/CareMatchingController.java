@@ -313,8 +313,11 @@ public class CareMatchingController {
                                         @RequestParam("careMatchingId") int careMatchingId
     ) {
         try {
-            careMatchingService.completeCare(accessToken, careMatchingId);
-            return ResponseEntity.ok("돌봄 종료 완료");
+            int careRecodeId = careMatchingService.completeCare(accessToken, careMatchingId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("care_recode_id", careRecodeId);
+            response.put("message", "돌봄 이용종료, care_recode_id를 이용하여 후기작성을 진행해주세요");
+            return ResponseEntity.ok(response);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
