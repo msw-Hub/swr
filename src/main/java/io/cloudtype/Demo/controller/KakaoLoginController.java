@@ -74,6 +74,7 @@ public class KakaoLoginController {
         String role = "ROLE_USER";
         String jwtAccessToken = jwtUtil.createAccessToken(email, role, 36000000L); // 10시간
         String jwtRefreshToken = jwtUtil.createRefreshToken(email, role, 604800000L); // 1주일
+        HttpHeaders headers = new HttpHeaders();
 
         if(isExist == 0) {  //회원가입
             kakaoService.signUp(email,role,profileImage, name, gender, jwtRefreshToken);
@@ -81,15 +82,29 @@ public class KakaoLoginController {
             return ResponseEntity.badRequest().body("일반로그인");   //이후 에러코드정렬
         }else if(isExist == 1) {    //카카오로그인
             UserEntity user = userRepository.findByUsername(email);
+            int partner = user.getPartnership();
+            String nickname = user.getNickname();
+            String profileImage2 = user.getProfileImage();
+            String birth = user.getBirth();
             user.setRefreshToken(jwtRefreshToken);
+            userRepository.save(user);
+            if(birth == null) {
+                //JoinDetails가 없는 경우
+                headers.add("JoinDetails", "false");
+            } else {
+                //JoinDetails가 있는 경우
+                headers.add("JoinDetails", "true");
+            }
+            headers.add("partnership", String.valueOf(partner));
+            headers.add("nickname", nickname);
+            headers.add("profileImage", profileImage2);
         }else {
             return ResponseEntity.badRequest().body("error");
         }
 
-        // 응답 헤더에 토큰 추가
-        HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + jwtAccessToken);
         headers.add("refresh_token", jwtRefreshToken);
+
 
         // JSON 응답에 포함할 데이터 준비
         Map<String, Object> jsonResponse = new HashMap<>();
