@@ -2,8 +2,6 @@ package io.cloudtype.Demo.service;
 
 import io.cloudtype.Demo.entity.UserEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
-import io.cloudtype.Demo.repository.Payment.KakaoPayRepository;
-import io.cloudtype.Demo.repository.Payment.TossPayRepository;
 import io.cloudtype.Demo.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +20,6 @@ import java.net.URL;
 public class PaymentService {
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
-    private final KakaoPayRepository kakaoPayRepository;
-    private final TossPayRepository tossPayRepository;
 
     @Value("${kakao.cid}")
     private String KakaoCid;
@@ -35,15 +31,9 @@ public class PaymentService {
     private String tossSecretKey;
 
     @Autowired
-    public PaymentService(JWTUtil jwtUtil, UserRepository userRepository, KakaoPayRepository kakaoPayRepository, TossPayRepository tossPayRepository,
-                          String tossSecretKey, String kakaoSecretKey, String KakaoCid) {
+    public PaymentService(JWTUtil jwtUtil, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
-        this.kakaoPayRepository = kakaoPayRepository;
-        this.tossPayRepository = tossPayRepository;
-        this.tossSecretKey = tossSecretKey;
-        this.kakaoSecretKey = kakaoSecretKey;
-        this.KakaoCid = KakaoCid;
     }
     public void tossPay(String accessToken, String orderId, String amount, String paymentKey) throws IOException {
         accessToken = accessToken.split(" ")[1];

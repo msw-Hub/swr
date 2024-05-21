@@ -1,6 +1,5 @@
 package io.cloudtype.Demo.controller;
 
-import io.cloudtype.Demo.Dto.Walk.WalkUsageSimpleDTO;
 import io.cloudtype.Demo.service.PaymentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -21,6 +18,7 @@ public class PaymentController {
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
+
     @PostMapping("/tossPay")
     public ResponseEntity<?> tossPay(@RequestHeader("Authorization") String accessToken,
                                      @RequestBody Map<String, Object> requestBody
