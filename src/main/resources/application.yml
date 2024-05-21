@@ -1,6 +1,11 @@
 kakao:
   client_id: ${kakao_client_id}
   redirect_uri: ${kakao_redirect_uri}
+  cid: ${kakaopay_cid}
+  SECRET_KEY: ${kakaopay_SECRET_KEY}
+
+toss:
+  secret_key: ${toss_secret_key}
 
 spring:
   datasource:
