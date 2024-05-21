@@ -84,7 +84,7 @@ public class PaymentService {
         br.close();
 
         // 결과 출력 (디버그 용도)
-        System.out.println("Response Code: " + responseCode);
-        System.out.println("Response: " + result);
+        log.info("Response Code: {}", responseCode);
+        log.info("Response: {}", result);
     }
 }
