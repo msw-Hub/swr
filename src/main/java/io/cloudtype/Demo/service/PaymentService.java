@@ -31,9 +31,16 @@ public class PaymentService {
     private String tossSecretKey;
 
     @Autowired
-    public PaymentService(JWTUtil jwtUtil, UserRepository userRepository) {
+    public PaymentService(JWTUtil jwtUtil, UserRepository userRepository,
+                          @Value("${toss.secret_key}") String tossSecretKey,
+                          @Value("${kakao.SECRET_KEY}") String kakaoSecretKey,
+                            @Value("${kakao.cid}") String KakaoCid
+    ) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.tossSecretKey = tossSecretKey;
+        this.kakaoSecretKey = kakaoSecretKey;
+        this.KakaoCid = KakaoCid;
     }
     public void tossPay(String accessToken, String orderId, String amount, String paymentKey) throws IOException {
         accessToken = accessToken.split(" ")[1];
