@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
 @Entity
 @Setter
 @Getter
-public class CareRecodeEntity {
+public class CareRecordEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "caregiver_id")  // 외래 키 컬럼 이름 지정
     private UserEntity caregiver;  // 연관된 UserEntity 객체
 

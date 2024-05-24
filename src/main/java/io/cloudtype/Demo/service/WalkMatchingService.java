@@ -6,13 +6,13 @@ import io.cloudtype.Demo.entity.PetEntity;
 import io.cloudtype.Demo.entity.UserEntity;
 import io.cloudtype.Demo.entity.WaiterEntity;
 import io.cloudtype.Demo.entity.Walk.WalkMatchingEntity;
-import io.cloudtype.Demo.entity.Walk.WalkRecodeEntity;
+import io.cloudtype.Demo.entity.Walk.WalkRecordEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.repository.PetRepository;
 import io.cloudtype.Demo.repository.UserRepository;
 import io.cloudtype.Demo.repository.WaiterRepository;
 import io.cloudtype.Demo.repository.Walk.WalkMatchingRepository;
-import io.cloudtype.Demo.repository.Walk.WalkRecodeRepository;
+import io.cloudtype.Demo.repository.Walk.WalkRecordRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,7 +48,7 @@ public class WalkMatchingService {
     private final JWTUtil jwtUtil;
     private final WalkMatchingRepository walkMatchingRepository;
     private final WaiterRepository waiterRepository;
-    private final WalkRecodeRepository walkRecodeRepository;
+    private final WalkRecordRepository walkRecordRepository;
 
     @Autowired
     public WalkMatchingService(@Value("${spring.cloud.gcp.storage.credentials.location}") String keyFileName,
@@ -57,7 +57,7 @@ public class WalkMatchingService {
                                UserRepository userRepository, PetRepository petRepository, JWTUtil jwtUtil,
                                WalkMatchingRepository walkMatchingRepository,
                                WaiterRepository waiterRepository,
-                               WalkRecodeRepository walkRecodeRepository
+                               WalkRecordRepository walkRecordRepository
     ) {
         this.keyFileName = keyFileName;
         this.projectId = projectId;
@@ -67,7 +67,7 @@ public class WalkMatchingService {
         this.jwtUtil = jwtUtil;
         this.walkMatchingRepository = walkMatchingRepository;
         this.waiterRepository = waiterRepository;
-        this.walkRecodeRepository = walkRecodeRepository;
+        this.walkRecordRepository = walkRecordRepository;
     }
 
     @Transactional
@@ -431,7 +431,7 @@ public class WalkMatchingService {
         return recodeId;
     }
     private int createRecode(WalkMatchingEntity post, LocalDateTime now, int status, String reason) {
-        WalkRecodeEntity walkRecode = new WalkRecodeEntity();
+        WalkRecordEntity walkRecode = new WalkRecordEntity();
         walkRecode.setUser(post.getUser());
         walkRecode.setPet(post.getPet());
         walkRecode.setWalkTime(post.getWalkTime());
@@ -451,7 +451,7 @@ public class WalkMatchingService {
             walkRecode.setStatus(4);
             walkRecode.setReason(reason);
         }
-        walkRecodeRepository.save(walkRecode);
+        walkRecordRepository.save(walkRecode);
         return walkRecode.getId();
     }
     @Transactional

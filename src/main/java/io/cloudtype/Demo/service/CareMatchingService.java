@@ -43,7 +43,7 @@ public class CareMatchingService {
     private final PetRepository petRepository;
     private final CareMatchingRepository careMatchingRepository;
     private final CommunityBoardService communityBoardService;
-    private final CareRecodeRepository careRecodeRepository;
+    private final CareRecordRepository careRecordRepository;
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -55,7 +55,7 @@ public class CareMatchingService {
             PetRepository petRepository,
             CareMatchingRepository careMatchingRepository,
             CommunityBoardService communityBoardService,
-            CareRecodeRepository careRecodeRepository
+            CareRecordRepository careRecordRepository
     ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
@@ -65,7 +65,7 @@ public class CareMatchingService {
         this.careMatchingRepository = careMatchingRepository;
         this.communityBoardService = communityBoardService;
         this.reservationSchedulerRepository = reservationSchedulerRepository;
-        this.careRecodeRepository = careRecodeRepository;
+        this.careRecordRepository = careRecordRepository;
     }
 
     @Transactional
@@ -741,7 +741,7 @@ public class CareMatchingService {
         carePost.setReservations(carePost.getReservations() - 1);
         carePostRepository.save(carePost);
 
-        CareRecodeEntity careRecode = new CareRecodeEntity();
+        CareRecordEntity careRecode = new CareRecordEntity();
         careRecode.setCaregiver(user);
         careRecode.setPet(careMatching.getPet());
         careRecode.setOwner(careMatching.getOwner());
@@ -753,7 +753,7 @@ public class CareMatchingService {
         careRecode.setAmount(careMatching.getAmount());
         careRecode.setRequestMessage(careMatching.getRequestMessage());
         careRecode.setReview(false);
-        careRecodeRepository.save(careRecode);
+        careRecordRepository.save(careRecode);
         //돌봄 완료 메세지 보내야함 양쪽
         return careRecode.getId();
     }
@@ -773,7 +773,7 @@ public class CareMatchingService {
         if (careMatching.getStatus() != 2) {
             throw new IllegalStateException("시작되지 않은 예약은 완료할 수 없습니다");
         }
-        CareRecodeEntity careRecode = new CareRecodeEntity();
+        CareRecordEntity careRecode = new CareRecordEntity();
         careRecode.setCaregiver(user);
         careRecode.setPet(careMatching.getPet());
         careRecode.setOwner(careMatching.getOwner());
@@ -786,7 +786,7 @@ public class CareMatchingService {
         careRecode.setRequestMessage(careMatching.getRequestMessage());
         careRecode.setReview(false);
         careRecode.setReason(reason);
-        careRecodeRepository.save(careRecode);
+        careRecordRepository.save(careRecode);
         //돌봄 미완료 메세지 보내야함 양쪽
     }
 }

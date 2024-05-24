@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 @Setter
 @Getter
-public class WalkRecodeEntity {
+public class WalkRecordEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
