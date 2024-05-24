@@ -2,6 +2,7 @@ package io.cloudtype.Demo.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cloudtype.Demo.Dto.Payment.PaymentListDTO;
 import io.cloudtype.Demo.entity.PaymentEntity;
 import io.cloudtype.Demo.entity.UserEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
@@ -21,7 +22,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -114,7 +117,7 @@ public class PaymentService {
             throw new IllegalArgumentException("토스 결제 키가 일치하지 않습니다");
         }
     }
-
+    @Transactional
     public void tossPay(String accessToken, String orderId, int amount, String paymentKey) throws IOException {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
@@ -185,6 +188,8 @@ public class PaymentService {
             paymentEntity.setOrderName(tossOrderName);
             paymentEntity.setPaymentType(tossPaymentType);
             paymentEntity.setApprovedAt(approvedAt);
+            UserEntity consumer = paymentEntity.getConsumer();
+            consumer.setCoin(consumer.getCoin() + amount); //코인 충전
             paymentRepository.save(paymentEntity);
         }else {
             //결제 실패
@@ -214,5 +219,27 @@ public class PaymentService {
         paymentEntity.setStatus("READY");
         //결제 정보 저장
         paymentRepository.save(paymentEntity);
+    }
+    public List<PaymentListDTO> paymentList(String accessToken){
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        List<PaymentEntity> paymentList = paymentRepository.findByConsumer_IdOrderByOrderAtDesc(user.getId());
+        return paymentList.stream()
+                .map(this::createPaymentListDTO)
+                .collect(Collectors.toList());
+    }
+    private PaymentListDTO createPaymentListDTO(PaymentEntity paymentEntity) {
+        PaymentListDTO paymentListDTO = new PaymentListDTO();
+        paymentListDTO.setOrderID(paymentEntity.getOrderId());
+        paymentListDTO.setAmount(paymentEntity.getAmount());
+        paymentListDTO.setPaymentType(paymentEntity.getPaymentType());
+        paymentListDTO.setOrderName(paymentEntity.getOrderName());
+        paymentListDTO.setOrderAt(paymentEntity.getOrderAt());
+        paymentListDTO.setStatus(paymentEntity.getStatus());
+        return paymentListDTO;
     }
 }

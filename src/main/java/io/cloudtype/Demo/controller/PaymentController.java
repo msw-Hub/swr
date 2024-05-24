@@ -1,6 +1,7 @@
 package io.cloudtype.Demo.controller;
 
-import io.cloudtype.Demo.Dto.PaymentDTO;
+import io.cloudtype.Demo.Dto.Payment.PaymentDTO;
+import io.cloudtype.Demo.Dto.Payment.PaymentListDTO;
 import io.cloudtype.Demo.service.PaymentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -38,7 +38,6 @@ public class PaymentController {
             throw new RuntimeException(e);
         }
     }
-
     //클라이언트가 토스페이를 통해 결제를 진행한 후 서버에서의 최종 결제 승인
     @PostMapping("/tossPay")
     public ResponseEntity<?> tossPay(@RequestHeader("Authorization") String accessToken,
@@ -55,6 +54,16 @@ public class PaymentController {
                 return ResponseEntity.badRequest().body(e.getMessage());
             } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+    // 본인 결제 내역 조회
+    @GetMapping("/paymentList")
+    public ResponseEntity<?> paymentList(@RequestHeader("Authorization") String accessToken){
+        try {
+            List<PaymentListDTO> paymentList = paymentService.paymentList(accessToken);
+            return ResponseEntity.ok(paymentList);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
