@@ -1,5 +1,6 @@
 package io.cloudtype.Demo.controller;
 
+import io.cloudtype.Demo.Dto.PaymentDTO;
 import io.cloudtype.Demo.service.PaymentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -20,14 +22,33 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
+    //결제 요청전에 결제할 데이터 저장(검증준비)
+    @PostMapping("/beforePayment")
+    public ResponseEntity<?> beforePayment(@RequestHeader("Authorization") String accessToken,
+                                           @RequestBody PaymentDTO paymentDTO
+    ){
+        try {
+            String orderId = paymentDTO.getOrderID();
+            int amount = paymentDTO.getAmount();
+            paymentService.beforePayment(accessToken, orderId, amount);
+            return ResponseEntity.ok("결제 준비 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    //클라이언트가 토스페이를 통해 결제를 진행한 후 서버에서의 최종 결제 승인
     @PostMapping("/tossPay")
     public ResponseEntity<?> tossPay(@RequestHeader("Authorization") String accessToken,
-                                     @RequestBody Map<String, Object> requestBody
-    ) {
+                                     @RequestBody PaymentDTO paymentDTO
+    ){
         try {
-            String orderId = (String) requestBody.get("orderId");
-            String amount = (String) requestBody.get("amount");
-            String paymentKey = (String) requestBody.get("paymentKey");
+            String orderId = paymentDTO.getOrderID();
+            int amount = paymentDTO.getAmount();
+            String paymentKey = paymentDTO.getPaymentKey();
+            paymentService.checkPayment(accessToken, orderId, amount, paymentKey);
             paymentService.tossPay(accessToken, orderId, amount, paymentKey);
             return ResponseEntity.ok("결제 성공");
             } catch (IllegalStateException | IllegalArgumentException e) {

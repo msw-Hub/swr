@@ -19,14 +19,16 @@ public class PaymentEntity {
     private UserEntity consumer;  // 연관된 UserEntity 객체
 
     private String orderId; // 주문번호
-    private String amount; // 결제금액
+    private int amount; // 결제금액
 
     private String paymentKey; // 결제키
     private String orderName; // 주문명
 
-    private String orderAt; // 주문일시
+    private LocalDateTime orderAt; // 주문일시
+    private LocalDateTime approvedAt; // 결제승인일시
 
-    private String paymentMethod; // 결제수단
+    private String paymentType; // 결제수단
+    private String failReason; // 결제실패사유
     private String status; // 결제상태
 
     /*
