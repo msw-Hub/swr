@@ -193,7 +193,7 @@ public class PaymentService {
             String tossPaymentKey = jsonResponse.getString("paymentKey");
             String tossStatus = jsonResponse.getString("status");
             String tossOrderName = jsonResponse.getString("orderName");
-            String tossPaymentType = jsonResponse.getString("paymentType");
+            String tossPaymentType = jsonResponse.getString("method");
             String approvedAt = jsonResponse.getString("approvedAt");
             //db에 저장
             paymentEntity.setPaymentKey(tossPaymentKey);
