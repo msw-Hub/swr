@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -26,8 +27,8 @@ public class PaymentController {
     public ResponseEntity<?> page(@RequestHeader("Authorization") String accessToken
     ){
         try {
-            String phoneNumber = paymentService.getPhoneNumber(accessToken);
-            return ResponseEntity.ok(phoneNumber);
+            Map<String,String> userInfo = paymentService.getInfo(accessToken);
+            return ResponseEntity.ok(userInfo);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

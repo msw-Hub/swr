@@ -242,7 +242,7 @@ public class PaymentService {
         paymentListDTO.setStatus(paymentEntity.getStatus());
         return paymentListDTO;
     }
-    public String getPhoneNumber(String accessToken){
+    public Map<String,String> getInfo(String accessToken){
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
@@ -252,6 +252,9 @@ public class PaymentService {
         if(user.getPhoneNumber() == null){
             throw new IllegalArgumentException("전화번호를 등록해주세요");
         }
-        return user.getPhoneNumber();
+        Map<String,String> userInfo = new HashMap<>();
+        userInfo.put("phoneNumber", user.getPhoneNumber());
+        userInfo.put("name", user.getName());
+        return userInfo;
     }
 }
