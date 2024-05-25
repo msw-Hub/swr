@@ -58,7 +58,13 @@ public class PaymentController {
             String orderId = paymentDTO.getOrderId();
             int amount = paymentDTO.getAmount();
             String paymentKey = paymentDTO.getPaymentKey();
+            log.info("paymentKey : " + paymentKey);
+            log.info("orderId : " + orderId);
+            log.info("amount : " + amount);
+
+            //결제전 order_id로 payment_id를 가져와서 검증
             paymentService.checkPayment(accessToken, orderId, amount, paymentKey);
+            //결제 승인
             paymentService.tossPay(accessToken, orderId, amount, paymentKey);
             return ResponseEntity.ok("결제 성공");
             } catch (IllegalStateException | IllegalArgumentException e) {

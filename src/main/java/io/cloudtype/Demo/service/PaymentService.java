@@ -83,7 +83,7 @@ public class PaymentService {
 
         //orderId로 토스에게 결제 정보 조회한 payment객체와 paymentKey가 일치하는지 확인
         //toss GET 요청 URL
-        String reqURL = "https://api.tosspayments.com/v1/payments/orders/" + orderId + "\"";
+        String reqURL = "https://api.tosspayments.com/v1/payments/orders/" + orderId;
         log.info("reqURL: {}", reqURL);
 
         URL url = new URL(reqURL);
@@ -175,34 +175,34 @@ public class PaymentService {
         }
         br.close();
         // 결과 출력 (디버그 용도)
-        log.info("Response Code: {}", responseCode);
-        log.info("Response: {}", result);
+        log.info("Response Code2: {}", responseCode);
+        log.info("Response2: {}", result);
 
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, String> responseMap = objectMapper.readValue(result.toString(), new TypeReference<Map<String, String>>() {});
+        // JSON 응답을 JSONObject로 파싱
+        JSONObject jsonResponse = new JSONObject(result.toString());
         PaymentEntity paymentEntity = paymentRepository.findByOrderId(orderId);
 
         if(responseCode >= 200 && responseCode < 300) {
             //결제 성공
-            String tossPaymentKey = responseMap.get("paymentKey");
-            String tossStatus = responseMap.get("status");
-            String tossOrderName = responseMap.get("orderName");
-            String tossPaymentType = responseMap.get("method");
-            LocalDateTime approvedAt = LocalDateTime.parse(responseMap.get("approvedAt"));
+            String tossPaymentKey = jsonResponse.getString("paymentKey");
+            String tossStatus = jsonResponse.getString("status");
+            String tossOrderName = jsonResponse.getString("orderName");
+            String tossPaymentType = jsonResponse.getString("paymentType");
+            String approvedAt = jsonResponse.getString("approvedAt");
             //db에 저장
             paymentEntity.setPaymentKey(tossPaymentKey);
             paymentEntity.setStatus(tossStatus);
             paymentEntity.setOrderName(tossOrderName);
             paymentEntity.setPaymentType(tossPaymentType);
-            paymentEntity.setApprovedAt(approvedAt);
+            paymentEntity.setApprovedAt(LocalDateTime.parse(approvedAt));
             UserEntity consumer = paymentEntity.getConsumer();
             consumer.setCoin(consumer.getCoin() + amount); //코인 충전
             paymentRepository.save(paymentEntity);
         }else {
             //결제 실패
-            String tossMessage = responseMap.get("message");
-            String tossStatus = responseMap.get("status");
+            String tossMessage = jsonResponse.getString("message");
+            String tossStatus = jsonResponse.getString("status");
             paymentEntity.setStatus(tossStatus);
             paymentEntity.setFailReason(tossMessage);
             paymentRepository.save(paymentEntity);
