@@ -83,7 +83,7 @@ public class PaymentService {
 
         //paymentKey로 토스에게 결제 정보 조회한 payment객체와 orderId 일치하는지 확인
         //toss GET 요청 URL
-        String reqURL = "https://api.tosspayments.com/v1/payments/payments/" + paymentKey;
+        String reqURL = "https://api.tosspayments.com/v1/payments/" + paymentKey;
         log.info("reqURL: {}", reqURL);
 
         URL url = new URL(reqURL);
