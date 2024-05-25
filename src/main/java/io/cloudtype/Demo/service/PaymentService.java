@@ -9,6 +9,7 @@ import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.repository.PaymentRepository;
 import io.cloudtype.Demo.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -111,10 +112,10 @@ public class PaymentService {
         log.info("Response Code: {}", responseCode);
         log.info("Response: {}", result);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, String> responseMap = objectMapper.readValue(result.toString(), new TypeReference<Map<String, String>>() {});
+        // JSON 응답을 JSONObject로 파싱
+        JSONObject jsonResponse = new JSONObject(result.toString());
         // paymentKey 추출
-        String tossPaymentKey = responseMap.get("paymentKey");
+        String tossPaymentKey = jsonResponse.getString("paymentKey");
         log.info("tossPaymentKey: {}", tossPaymentKey);
         // 결제 키 검증
         if (!paymentKey.equals(tossPaymentKey)) {
