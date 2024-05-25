@@ -77,6 +77,9 @@ public class PaymentService {
         if (paymentEntity.getConsumer().getId()!= user.getId()) {
             throw new IllegalArgumentException("결제 요청자가 일치하지 않습니다");
         }
+        //프론트로 부터 받은  paymentKey
+        log.info("paymentKey: {}", paymentKey);
+
         //orderId로 토스에게 결제 정보 조회한 payment객체와 paymentKey가 일치하는지 확인
         //toss GET 요청 URL
         String reqURL = "https://api.tosspayments.com/v1/payments/orders/" + orderId;
@@ -112,6 +115,7 @@ public class PaymentService {
         Map<String, String> responseMap = objectMapper.readValue(result.toString(), new TypeReference<Map<String, String>>() {});
         // paymentKey 추출
         String tossPaymentKey = responseMap.get("paymentKey");
+        log.info("tossPaymentKey: {}", tossPaymentKey);
         // 결제 키 검증
         if (!paymentKey.equals(tossPaymentKey)) {
             throw new IllegalArgumentException("토스 결제 키가 일치하지 않습니다");
