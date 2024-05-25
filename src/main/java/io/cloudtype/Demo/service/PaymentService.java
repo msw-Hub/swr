@@ -78,12 +78,12 @@ public class PaymentService {
         if (paymentEntity.getConsumer().getId()!= user.getId()) {
             throw new IllegalArgumentException("결제 요청자가 일치하지 않습니다");
         }
-        //프론트로 부터 받은  paymentKey
-        log.info("paymentKey: {}", paymentKey);
+        //프론트로 부터 받은 orderId
+        log.info("orderId: {}", orderId);
 
-        //orderId로 토스에게 결제 정보 조회한 payment객체와 paymentKey가 일치하는지 확인
+        //paymentKey로 토스에게 결제 정보 조회한 payment객체와 orderId 일치하는지 확인
         //toss GET 요청 URL
-        String reqURL = "https://api.tosspayments.com/v1/payments/orders/" + orderId;
+        String reqURL = "https://api.tosspayments.com/v1/payments/payments/" + paymentKey;
         log.info("reqURL: {}", reqURL);
 
         URL url = new URL(reqURL);
@@ -117,11 +117,16 @@ public class PaymentService {
         // JSON 응답을 JSONObject로 파싱
         JSONObject jsonResponse = new JSONObject(result.toString());
         // paymentKey 추출
-        String tossPaymentKey = jsonResponse.getString("paymentKey");
-        log.info("tossPaymentKey: {}", tossPaymentKey);
+        String tossOrderId = jsonResponse.getString("orderId");
+        String tossStatus = jsonResponse.getString("status");
+        log.info("status: {}", tossStatus);
+        log.info("orderId: {}", tossOrderId);
         // 결제 키 검증
-        if (!paymentKey.equals(tossPaymentKey)) {
-            throw new IllegalArgumentException("토스 결제 키가 일치하지 않습니다");
+        if(!tossStatus.equals("IN_PROGRESS")){
+            throw new IllegalArgumentException("결제 진행중이 아닙니다");
+        }
+        if (!orderId.equals(tossOrderId)) {
+            throw new IllegalArgumentException("결제 정보가 일치하지 않습니다");
         }
     }
     @Transactional
