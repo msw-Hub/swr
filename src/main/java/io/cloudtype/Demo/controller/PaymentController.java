@@ -39,7 +39,7 @@ public class PaymentController {
                                            @RequestBody PaymentDTO paymentDTO
     ){
         try {
-            String orderId = paymentDTO.getOrderID();
+            String orderId = paymentDTO.getOrderId();
             int amount = paymentDTO.getAmount();
             paymentService.beforePayment(accessToken, orderId, amount);
             return ResponseEntity.ok("결제 준비 완료");
@@ -55,7 +55,7 @@ public class PaymentController {
                                      @RequestBody PaymentDTO paymentDTO
     ){
         try {
-            String orderId = paymentDTO.getOrderID();
+            String orderId = paymentDTO.getOrderId();
             int amount = paymentDTO.getAmount();
             String paymentKey = paymentDTO.getPaymentKey();
             paymentService.checkPayment(accessToken, orderId, amount, paymentKey);
