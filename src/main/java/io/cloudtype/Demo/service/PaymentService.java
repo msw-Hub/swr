@@ -242,4 +242,16 @@ public class PaymentService {
         paymentListDTO.setStatus(paymentEntity.getStatus());
         return paymentListDTO;
     }
+    public String getPhoneNumber(String accessToken){
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        if(user.getPhoneNumber() == null){
+            throw new IllegalArgumentException("전화번호를 등록해주세요");
+        }
+        return user.getPhoneNumber();
+    }
 }

@@ -22,6 +22,16 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
+    @GetMapping("/getPhoneNumber")
+    public ResponseEntity<?> page(@RequestHeader("Authorization") String accessToken
+    ){
+        try {
+            String phoneNumber = paymentService.getPhoneNumber(accessToken);
+            return ResponseEntity.ok(phoneNumber);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     //결제 요청전에 결제할 데이터 저장(검증준비)
     @PostMapping("/beforePayment")
     public ResponseEntity<?> beforePayment(@RequestHeader("Authorization") String accessToken,
