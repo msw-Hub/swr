@@ -23,7 +23,7 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    @GetMapping("/getPhoneNumber")
+    @GetMapping("/getUserInfo")
     public ResponseEntity<?> page(@RequestHeader("Authorization") String accessToken
     ){
         try {
