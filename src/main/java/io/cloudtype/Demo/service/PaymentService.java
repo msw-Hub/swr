@@ -83,7 +83,9 @@ public class PaymentService {
 
         //orderId로 토스에게 결제 정보 조회한 payment객체와 paymentKey가 일치하는지 확인
         //toss GET 요청 URL
-        String reqURL = "https://api.tosspayments.com/v1/payments/orders/" + orderId;
+        String reqURL = "https://api.tosspayments.com/v1/payments/orders/" + orderId + "\"";
+        log.info("reqURL: {}", reqURL);
+
         URL url = new URL(reqURL);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -180,6 +182,7 @@ public class PaymentService {
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, String> responseMap = objectMapper.readValue(result.toString(), new TypeReference<Map<String, String>>() {});
         PaymentEntity paymentEntity = paymentRepository.findByOrderId(orderId);
+
         if(responseCode >= 200 && responseCode < 300) {
             //결제 성공
             String tossPaymentKey = responseMap.get("paymentKey");
