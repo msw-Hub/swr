@@ -194,13 +194,12 @@ public class PaymentService {
             String tossStatus = jsonResponse.getString("status");
             String tossOrderName = jsonResponse.getString("orderName");
             String tossPaymentType = jsonResponse.getString("method");
-            String approvedAt = jsonResponse.getString("approvedAt");
             //db에 저장
             paymentEntity.setPaymentKey(tossPaymentKey);
             paymentEntity.setStatus(tossStatus);
             paymentEntity.setOrderName(tossOrderName);
             paymentEntity.setPaymentType(tossPaymentType);
-            paymentEntity.setApprovedAt(LocalDateTime.parse(approvedAt));
+            paymentEntity.setApprovedAt(LocalDateTime.now());
             UserEntity consumer = paymentEntity.getConsumer();
             consumer.setCoin(consumer.getCoin() + amount); //코인 충전
             paymentRepository.save(paymentEntity);
