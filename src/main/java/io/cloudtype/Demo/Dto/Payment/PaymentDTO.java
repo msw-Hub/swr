@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 public class PaymentDTO {
     private String paymentKey; // 결제키
-    private String orderID; // 주문번호
+    private String orderId; // 주문번호
     private int amount; // 결제금액
     private String paymentType; // 결제수단
 }
