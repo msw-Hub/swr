@@ -1,8 +1,7 @@
 package io.cloudtype.Demo.jwt;
 
-import io.cloudtype.Demo.Dto.CustomUserDetails;
-import io.cloudtype.Demo.entity.UserEntity;
-import io.cloudtype.Demo.repository.UserRepository;
+import io.cloudtype.Demo.mypage.user.UserEntity;
+import io.cloudtype.Demo.mypage.user.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.Collection;
 import java.util.Iterator;

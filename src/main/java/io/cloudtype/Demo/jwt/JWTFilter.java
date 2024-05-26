@@ -1,8 +1,7 @@
 package io.cloudtype.Demo.jwt;
 
-import io.cloudtype.Demo.Dto.CustomUserDetails;
-import io.cloudtype.Demo.entity.UserEntity;
-import io.cloudtype.Demo.repository.UserRepository;
+import io.cloudtype.Demo.mypage.user.UserEntity;
+import io.cloudtype.Demo.mypage.user.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

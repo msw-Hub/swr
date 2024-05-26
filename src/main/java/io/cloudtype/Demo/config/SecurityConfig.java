@@ -4,7 +4,7 @@ package io.cloudtype.Demo.config;
 import io.cloudtype.Demo.jwt.JWTFilter;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.jwt.LoginFilter;
-import io.cloudtype.Demo.repository.UserRepository;
+import io.cloudtype.Demo.mypage.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
