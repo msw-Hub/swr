@@ -1,7 +1,5 @@
 package io.cloudtype.Demo.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudtype.Demo.Dto.Payment.PaymentListDTO;
 import io.cloudtype.Demo.entity.PaymentEntity;
 import io.cloudtype.Demo.entity.UserEntity;

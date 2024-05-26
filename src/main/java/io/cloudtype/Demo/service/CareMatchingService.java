@@ -203,8 +203,7 @@ public class CareMatchingService {
         careMatching.setRequestMessage(careApplyDTO.getRequestMessage());
         careMatchingRepository.save(careMatching);
 
-        //돌봄글 작성자에게 신청자가 있음을 알림
-        sseService.notifyMatch(String.valueOf(carePost.getCaregiver().getId()), "신청자가 있습니다", 2);
+        //신청한거 메세지 보내야함
     }
 
     @Transactional
@@ -444,6 +443,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
 
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByCarePost_Caregiver_IdAndStatus(user.getId(), 0);
 
@@ -472,6 +474,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
 
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByCarePost_Caregiver_IdAndStatus(user.getId(), 1);
 
@@ -483,6 +488,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
 
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByCarePost_Caregiver_IdAndStatus(user.getId(), 2);
 
@@ -494,6 +502,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
 
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByOwner_IdAndStatus(user.getId(), 0);
 
@@ -505,6 +516,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
 
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
@@ -513,6 +527,8 @@ public class CareMatchingService {
         if (careMatching.getOwner().getId() != user.getId()) {
             throw new IllegalStateException("자신의 예약만 확인할 수 있습니다");
         }
+        double distance = getDistance(careMatching.getCarePost().getLatitude(),
+                careMatching.getCarePost().getLongitude(), homeLatitude, homeLongitude);
         //매칭id로 post정보 가져오기
         CarePostEntity carePost = careMatching.getCarePost();
         CarePostDetailsDTO dto = new CarePostDetailsDTO();
@@ -526,6 +542,7 @@ public class CareMatchingService {
         dto.setAdministrativeAddress2(carePost.getAdministrativeAddress2());
         dto.setStreetNameAddress(carePost.getStreetNameAddress());
         dto.setDetailAddress(carePost.getDetailAddress());
+        dto.setDistance(distance);
         dto.setUnavailableDate(reservationSchedulerRepository.findByCarePost(carePost).stream()
                 .map(ReservationSchedulerEntity::getUnavailableDate)
                 .filter(Objects::nonNull) // null 값을 필터링
@@ -537,6 +554,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
 
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByOwner_IdAndStatus(user.getId(), 1);
 
@@ -548,6 +568,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
 
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByOwner_IdAndStatus(user.getId(), 2);
 
@@ -560,6 +583,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
 
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
@@ -636,7 +662,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
-
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약신청내역을 찾을 수 없습니다");
@@ -656,7 +684,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
-
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약신청내역을 찾을 수 없습니다");
@@ -674,7 +704,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
-
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약내역을 찾을 수 없습니다");
@@ -721,7 +753,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
-
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약내역을 찾을 수 없습니다");
@@ -748,7 +782,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
-
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약내역을 찾을 수 없습니다");
@@ -787,7 +823,9 @@ public class CareMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
-
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약내역을 찾을 수 없습니다");
@@ -812,6 +850,11 @@ public class CareMatchingService {
         careRecode.setReview(false);
         careRecode.setReason(reason);
         careRecordRepository.save(careRecode);
+
+        CarePostEntity carePost = careMatching.getCarePost();
+        carePost.setReservations(carePost.getReservations() - 1);
+        carePostRepository.save(carePost);
+
         //돌봄 미완료 메세지 보내야함 양쪽
         sseService.notifyMatch(String.valueOf(careMatching.getOwner().getId()), "돌봄이 미완료되었습니다", 7);
         sseService.notifyMatch(String.valueOf(careMatching.getCarePost().getCaregiver().getId()), "돌봄이 미완료되었습니다", 7);

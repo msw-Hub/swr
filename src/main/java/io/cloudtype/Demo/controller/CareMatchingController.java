@@ -199,7 +199,7 @@ public class CareMatchingController {
         }
     }
     //careMatchingId(예약번호)로 해당 돌봄글 보기
-    @PostMapping("/reservation/post")
+    @PostMapping("/myReservation/post")
     public ResponseEntity<?> reservationPost(@RequestHeader("Authorization") String accessToken,
                                             @RequestBody Map<String, Object> requestBody
     ) {
@@ -313,10 +313,10 @@ public class CareMatchingController {
                                         @RequestParam("careMatchingId") int careMatchingId
     ) {
         try {
-            int careRecodeId = careMatchingService.completeCare(accessToken, careMatchingId);
+            int careRecordId = careMatchingService.completeCare(accessToken, careMatchingId);
             Map<String, Object> response = new HashMap<>();
-            response.put("care_recode_id", careRecodeId);
-            response.put("message", "돌봄 이용종료, care_recode_id를 이용하여 후기작성을 진행해주세요");
+            response.put("care_record_id", careRecordId);
+            response.put("message", "돌봄 이용종료, care_record_id를 이용하여 후기작성을 진행해주세요");
             return ResponseEntity.ok(response);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

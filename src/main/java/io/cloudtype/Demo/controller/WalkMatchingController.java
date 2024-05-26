@@ -164,10 +164,10 @@ public class WalkMatchingController {
                                    @PathVariable int postId
     ) {
         try {   //주인의 산책완료버튼
-            int walkRecodeId = walkMatchingService.end(accessToken, postId);
+            int walkRecordId = walkMatchingService.end(accessToken, postId);
             Map<String, Object> response = new HashMap<>();
-            response.put("walk_recode_id", walkRecodeId);
-            response.put("message", "산책 정상종료, walkRecodeId를 이용하여 후기작성을 진행해주세요");
+            response.put("walk_record_id", walkRecordId);
+            response.put("message", "산책 정상종료, walk_record_id를 이용하여 후기작성을 진행해주세요");
             return ResponseEntity.ok(response);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
