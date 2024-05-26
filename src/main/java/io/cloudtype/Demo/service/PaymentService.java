@@ -33,28 +33,18 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
 
-    @Value("${kakao.cid}")
-    private String KakaoCid;
-
-    @Value("${kakao.SECRET_KEY}")
-    private String kakaoSecretKey;
-
     @Value("${toss.secret_key}")
-    private String tossSecretKey;
+    private final String tossSecretKey;
 
     @Autowired
     public PaymentService(JWTUtil jwtUtil, UserRepository userRepository,
                           @Value("${toss.secret_key}") String tossSecretKey,
-                          @Value("${kakao.SECRET_KEY}") String kakaoSecretKey,
-                            @Value("${kakao.cid}") String KakaoCid,
                             PaymentRepository paymentRepository
 
     ) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.tossSecretKey = tossSecretKey;
-        this.kakaoSecretKey = kakaoSecretKey;
-        this.KakaoCid = KakaoCid;
         this.paymentRepository = paymentRepository;
     }
     public void checkPayment(String accessToken, String orderId, int amount, String paymentKey) throws IOException {

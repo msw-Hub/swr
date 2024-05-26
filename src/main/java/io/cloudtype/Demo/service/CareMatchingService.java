@@ -44,7 +44,6 @@ public class CareMatchingService {
     private final CareMatchingRepository careMatchingRepository;
     private final CommunityBoardService communityBoardService;
     private final CareRecordRepository careRecordRepository;
-    private final SseService sseService;
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -56,8 +55,7 @@ public class CareMatchingService {
             PetRepository petRepository,
             CareMatchingRepository careMatchingRepository,
             CommunityBoardService communityBoardService,
-            CareRecordRepository careRecordRepository,
-            SseService sseService
+            CareRecordRepository careRecordRepository
     ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
@@ -68,7 +66,6 @@ public class CareMatchingService {
         this.communityBoardService = communityBoardService;
         this.reservationSchedulerRepository = reservationSchedulerRepository;
         this.careRecordRepository = careRecordRepository;
-        this.sseService = sseService;
     }
 
     @Transactional
@@ -651,8 +648,6 @@ public class CareMatchingService {
         carePost.setReservations(carePost.getReservations() + 1);
         carePostRepository.save(carePost);
         //예약 수락한거 메세지 보내야함 양쪽
-        sseService.notifyMatch(String.valueOf(careMatching.getOwner().getId()), "예약이 수락되었습니다", 1);
-        sseService.notifyMatch(String.valueOf(careMatching.getCarePost().getCaregiver().getId()), "예약이 수락되었습니다", 1);
 
         //결제 - 차감만 하면됌
         careMatching.getOwner().setCoin(careMatching.getOwner().getCoin()-careMatching.getAmount());
@@ -677,7 +672,6 @@ public class CareMatchingService {
         }
         careMatchingRepository.delete(careMatching);
         //예약 거절한거 메세지 보내야함
-        sseService.notifyMatch(String.valueOf(careMatching.getOwner().getId()), "예약이 거절되었습니다", 5);
     }
     @Transactional
     public void cancelApply(String accessToken, int careMatchingId) {
@@ -744,7 +738,6 @@ public class CareMatchingService {
             }
         }
         //예약 취소한거 메세지 보내야함
-        sseService.notifyMatch(String.valueOf(careMatching.getCarePost().getCaregiver().getId()), "예약이 취소되었습니다", 3);
         //환불
         careMatching.getOwner().setCoin(careMatching.getOwner().getCoin()+careMatching.getAmount());
     }
@@ -774,8 +767,6 @@ public class CareMatchingService {
         careMatching.setStartDate(LocalDateTime.now());
         careMatchingRepository.save(careMatching);
         //돌봄 시작 메세지 보내야함 양쪽
-        sseService.notifyMatch(String.valueOf(careMatching.getOwner().getId()), "돌봄이 시작되었습니다", 6);
-        sseService.notifyMatch(String.valueOf(careMatching.getCarePost().getCaregiver().getId()), "돌봄이 시작되었습니다", 6);
     }
     @Transactional
     public int completeCare(String accessToken, int careMatchingId) {
@@ -813,8 +804,6 @@ public class CareMatchingService {
         careRecode.setReview(false);
         careRecordRepository.save(careRecode);
         //돌봄 완료 메세지 보내야함 양쪽
-        sseService.notifyMatch(String.valueOf(careMatching.getOwner().getId()), "돌봄이 완료되었습니다", 4);
-        sseService.notifyMatch(String.valueOf(careMatching.getCarePost().getCaregiver().getId()), "돌봄이 완료되었습니다", 4);
 
         return careRecode.getId();
     }
@@ -856,7 +845,5 @@ public class CareMatchingService {
         carePostRepository.save(carePost);
 
         //돌봄 미완료 메세지 보내야함 양쪽
-        sseService.notifyMatch(String.valueOf(careMatching.getOwner().getId()), "돌봄이 미완료되었습니다", 7);
-        sseService.notifyMatch(String.valueOf(careMatching.getCarePost().getCaregiver().getId()), "돌봄이 미완료되었습니다", 7);
     }
 }

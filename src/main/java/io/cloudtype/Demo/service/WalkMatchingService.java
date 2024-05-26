@@ -34,14 +34,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class WalkMatchingService {
-    @Value("${spring.cloud.gcp.storage.credentials.location}")
-    private final String keyFileName;
-
-    @Value("${spring.cloud.gcp.storage.project-id}")
-    private final String projectId;
-
-    @Value("${spring.cloud.gcp.storage.bucket}")
-    private final String bucketName;
 
     private final UserRepository userRepository;
     private final PetRepository petRepository;
@@ -49,28 +41,19 @@ public class WalkMatchingService {
     private final WalkMatchingRepository walkMatchingRepository;
     private final WaiterRepository waiterRepository;
     private final WalkRecordRepository walkRecordRepository;
-    private final SseService sseService;
 
     @Autowired
-    public WalkMatchingService(@Value("${spring.cloud.gcp.storage.credentials.location}") String keyFileName,
-                               @Value("${spring.cloud.gcp.storage.bucket}") String bucketName,
-                                 @Value("${spring.cloud.gcp.storage.project-id}") String projectId,
-                               UserRepository userRepository, PetRepository petRepository, JWTUtil jwtUtil,
+    public WalkMatchingService(UserRepository userRepository, PetRepository petRepository, JWTUtil jwtUtil,
                                WalkMatchingRepository walkMatchingRepository,
                                WaiterRepository waiterRepository,
-                               WalkRecordRepository walkRecordRepository,
-                                 SseService sseService
+                               WalkRecordRepository walkRecordRepository
     ) {
-        this.keyFileName = keyFileName;
-        this.projectId = projectId;
-        this.bucketName = bucketName;
         this.userRepository = userRepository;
         this.petRepository = petRepository;
         this.jwtUtil = jwtUtil;
         this.walkMatchingRepository = walkMatchingRepository;
         this.waiterRepository = waiterRepository;
         this.walkRecordRepository = walkRecordRepository;
-        this.sseService = sseService;
     }
 
     @Transactional
@@ -236,7 +219,6 @@ public class WalkMatchingService {
         waiter.setWaiter(user);
         waiterRepository.save(waiter);
         //신청이 완료되었음으로 주인에게 신청 알람을 보내야함
-        sseService.notifyMatch(String.valueOf(post.getUser().getId()), "신청이 들어왔습니다",2);
     }
     public WalkMatchingDTO myPost(String accessToken) {
         accessToken = accessToken.split(" ")[1];
@@ -335,8 +317,6 @@ public class WalkMatchingService {
         waiterRepository.deleteByWaiterId(waiterId);
         //서브 서버에게 매칭완료 메세지와 채팅방 개설 요청을 보내야함
         //양쪽에게 매칭완료 메세지를 보내야함
-        sseService.notifyMatch(String.valueOf(post.getUser().getId()), "매칭이 성사되었습니다",1);
-        sseService.notifyMatch(String.valueOf(waiterId), "매칭이 성사되었습니다",1);
     }
     @Transactional
     public void deletePost(String accessToken, int postId) {
@@ -402,7 +382,6 @@ public class WalkMatchingService {
         post.setStartTime(LocalDateTime.now());
         walkMatchingRepository.save(post);
         //주인에게 산책 시작 알람을 보내야함
-        sseService.notifyMatch(String.valueOf(post.getUser().getId()), "산책이 시작되었습니다",6);
     }
     @Transactional
     public int end(String accessToken, int postId) {
@@ -437,7 +416,6 @@ public class WalkMatchingService {
         //고객의 토큰 계산내용 들가야함.
         post.getUser().setCoin(post.getUser().getCoin()-post.getAmount());
         //파트너에게 산책 종료 알람을 보내야함
-        sseService.notifyMatch(String.valueOf(post.getWalker().getId()), "산책이 완료되었습니다",4);
 
         int status = 3; // 산책 완료
         String reason = "no problem"; // 문제가 없을 경우
@@ -490,8 +468,6 @@ public class WalkMatchingService {
             throw new IllegalArgumentException("산책중인 게시글이 아닙니다");
         }
         //파트너에게 산책 비정상종료 알람을 보내야함
-        sseService.notifyMatch(String.valueOf(post.getWalker().getId()), "산책이 비정상 종료되었습니다",7);
-        sseService.notifyMatch(String.valueOf(post.getUser().getId()), "산책이 비정상 종료되었습니다",7);
 
         int status = 4; // 산책 미완료
         //레코드 테이블로 이동
