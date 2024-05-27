@@ -12,4 +12,7 @@ public interface CareMatchingRepository extends JpaRepository<CareMatchingEntity
     List<CareMatchingEntity> findByCarePost_Caregiver_IdAndStatus(int caregiverId, int status);
     List<CareMatchingEntity> findByOwner_IdAndStatus(int userId, int status);
     CareMatchingEntity findById(int id);
+    int countByOwner_IdAndStatus(int userId,int status);
+    int countByCarePost_Caregiver_IdAndStatus(int userId,int status);
+    CareMatchingEntity findByCarePost_Caregiver_Id(int userId);
 }

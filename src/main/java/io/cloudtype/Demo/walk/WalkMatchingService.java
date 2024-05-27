@@ -4,6 +4,7 @@ import io.cloudtype.Demo.mypage.pet.PetEntity;
 import io.cloudtype.Demo.mypage.user.UserEntity;
 import io.cloudtype.Demo.walk.DTO.WaiterDTO;
 import io.cloudtype.Demo.walk.DTO.WalkMatchingDTO;
+import io.cloudtype.Demo.walk.DTO.WalkMatchingDetailsDTO;
 import io.cloudtype.Demo.walk.entity.WaiterEntity;
 import io.cloudtype.Demo.walk.entity.WalkMatchingEntity;
 import io.cloudtype.Demo.walk.entity.WalkRecordEntity;
@@ -219,7 +220,7 @@ public class WalkMatchingService {
         waiterRepository.save(waiter);
         //신청이 완료되었음으로 주인에게 신청 알람을 보내야함
     }
-    public WalkMatchingDTO myPost(String accessToken) {
+    public WalkMatchingDetailsDTO myPost(String accessToken) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
@@ -230,7 +231,27 @@ public class WalkMatchingService {
         if (post == null) {
             throw new IllegalArgumentException("작성한 게시글이 없습니다");
         }
-        return createDTO(post, 0, 0);
+        return createWalkDTO(post);
+    }
+    private WalkMatchingDetailsDTO createWalkDTO(WalkMatchingEntity entity) {
+        WalkMatchingDetailsDTO dto = new WalkMatchingDetailsDTO();
+        dto.setId(entity.getId());
+        dto.setUserNickname(entity.getUser().getNickname());
+        dto.setUserProfile(entity.getUser().getProfileImage());
+        dto.setPetId(entity.getPet().getId());
+        dto.setWalkTime(entity.getWalkTime());
+        dto.setCreateDate(entity.getCreateDate());
+        dto.setStartTime(entity.getStartTime());
+        dto.setLatitude(entity.getLatitude());
+        dto.setLongitude(entity.getLongitude());
+        dto.setStatus(entity.getStatus());
+        dto.setAddress(entity.getAddress());
+        dto.setDetailAddress(entity.getDetailAddress());
+        dto.setTitle(entity.getTitle());
+        dto.setContent(entity.getContent());
+        dto.setWalkerNickname(entity.getWalker().getNickname());
+        dto.setWalkerProfile(entity.getWalker().getProfileImage());
+        return dto;
     }
     public List<WaiterDTO> getApplierList(String accessToken) {
         accessToken = accessToken.split(" ")[1];
@@ -290,6 +311,19 @@ public class WalkMatchingService {
         double distance = getDistance(walkMatching.getLatitude(), walkMatching.getLongitude(), nowLatitude, nowLongitude);
         dto.setDistance(distance); // 거리 설정
         return dto;
+    }
+    public WalkMatchingDetailsDTO myApplyProgress(String accessToken) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        WalkMatchingEntity post = walkMatchingRepository.findByWalkerIdAndStatus(user.getId(),1);
+        if (post == null) {
+            throw new IllegalArgumentException("진행중인 산책이 없습니다");
+        }
+        return createWalkDTO(post);
     }
     @Transactional
     public void accept(String accessToken, int waiterListId, int postId, int waiterId) {
@@ -472,5 +506,28 @@ public class WalkMatchingService {
         //레코드 테이블로 이동
         int walkRecodeId = createRecord(post, LocalDateTime.now(), status, reason);
         walkMatchingRepository.delete(post);
+    }
+    public int getUserWalkStatus(String accessToken,int status) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        if(status==0) return walkMatchingRepository.countByUserIdAndStatus(user.getId(),0);
+        else if (status==1) return walkMatchingRepository.countByUserIdAndStatus(user.getId(),1);
+        else if (status==2) return walkMatchingRepository.countByUserIdAndStatus(user.getId(),2);
+        else return 0;
+    }
+    public int getWalkerStatus(String accessToken,int status) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        if (status==1) return walkMatchingRepository.countByWalkerIdAndStatus(user.getId(),1);
+        else if (status==2) return walkMatchingRepository.countByWalkerIdAndStatus(user.getId(),2);
+        else return 0;
     }
 }

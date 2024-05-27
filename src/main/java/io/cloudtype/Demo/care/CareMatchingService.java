@@ -151,9 +151,6 @@ public class CareMatchingService {
         if (carePost.getCaregiver().getId() == user.getId()) {
             throw new IllegalStateException("자신의 글에는 신청할 수 없습니다");
         }
-        if(careApplyDTO.getAmount()> user.getCoin()){
-            throw new IllegalStateException("코인이 부족합니다 충전후 이용해주세요");
-        }
 
         // 예약 시작일과 종료일을 LocalDate로 변환하여 날짜 리스트를 만듭니다.
         LocalDate startDate = careApplyDTO.getReservationStartDate().toLocalDate();
@@ -162,7 +159,12 @@ public class CareMatchingService {
         log.info("startDate: {}", startDate);
         log.info("endDate: {}", endDate);
         log.info("reservationDates: {}", reservationDates);
-
+        //reservationDates의 수
+        int reservationDays = reservationDates.size();
+        int amount = reservationDays * 40000;
+        if(amount> user.getCoin()){
+            throw new IllegalStateException("코인이 부족합니다 충전후 이용해주세요");
+        }
         // 예약 불가 날짜와 겹치는지 확인
         List<ReservationSchedulerEntity> reservationSchedulers = reservationSchedulerRepository.findByCarePost(carePost);
         for (LocalDate date : reservationDates) {
@@ -194,7 +196,7 @@ public class CareMatchingService {
         careMatching.setCarePost(carePost);
         careMatching.setPet(pet);
         careMatching.setOwner(user);
-        careMatching.setAmount(careApplyDTO.getAmount());
+        careMatching.setAmount(amount);
         careMatching.setApplyDate(LocalDateTime.now());
         careMatching.setReservationStartDate(careApplyDTO.getReservationStartDate());
         careMatching.setReservationEndDate(careApplyDTO.getReservationEndDate());
@@ -846,5 +848,28 @@ public class CareMatchingService {
         carePostRepository.save(carePost);
 
         //돌봄 미완료 메세지 보내야함 양쪽
+    }
+    public int getUserCareStatus(String accessToken,int status) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        if (status == 0) return careMatchingRepository.countByOwner_IdAndStatus(user.getId(), 0);
+        else if (status == 1) return careMatchingRepository.countByOwner_IdAndStatus(user.getId(), 1);
+        else if (status == 2) return careMatchingRepository.countByOwner_IdAndStatus(user.getId(), 2);
+        return 0;
+    }
+    public int getCaregiverStatus(String accessToken,int status) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        if (status == 1) return careMatchingRepository.countByCarePost_Caregiver_IdAndStatus(user.getId(), 1);
+        else if (status == 2) return careMatchingRepository.countByCarePost_Caregiver_IdAndStatus(user.getId(), 2);
+        return 0;
     }
 }

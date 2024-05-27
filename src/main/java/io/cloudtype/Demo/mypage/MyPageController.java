@@ -1,8 +1,10 @@
 package io.cloudtype.Demo.mypage;
 
+import io.cloudtype.Demo.care.CareMatchingService;
 import io.cloudtype.Demo.community.CommunityBoardService;
 import io.cloudtype.Demo.login.JoinDetailsDTO;
 import io.cloudtype.Demo.mypage.pet.PetDTO;
+import io.cloudtype.Demo.walk.WalkMatchingService;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
@@ -21,10 +23,16 @@ public class MyPageController {
 
     private final MyPageService myPageService;
     private final CommunityBoardService communityBoardService;
+    private final WalkMatchingService walkMatchingService;
+    private final CareMatchingService careMatchingService;
 
-    public MyPageController(MyPageService myPageService, CommunityBoardService communityBoardService) {
+    public MyPageController(MyPageService myPageService, CommunityBoardService communityBoardService,
+                            WalkMatchingService walkMatchingService, CareMatchingService careMatchingService
+    ) {
         this.myPageService = myPageService;
         this.communityBoardService = communityBoardService;
+        this.walkMatchingService = walkMatchingService;
+        this.careMatchingService = careMatchingService;
     }
     @PostMapping("")
     public ResponseEntity<?> myPage(@RequestHeader("Authorization") String accessToken,
@@ -190,6 +198,51 @@ public class MyPageController {
         try {
             int coin = myPageService.getCoin(accessToken);
             return ResponseEntity.ok(coin);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/status")
+    public ResponseEntity<?> getStatus(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            Map<String, Object> status = new HashMap<>();
+            //유저로서 산책 상태값이 0인 것이 있는가 - 0,1
+            int userWalkStatus0 = walkMatchingService.getUserWalkStatus(accessToken,0);
+            //유저로서 산책 상태값이 1인 것이 있는가 - 0,1
+            int userWalkStatus1 = walkMatchingService.getUserWalkStatus(accessToken,1);
+            //유저로서 산책 상태값이 2인 것이 있는가 - 0,1
+            int userWalkStatus2 = walkMatchingService.getUserWalkStatus(accessToken,2);
+
+            if(userWalkStatus2 == 1) status.put("userWalkStatus", "유저로서 산책을 진행중");
+            else if(userWalkStatus1 == 1) status.put("userWalkStatus", "유저로서 산책매칭이 완료");
+            else if(userWalkStatus0 == 1) status.put("userWalkStatus", "유저로서 산책매칭을 신청중");
+            else status.put("userWalkStatus", "유저로서 산책매칭을 신청한 적이 없습니다");
+
+            //유저로서 돌봄 상채값이 0인 것이 몇개 있는가
+            int userCareStatus0 = careMatchingService.getUserCareStatus(accessToken,0);
+            status.put("유저로서 돌봄 예약신청 수", userCareStatus0);
+            //유저로서 돌봄 상태값이 1인 것이 몇개 있는가
+            int userCareStatus1 = careMatchingService.getUserCareStatus(accessToken,1);
+            status.put("유저로서 돌봄 예약확정 수", userCareStatus1);
+            //유저로서 돌봄 상태값이 2인 것이 몇개 있는가
+            int userCareStatus2 = careMatchingService.getUserCareStatus(accessToken,2);
+            status.put("유저로서 돌봄 진행중 수", userCareStatus2);
+
+            //파트너로서 산책 상태값이 1인 것이 있는가
+            int walkerWalkStatus1 = walkMatchingService.getWalkerStatus(accessToken,1);
+            //파트너로서 산책 상태값이 2인 것이 있는가
+            int walkerWalkStatus2 = walkMatchingService.getWalkerStatus(accessToken,2);
+            if(walkerWalkStatus1 == 1) status.put("파트너로서 산책매칭이 완료", walkerWalkStatus1);
+            else if(walkerWalkStatus2 == 1) status.put("파트너로서 산책을 진행중", walkerWalkStatus2);
+
+            //파트너로서 돌봄 상태값이 1인 것이 몇개 있는가
+            int caregiverCareStatus1 = careMatchingService.getCaregiverStatus(accessToken,1);
+            status.put("파트너로서 돌봄 예약확정 수", caregiverCareStatus1);
+            //파트너로서 돌봄 상태값이 2인 것이 몇개 있는가
+            int caregiverCareStatus2 = careMatchingService.getCaregiverStatus(accessToken,2);
+            status.put("파트너로서 돌봄 진행중 수", caregiverCareStatus2);
+            return ResponseEntity.ok(status);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

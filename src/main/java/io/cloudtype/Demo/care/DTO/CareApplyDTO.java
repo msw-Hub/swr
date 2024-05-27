@@ -14,8 +14,6 @@ public class CareApplyDTO {
 
     private int petId;
 
-    private int amount;
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime reservationStartDate;
 

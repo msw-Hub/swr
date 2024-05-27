@@ -12,5 +12,7 @@ public interface WalkMatchingRepository extends JpaRepository<WalkMatchingEntity
     WalkMatchingEntity findById(int id);
 
     WalkMatchingEntity findByUserId(int userId);
+    int countByUserIdAndStatus(int userId,int status);
+    WalkMatchingEntity findByWalkerIdAndStatus(int walkerId, int status);
     int countByWalkerIdAndStatus(int walkerId, int status);
 }

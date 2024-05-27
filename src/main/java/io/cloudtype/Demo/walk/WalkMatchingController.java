@@ -2,6 +2,7 @@ package io.cloudtype.Demo.walk;
 
 import io.cloudtype.Demo.walk.DTO.WaiterDTO;
 import io.cloudtype.Demo.walk.DTO.WalkMatchingDTO;
+import io.cloudtype.Demo.walk.DTO.WalkMatchingDetailsDTO;
 import io.cloudtype.Demo.walk.entity.WalkMatchingEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +93,7 @@ public class WalkMatchingController {
     public ResponseEntity<?> myPost(@RequestHeader("Authorization") String accessToken
     ) {
         try {
-            WalkMatchingDTO myPost = walkMatchingService.myPost(accessToken);
+            WalkMatchingDetailsDTO myPost = walkMatchingService.myPost(accessToken);
             return ResponseEntity.ok(myPost);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -118,6 +119,16 @@ public class WalkMatchingController {
 
             List<WalkMatchingDTO> myApply = walkMatchingService.myApply(accessToken, nowLatitude, nowLongitude);
             return ResponseEntity.ok(myApply);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/myApply/progress")
+    public ResponseEntity<?> myApplyProgress(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            WalkMatchingDetailsDTO myApplyProgress = walkMatchingService.myApplyProgress(accessToken);
+            return ResponseEntity.ok(myApplyProgress);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
