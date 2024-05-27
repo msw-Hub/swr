@@ -22,7 +22,7 @@ public class PartnerEntity {
     private String address;                //거주지
     private String career;                //경력
 
-    private String testScore;            //테스트 점수
+    private int testScore;            //테스트 점수
     private LocalDateTime testDate;            //테스트 응시일
     private int testCount;            //테스트 응시횟수
 
