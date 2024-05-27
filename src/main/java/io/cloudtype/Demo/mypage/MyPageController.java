@@ -214,10 +214,10 @@ public class MyPageController {
             //유저로서 산책 상태값이 2인 것이 있는가 - 0,1
             int userWalkStatus2 = walkMatchingService.getUserWalkStatus(accessToken,2);
 
-            if(userWalkStatus2 == 1) status.put("userWalkStatus", "유저로서 산책을 진행중");
-            else if(userWalkStatus1 == 1) status.put("userWalkStatus", "유저로서 산책매칭이 완료");
-            else if(userWalkStatus0 == 1) status.put("userWalkStatus", "유저로서 산책매칭을 신청중");
-            else status.put("userWalkStatus", "유저로서 산책매칭을 신청한 적이 없습니다");
+            if(userWalkStatus2 == 1) status.put("유저로서 산책 상태", "유저로서 산책을 진행중");
+            else if(userWalkStatus1 == 1) status.put("유저로서 산책 상태", "유저로서 산책매칭이 완료");
+            else if(userWalkStatus0 == 1) status.put("유저로서 산책 상태", "유저로서 산책매칭을 신청중");
+            else status.put("유저로서 산책 상태", "유저로서 산책매칭을 신청한 적이 없습니다");
 
             //유저로서 돌봄 상채값이 0인 것이 몇개 있는가
             int userCareStatus0 = careMatchingService.getUserCareStatus(accessToken,0);
@@ -242,6 +242,7 @@ public class MyPageController {
             //파트너로서 돌봄 상태값이 2인 것이 몇개 있는가
             int caregiverCareStatus2 = careMatchingService.getCaregiverStatus(accessToken,2);
             status.put("파트너로서 돌봄 진행중 수", caregiverCareStatus2);
+
             return ResponseEntity.ok(status);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

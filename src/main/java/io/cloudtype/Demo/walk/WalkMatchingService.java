@@ -319,9 +319,12 @@ public class WalkMatchingService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        WalkMatchingEntity post = walkMatchingRepository.findByWalkerIdAndStatus(user.getId(),1);
+        WalkMatchingEntity post = walkMatchingRepository.findByWalkerId(user.getId());
         if (post == null) {
             throw new IllegalArgumentException("진행중인 산책이 없습니다");
+        }
+        if(post.getStatus()==0) {
+            throw new IllegalArgumentException("아직 수락되지 않은 게시글입니다");
         }
         return createWalkDTO(post);
     }
