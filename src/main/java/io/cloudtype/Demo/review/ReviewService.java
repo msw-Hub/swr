@@ -117,10 +117,10 @@ public class ReviewService {
     private WalkReviewDTO mapToWalkReviewDTO(WalkReviewEntity walkReview) {
         WalkReviewDTO walkReviewDTO = new WalkReviewDTO();
         walkReviewDTO.setId(walkReview.getId());
-        walkReviewDTO.setWalkRecodeId(walkReview.getWalkRecode().getId());
-        walkReviewDTO.setUserNickname(walkReview.getWalkRecode().getUser().getNickname());
-        walkReviewDTO.setWalkerNickname(walkReview.getWalkRecode().getWalker().getNickname());
-        walkReviewDTO.setWalkTime(walkReview.getWalkRecode().getWalkTime());
+        walkReviewDTO.setWalkRecodeId(walkReview.getWalkRecord().getId());
+        walkReviewDTO.setUserNickname(walkReview.getWalkRecord().getUser().getNickname());
+        walkReviewDTO.setWalkerNickname(walkReview.getWalkRecord().getWalker().getNickname());
+        walkReviewDTO.setWalkTime(walkReview.getWalkRecord().getWalkTime());
         walkReviewDTO.setRating(walkReview.getRating());
         walkReviewDTO.setContent(walkReview.getContent());
         walkReviewDTO.setReviewDate(walkReview.getCreateDate());
@@ -163,7 +163,7 @@ public class ReviewService {
         if (walkReview == null) {
             throw new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다");
         }
-        if (walkReview.getWalkRecode().getUser().getId() != user.getId()) {
+        if (walkReview.getWalkRecord().getUser().getId() != user.getId()) {
             throw new IllegalArgumentException("해당 리뷰의 작성자가 아닙니다");
         }
         String imgUrl = walkReview.getImgUrl();
@@ -171,7 +171,7 @@ public class ReviewService {
             communityBoardService.deleteImageGcs(imgUrl);
         }
         //파트너의 산책 평점 및 리뷰수 업데이트
-        UserEntity walker = walkReview.getWalkRecode().getWalker();
+        UserEntity walker = walkReview.getWalkRecord().getWalker();
         int reviewCount = walker.getWalkReviewCount();
         double walkRating = walker.getWalkRating();
         int newReviewCount = reviewCount - 1;
