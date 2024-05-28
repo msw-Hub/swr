@@ -29,7 +29,7 @@ public class ReviewController {
     //유저의 산책리뷰쓰기
     @PostMapping("/create/walk")
     public ResponseEntity<?> createWalkReview(@RequestHeader("Authorization") String accessToken,
-                                          @ModelAttribute("walk_recode_id") int walkRecodeId,
+                                          @ModelAttribute("walk_record_id") int walkRecordId,
                                           @ModelAttribute("content") String content,
                                           @ModelAttribute("rating") double rating,
                                           @RequestPart(value = "image", required=false) MultipartFile image
@@ -41,7 +41,7 @@ public class ReviewController {
                 imageUrl = communityBoardService.uploadImage(image);
             }
             // 후기 작성
-            reviewService.createReview(accessToken, walkRecodeId, content, rating, imageUrl);
+            reviewService.createReview(accessToken, walkRecordId, content, rating, imageUrl);
             return ResponseEntity.ok("후기 작성 성공");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

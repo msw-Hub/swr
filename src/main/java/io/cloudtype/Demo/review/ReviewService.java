@@ -54,46 +54,46 @@ public class ReviewService {
         this.carePostRepository = carePostRepository;
     }
     @Transactional
-    public void createReview(String accessToken, int walkRecodeId, String content, double rating, String imgUrl) {
+    public void createReview(String accessToken, int walkRecordId, String content, double rating, String imgUrl) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        WalkRecordEntity walkRecode = walkRecordRepository.findById(walkRecodeId);
-        if (walkRecode == null) {
+        WalkRecordEntity walkRecord = walkRecordRepository.findById(walkRecordId);
+        if (walkRecord == null) {
             throw new IllegalArgumentException("해당 산책기록을 찾을 수 없습니다");
         }
-        if (walkRecode.getUser().getId() != user.getId()) {
+        if (walkRecord.getUser().getId() != user.getId()) {
             throw new IllegalArgumentException("해당 산책기록의 작성자가 아닙니다");
         }
-        if(walkRecode.getStatus()!=3){
+        if(walkRecord.getStatus()!=3){
             throw new IllegalArgumentException("완료된 산책건에 대해서만 가능합니다");
         }
-        if (walkRecode.isReview()) {
+        if (walkRecord.isReview()) {
             throw new IllegalArgumentException("이미 리뷰를 작성하였습니다");
         }
         if(rating<0 || rating>5) {
             throw new IllegalArgumentException("평점은 0~5 사이의 값이어야 합니다");
         }
         //산책종료 24시간 내에 가능
-        if(walkRecode.getEndTime().plusDays(1).isBefore(LocalDateTime.now())) {
+        if(walkRecord.getEndTime().plusDays(1).isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("산책종료 후 24시간 이내에만 작성 가능합니다");
         }
         //리뷰 작성여부 수정
-        walkRecode.setReview(true);
-        walkRecordRepository.save(walkRecode);
+        walkRecord.setReview(true);
+        walkRecordRepository.save(walkRecord);
         //리뷰 작성
         WalkReviewEntity review = new WalkReviewEntity();
-        review.setWalkRecode(walkRecode);
+        review.setWalkRecode(walkRecord);
         review.setRating(rating);
         review.setContent(content);
         review.setCreateDate(LocalDateTime.now());
         review.setImgUrl(imgUrl);
         walkReviewRepository.save(review);
         //파트너의 산책 평점 및 리뷰수 업데이트
-        UserEntity walker = walkRecode.getWalker();
+        UserEntity walker = walkRecord.getWalker();
         int reviewCount = walker.getWalkReviewCount();
         double walkRating = walker.getWalkRating();
         int newReviewCount = reviewCount + 1;
