@@ -509,7 +509,7 @@ public class WalkMatchingService {
         if (post.getUser().getId() != user.getId()) {
             throw new IllegalArgumentException("해당 게시글의 작성자가 아닙니다");
         }
-        if (post.getStatus() != 2) {
+        if (post.getStatus() ==0) {
             throw new IllegalArgumentException("산책중인 게시글이 아닙니다");
         }
         //파트너에게 산책 비정상종료 알람을 보내야함

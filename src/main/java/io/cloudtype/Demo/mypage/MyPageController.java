@@ -235,6 +235,7 @@ public class MyPageController {
             int walkerWalkStatus2 = walkMatchingService.getWalkerStatus(accessToken,2);
             if(walkerWalkStatus1 == 1) status.put("partnerWalk", "매칭만완료");
             else if(walkerWalkStatus2 == 1) status.put("partnerWalk", "현재산책중");
+            else status.put("partnerWalk", "산책매칭없음");
 
             //파트너로서 돌봄 상태값이 1인 것이 몇개 있는가
             int caregiverCareStatus1 = careMatchingService.getCaregiverStatus(accessToken,1);
