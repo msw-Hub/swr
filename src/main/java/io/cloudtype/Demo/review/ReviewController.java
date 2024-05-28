@@ -100,7 +100,7 @@ public class ReviewController {
     //돌봄 리뷰 작성
     @PostMapping("/create/care")
     public ResponseEntity<?> createCareReview(@RequestHeader("Authorization") String accessToken,
-                                             @ModelAttribute("care_recode_id") int careRecodeId,
+                                             @ModelAttribute("care_record_id") int careRecordId,
                                              @ModelAttribute("content") String content,
                                              @ModelAttribute("rating") double rating,
                                              @RequestPart(value = "image", required=false) MultipartFile image
@@ -112,7 +112,7 @@ public class ReviewController {
                 imageUrl = communityBoardService.uploadImage(image);
             }
             // 후기 작성
-            reviewService.createCareReview(accessToken, careRecodeId, content, rating, imageUrl);
+            reviewService.createCareReview(accessToken, careRecordId, content, rating, imageUrl);
             return ResponseEntity.ok("후기 작성 성공");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

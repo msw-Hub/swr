@@ -188,36 +188,36 @@ public class ReviewService {
         walkReviewRepository.delete(walkReview);
     }
     @Transactional
-    public void createCareReview(String accessToken, int careRecodeId, String content, double rating, String imgUrl) {
+    public void createCareReview(String accessToken, int careRecordId, String content, double rating, String imgUrl) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        CareRecordEntity careRecode = careRecordRepository.findById(careRecodeId);
-        if (careRecode == null) {
+        CareRecordEntity careRecord = careRecordRepository.findById(careRecordId);
+        if (careRecord == null) {
             throw new IllegalArgumentException("해당 돌봄기록을 찾을 수 없습니다");
         }
-        if (careRecode.getOwner().getId() != user.getId()) {
+        if (careRecord.getOwner().getId() != user.getId()) {
             throw new IllegalArgumentException("해당 돌봄기록의 작성자가 아닙니다");
         }
-        if (careRecode.isReview()) {
+        if (careRecord.isReview()) {
             throw new IllegalArgumentException("이미 리뷰를 작성하였습니다");
         }
         if (rating < 0 || rating > 5) {
             throw new IllegalArgumentException("평점은 0~5 사이의 값이어야 합니다");
         }
         //돌봄종료 24시간 내에 가능
-        if (careRecode.getEndDate().plusDays(1).isBefore(LocalDateTime.now())) {
+        if (careRecord.getEndDate().plusDays(1).isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("돌봄종료 후 24시간 이내에만 작성 가능합니다");
         }
         //리뷰 작성여부 수정
-        careRecode.setReview(true);
-        careRecordRepository.save(careRecode);
+        careRecord.setReview(true);
+        careRecordRepository.save(careRecord);
         //리뷰 작성
         CareReviewEntity review = new CareReviewEntity();
-        review.setCareRecode(careRecode);
+        review.setCareRecord(careRecord);
         review.setRating(rating);
         review.setContent(content);
         review.setCreateDate(LocalDateTime.now());
@@ -225,7 +225,7 @@ public class ReviewService {
         careReviewRepository.save(review);
 
         //파트너의 돌봄 평점 및 리뷰수 업데이트
-        UserEntity caregiver = careRecode.getCaregiver();
+        UserEntity caregiver = careRecord.getCaregiver();
         int reviewCount = caregiver.getCareReviewCount();
         double careRating = caregiver.getCareRating();
         int newReviewCount = reviewCount + 1;
@@ -250,13 +250,13 @@ public class ReviewService {
     private CareReviewDTO mapToCareReviewDTO(CareReviewEntity careReview) {
         CareReviewDTO careReviewDTO = new CareReviewDTO();
         careReviewDTO.setId(careReview.getId());
-        careReviewDTO.setCareRecodeId(careReview.getCareRecode().getId());
-        careReviewDTO.setUserNickname(careReview.getCareRecode().getOwner().getNickname());
-        careReviewDTO.setCaregiverNickname(careReview.getCareRecode().getCaregiver().getNickname());
+        careReviewDTO.setCareRecodeId(careReview.getCareRecord().getId());
+        careReviewDTO.setUserNickname(careReview.getCareRecord().getOwner().getNickname());
+        careReviewDTO.setCaregiverNickname(careReview.getCareRecord().getCaregiver().getNickname());
         careReviewDTO.setContent(careReview.getContent());
         careReviewDTO.setRating(careReview.getRating());
         careReviewDTO.setReviewDate(careReview.getCreateDate());
-        careReviewDTO.setPetSpecies(careReview.getCareRecode().getPet().getSpecies());
+        careReviewDTO.setPetSpecies(careReview.getCareRecord().getPet().getSpecies());
         careReviewDTO.setImgUrl(careReview.getImgUrl());
         return careReviewDTO;
     }
@@ -272,7 +272,7 @@ public class ReviewService {
         if (careReview == null) {
             throw new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다");
         }
-        if (careReview.getCareRecode().getOwner().getId() != user.getId()) {
+        if (careReview.getCareRecord().getOwner().getId() != user.getId()) {
             throw new IllegalArgumentException("해당 리뷰의 작성자가 아닙니다");
         }
         String imgUrl = careReview.getImgUrl();
@@ -280,7 +280,7 @@ public class ReviewService {
             communityBoardService.deleteImageGcs(imgUrl);
         }
         //파트너의 돌봄 평점 및 리뷰수 업데이트
-        UserEntity caregiver = careReview.getCareRecode().getCaregiver();
+        UserEntity caregiver = careReview.getCareRecord().getCaregiver();
         int reviewCount = caregiver.getCareReviewCount();
         double careRating = caregiver.getCareRating();
         int newReviewCount = reviewCount - 1;
