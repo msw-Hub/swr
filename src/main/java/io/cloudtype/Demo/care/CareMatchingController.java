@@ -239,7 +239,7 @@ public class CareMatchingController {
     public ResponseEntity<?> myPostProgress(@RequestHeader("Authorization") String accessToken
     ) {
         try {
-            List<CareApplyDetailDTO> progressList = careMatchingService.myProgressList(accessToken);
+            List<CareApplyDetailDTO> progressList = careMatchingService.myPostProgressList(accessToken);
             return ResponseEntity.ok(progressList);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

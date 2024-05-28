@@ -358,37 +358,8 @@ public class MyPageService {
         partner.setTestDate(LocalDate.now());
         partnerRepository.save(partner);
 
-        int score = 0;
-        if(quizDTO.getQ1() == 1){
-            score += 10;
-        }
-        if(quizDTO.getQ2() == 2){
-            score += 10;
-        }
-        if(quizDTO.getQ3() == 3){
-            score += 10;
-        }
-        if(quizDTO.getQ4() == 4){
-            score += 10;
-        }
-        if(quizDTO.getQ5() == 5){
-            score += 10;
-        }
-        if (quizDTO.getQ6() == 6) {
-            score += 10;
-        }
-        if (quizDTO.getQ7() == 7) {
-            score += 10;
-        }
-        if (quizDTO.getQ8() == 8) {
-            score += 10;
-        }
-        if (quizDTO.getQ9() == 9) {
-            score += 10;
-        }
-        if (quizDTO.getQ10() == 10) {
-            score += 10;
-        }
+        int score = getScore(quizDTO);
+
         if(score >=80){
             partner.setPartnerStep(4);
             partner.setPartnerDate(LocalDateTime.now());
@@ -396,6 +367,31 @@ public class MyPageService {
             userRepository.save(user);
         }else if (partner.getTestCount()==3) partner.setPartnerStep(3);
         partnerRepository.save(partner);
+        return score;
+    }
+
+    private static int getScore(QuizDTO quizDTO) {
+        int score = 0;
+        if(quizDTO.isQ1()) score+=5;
+        if(!quizDTO.isQ2()) score+=5;
+        if(!quizDTO.isQ3()) score+=5;
+        if(quizDTO.isQ4()) score+=5;
+        if(!quizDTO.isQ5()) score+=5;
+        if(!quizDTO.isQ6()) score+=5;
+        if(!quizDTO.isQ7()) score+=5;
+        if(quizDTO.isQ8()) score+=5;
+        if(quizDTO.isQ9()) score+=5;
+        if(quizDTO.isQ10()) score+=5;
+        if(quizDTO.getQ11()==4) score+=5;
+        if(quizDTO.getQ12()==2) score+=5;
+        if(quizDTO.getQ13()==4) score+=5;
+        if(quizDTO.getQ14()==5) score+=5;
+        if(quizDTO.getQ15()==5) score+=5;
+        if(quizDTO.getQ16()==1) score+=5;
+        if(quizDTO.getQ17()==3) score+=5;
+        if(quizDTO.getQ18()==3) score+=5;
+        if(quizDTO.getQ19()==1) score+=5;
+        if(quizDTO.getQ20()==3) score+=5;
         return score;
     }
 }

@@ -578,6 +578,20 @@ public class CareMatchingService {
                 .map(this::applierListToDTO)
                 .toList();
     }
+    public List<CareApplyDetailDTO> myPostProgressList(String accessToken) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+
+        List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByCarePost_Caregiver_IdAndStatus(user.getId(), 2);
+
+        return careMatchingList.stream()
+                .map(this::applierListToDTO)
+                .toList();
+    }
     @Transactional
     public void acceptCare(String accessToken, int careMatchingId) {
         accessToken = accessToken.split(" ")[1];
