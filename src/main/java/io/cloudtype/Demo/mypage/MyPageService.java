@@ -335,7 +335,8 @@ public class MyPageService {
             throw new IllegalArgumentException("인증에 실패하였습니다");
         }
         //결과가 일치하면 partnerStep을 1로 변경
-        PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
+        PartnerEntity partner = new PartnerEntity();
+        partner.setUser(user);
         partner.setPartnerStep(1);
         partnerRepository.save(partner);
     }
