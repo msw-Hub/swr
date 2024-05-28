@@ -81,7 +81,7 @@ public class WalkMatchingService {
             throw new IllegalArgumentException("필수 펫 정보가 누락 되어 신청글 작성이 불가능 합니다");
         }
         //산책글은 1개만 작성가능
-        if (walkMatchingRepository.findByUserId(user.getId())!=null && isEdit == 0) {
+        if (walkMatchingRepository.findByUser_Id(user.getId())!=null && isEdit == 0) {
             throw new IllegalArgumentException("이미 작성한 산책글이 있습니다");
         }
 
@@ -207,7 +207,7 @@ public class WalkMatchingService {
         if (post.getUser().getId() == user.getId()) {
             throw new IllegalArgumentException("본인의 게시글에는 신청할 수 없습니다");
         }
-        if (walkMatchingRepository.countByWalkerIdAndStatus(user.getId(),1)>0) {
+        if (walkMatchingRepository.countByWalker_IdAndStatus(user.getId(),1)>0) {
             throw new IllegalArgumentException("이미 산책중 입니다");
         }
         if (waiterRepository.findByWalkMatchingIdAndWaiterId(postId, user.getId())!=null) {
@@ -227,7 +227,7 @@ public class WalkMatchingService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        WalkMatchingEntity post = walkMatchingRepository.findByUserId(user.getId());
+        WalkMatchingEntity post = walkMatchingRepository.findByUser_Id(user.getId());
         if (post == null) {
             throw new IllegalArgumentException("작성한 게시글이 없습니다");
         }
@@ -257,7 +257,7 @@ public class WalkMatchingService {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
-        WalkMatchingEntity post = walkMatchingRepository.findByUserId(user.getId());
+        WalkMatchingEntity post = walkMatchingRepository.findByUser_Id(user.getId());
 
         List<WaiterEntity> waiters = waiterRepository.findByWalkMatchingId(post.getId());
 
@@ -319,7 +319,7 @@ public class WalkMatchingService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        WalkMatchingEntity post = walkMatchingRepository.findByWalkerId(user.getId());
+        WalkMatchingEntity post = walkMatchingRepository.findByWalker_Id(user.getId());
         if (post == null) {
             throw new IllegalArgumentException("진행중인 산책이 없습니다");
         }
@@ -517,9 +517,9 @@ public class WalkMatchingService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        if(status==0) return walkMatchingRepository.countByUserIdAndStatus(user.getId(),0);
-        else if (status==1) return walkMatchingRepository.countByUserIdAndStatus(user.getId(),1);
-        else if (status==2) return walkMatchingRepository.countByUserIdAndStatus(user.getId(),2);
+        if(status==0) return walkMatchingRepository.countByUser_IdAndStatus(user.getId(),0);
+        else if (status==1) return walkMatchingRepository.countByUser_IdAndStatus(user.getId(),1);
+        else if (status==2) return walkMatchingRepository.countByUser_IdAndStatus(user.getId(),2);
         else return 0;
     }
     public int getWalkerStatus(String accessToken,int status) {
@@ -529,8 +529,8 @@ public class WalkMatchingService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        if (status==1) return walkMatchingRepository.countByWalkerIdAndStatus(user.getId(),1);
-        else if (status==2) return walkMatchingRepository.countByWalkerIdAndStatus(user.getId(),2);
+        if (status==1) return walkMatchingRepository.countByWalker_IdAndStatus(user.getId(),1);
+        else if (status==2) return walkMatchingRepository.countByWalker_IdAndStatus(user.getId(),2);
         else return 0;
     }
 }
