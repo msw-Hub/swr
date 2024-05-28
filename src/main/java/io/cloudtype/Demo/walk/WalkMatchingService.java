@@ -241,7 +241,6 @@ public class WalkMatchingService {
         dto.setPetId(entity.getPet().getId());
         dto.setWalkTime(entity.getWalkTime());
         dto.setCreateDate(entity.getCreateDate());
-        dto.setStartTime(entity.getStartTime());
         dto.setLatitude(entity.getLatitude());
         dto.setLongitude(entity.getLongitude());
         dto.setStatus(entity.getStatus());
@@ -249,8 +248,18 @@ public class WalkMatchingService {
         dto.setDetailAddress(entity.getDetailAddress());
         dto.setTitle(entity.getTitle());
         dto.setContent(entity.getContent());
-        dto.setWalkerNickname(entity.getWalker().getNickname());
-        dto.setWalkerProfile(entity.getWalker().getProfileImage());
+        if( entity.getStartTime() != null) {
+            dto.setStartTime(entity.getStartTime());
+        } else {
+            dto.setStartTime(null);
+        }
+        if (entity.getWalker() != null) {
+            dto.setWalkerNickname(entity.getWalker().getNickname());
+            dto.setWalkerProfile(entity.getWalker().getProfileImage());
+        } else {
+            dto.setWalkerNickname(null);
+            dto.setWalkerProfile(null);
+        }
         return dto;
     }
     public List<WaiterDTO> getApplierList(String accessToken) {
