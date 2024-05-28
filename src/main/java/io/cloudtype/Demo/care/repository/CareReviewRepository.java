@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface CareReviewRepository extends JpaRepository<CareReviewEntity, Long> {
-    List<CareReviewEntity> findByCareRecode_Owner_IdOrderByCreateDateDesc(int userId);
+    List<CareReviewEntity> findByCareRecord_Owner_IdOrderByCreateDateDesc(int userId);
     CareReviewEntity findById(int careReviewId);
-    List<CareReviewEntity> findByCareRecode_Caregiver_IdOrderByCreateDateDesc(int userId);
+    List<CareReviewEntity> findByCareRecord_Caregiver_IdOrderByCreateDateDesc(int userId);
 }

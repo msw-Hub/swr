@@ -109,7 +109,7 @@ public class ReviewService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        List<WalkReviewEntity> walkReviewList = walkReviewRepository.findByWalkRecode_User_IdOrderByCreateDateDesc(user.getId());
+        List<WalkReviewEntity> walkReviewList = walkReviewRepository.findByWalkRecord_User_IdOrderByCreateDateDesc(user.getId());
         return walkReviewList.stream()
                 .map(this::mapToWalkReviewDTO)
                 .collect(Collectors.toList());
@@ -134,7 +134,7 @@ public class ReviewService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        List<WalkReviewEntity> walkReviewList = walkReviewRepository.findByWalkRecode_Walker_IdOrderByCreateDateDesc(user.getId());
+        List<WalkReviewEntity> walkReviewList = walkReviewRepository.findByWalkRecord_Walker_IdOrderByCreateDateDesc(user.getId());
         return walkReviewList.stream()
                 .map(this::mapToWalkReviewDTO)
                 .collect(Collectors.toList());
@@ -146,7 +146,7 @@ public class ReviewService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        List<WalkReviewEntity> walkReviewList = walkReviewRepository.findByWalkRecode_Walker_IdOrderByCreateDateDesc(partnerId);
+        List<WalkReviewEntity> walkReviewList = walkReviewRepository.findByWalkRecord_Walker_IdOrderByCreateDateDesc(partnerId);
         return walkReviewList.stream()
                 .map(this::mapToWalkReviewDTO)
                 .collect(Collectors.toList());
@@ -242,7 +242,7 @@ public class ReviewService {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
         //care_recode_id로 접근해서
-        List<CareReviewEntity> careReviewList = careReviewRepository.findByCareRecode_Owner_IdOrderByCreateDateDesc(user.getId());
+        List<CareReviewEntity> careReviewList = careReviewRepository.findByCareRecord_Owner_IdOrderByCreateDateDesc(user.getId());
         return careReviewList.stream()
                 .map(this::mapToCareReviewDTO)
                 .collect(Collectors.toList());
@@ -303,7 +303,7 @@ public class ReviewService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        List<CareReviewEntity> careReviewList = careReviewRepository.findByCareRecode_Caregiver_IdOrderByCreateDateDesc(user.getId());
+        List<CareReviewEntity> careReviewList = careReviewRepository.findByCareRecord_Caregiver_IdOrderByCreateDateDesc(user.getId());
         return careReviewList.stream()
                 .map(this::mapToCareReviewDTO)
                 .collect(Collectors.toList());
@@ -316,7 +316,7 @@ public class ReviewService {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
         int caregiverId = carePostRepository.findById(carePostId).getCaregiver().getId();
-        List<CareReviewEntity> careReviewList = careReviewRepository.findByCareRecode_Caregiver_IdOrderByCreateDateDesc(caregiverId);
+        List<CareReviewEntity> careReviewList = careReviewRepository.findByCareRecord_Caregiver_IdOrderByCreateDateDesc(caregiverId);
         return careReviewList.stream()
                 .map(this::mapToCareReviewDTO)
                 .collect(Collectors.toList());

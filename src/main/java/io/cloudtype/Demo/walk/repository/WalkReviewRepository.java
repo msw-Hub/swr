@@ -8,8 +8,8 @@ import java.util.List;
 
 @Repository
 public interface WalkReviewRepository extends JpaRepository<WalkReviewEntity, Long> {
-    List<WalkReviewEntity> findByWalkRecode_User_IdOrderByCreateDateDesc(int userId);
-    List<WalkReviewEntity> findByWalkRecode_Walker_IdOrderByCreateDateDesc(int walkerId);
+    List<WalkReviewEntity> findByWalkRecord_User_IdOrderByCreateDateDesc(int userId);
+    List<WalkReviewEntity> findByWalkRecord_Walker_IdOrderByCreateDateDesc(int walkerId);
 
     WalkReviewEntity findById(int id);
 }
