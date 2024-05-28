@@ -303,6 +303,7 @@ public class MyPageService {
 
         return testDate.plusDays(3);
     }
+    @Transactional
     public void identifyIdentification(String accessToken, MultipartFile identificationImage) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
