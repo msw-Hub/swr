@@ -11,17 +11,18 @@ import io.cloudtype.Demo.mypage.user.UserEntity;
 import io.cloudtype.Demo.mypage.user.UserRepository;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.BodyInserters;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -33,10 +34,11 @@ public class MyPageService {
     private final PartnerRepository partnerRepository;
     private final JWTUtil jwtUtil;
     private final JoinService joinService;
+    private final WebClient.Builder webClientBuilder;
 
     public MyPageService(UserRepository userRepository, JWTUtil jwtUtil, JoinService joinService,
                          BCryptPasswordEncoder bCryptPasswordEncoder, PetRepository petRepository,
-                         PartnerRepository partnerRepository
+                         PartnerRepository partnerRepository, WebClient.Builder webClientBuilder
     ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
@@ -44,6 +46,7 @@ public class MyPageService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.petRepository = petRepository;
         this.partnerRepository = partnerRepository;
+        this.webClientBuilder = webClientBuilder;
     }
     public boolean checkPinNumber(String accessToken, int pinNumber) {
         accessToken = accessToken.split(" ")[1];
@@ -307,8 +310,29 @@ public class MyPageService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        //이미지를 파이썬 서버로 post로 이미지를 넣어서 요청
+        String url = "http://43.201.218.11:8000/detect/";
+        // Send image to Python server
+        String result = webClientBuilder.build()
+                .post()
+                .uri(url)
+                .body(BodyInserters.fromMultipartData("file", identificationImage.getResource()))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        JSONObject jsonObject = new JSONObject(result);
+        String ocrName = jsonObject.getString("name");
+        String ocrBirth = jsonObject.getString("birth");
+        String ocrGender = jsonObject.getString("gender");
+        log.info("ocrName: " + ocrName);
+        log.info("ocrBirth: " + ocrBirth);
+        log.info("ocrGender: " + ocrGender);
         //이미지를 받아서 결과를 확인 및 비교
+        String dbName = user.getName();
+        String dbBirth = user.getBirth();
+        String dbGender = user.getGender();
+        if (!ocrName.equals(dbName) || !ocrBirth.equals(dbBirth) || !ocrGender.equals(dbGender)) {
+            throw new IllegalArgumentException("인증에 실패하였습니다");
+        }
         //결과가 일치하면 partnerStep을 1로 변경
         PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
         partner.setPartnerStep(1);
