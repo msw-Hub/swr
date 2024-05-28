@@ -86,7 +86,7 @@ public class ReviewService {
         walkRecordRepository.save(walkRecord);
         //리뷰 작성
         WalkReviewEntity review = new WalkReviewEntity();
-        review.setWalkRecode(walkRecord);
+        review.setWalkRecord(walkRecord);
         review.setRating(rating);
         review.setContent(content);
         review.setCreateDate(LocalDateTime.now());
