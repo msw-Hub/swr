@@ -169,8 +169,15 @@ public class CareMatchingService {
         List<ReservationSchedulerEntity> reservationSchedulers = reservationSchedulerRepository.findByCarePost(carePost);
         for (LocalDate date : reservationDates) {
             boolean isUnavailable = reservationSchedulers.stream()
-                    .anyMatch(reservation -> reservation.getUnavailableDate().toInstant()
-                            .atZone(ZoneId.systemDefault()).toLocalDate().isEqual(date));
+                    .anyMatch(reservation -> {
+                        Date unavailableDate = reservation.getUnavailableDate();
+                        if (unavailableDate != null) {
+                            return unavailableDate.toInstant()
+                                    .atZone(ZoneId.systemDefault()).toLocalDate().isEqual(date);
+                        } else {
+                            return false;
+                        }
+                    });
             if (isUnavailable) {
                 throw new IllegalStateException("예약 기간에 예약 불가 날짜가 포함되어 있습니다.");
             }
