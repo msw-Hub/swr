@@ -310,7 +310,7 @@ public class MyPageService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        String url = "http://43.201.218.11:8000/detect/";
+        String url = "http://43.201.218.68:8000/detect/";
         // Send image to Python server
         String result = webClientBuilder.build()
                 .post()
