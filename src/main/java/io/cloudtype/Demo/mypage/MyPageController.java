@@ -289,7 +289,8 @@ public class MyPageController {
     @PostMapping("/partner/apply/step2")
     public ResponseEntity<String> partnerApplyStep2(@RequestHeader("Authorization") String accessToken,
                                                     @RequestPart("face_image") MultipartFile faceImage,
-                                                    @RequestBody Map<String, String> requestBody
+                                                    @ModelAttribute("address") String address,
+                                                    @ModelAttribute("career") String career
     ) {
         try {
             if(faceImage == null){
@@ -298,7 +299,7 @@ public class MyPageController {
             // 이미지 업로드 서비스 호출
             String imageUrl = communityBoardService.uploadImage(faceImage);
             // 파트너 추가 정보 입력
-            myPageService.addPartnerStep2(accessToken, imageUrl, requestBody.get("address"), requestBody.get("career"));
+            myPageService.addPartnerStep2(accessToken, imageUrl, address, career);
             return ResponseEntity.ok("추가 정보 입력 완료");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
