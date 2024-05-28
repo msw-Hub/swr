@@ -5,6 +5,8 @@ import io.cloudtype.Demo.login.JoinService;
 import io.cloudtype.Demo.mypage.pet.PetDTO;
 import io.cloudtype.Demo.mypage.pet.PetEntity;
 import io.cloudtype.Demo.mypage.pet.PetRepository;
+import io.cloudtype.Demo.mypage.user.PartnerEntity;
+import io.cloudtype.Demo.mypage.user.PartnerRepository;
 import io.cloudtype.Demo.mypage.user.UserEntity;
 import io.cloudtype.Demo.mypage.user.UserRepository;
 import io.cloudtype.Demo.jwt.JWTUtil;
@@ -12,8 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Year;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,16 +30,20 @@ public class MyPageService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final PetRepository petRepository;
+    private final PartnerRepository partnerRepository;
     private final JWTUtil jwtUtil;
     private final JoinService joinService;
 
     public MyPageService(UserRepository userRepository, JWTUtil jwtUtil, JoinService joinService,
-                         BCryptPasswordEncoder bCryptPasswordEncoder, PetRepository petRepository) {
+                         BCryptPasswordEncoder bCryptPasswordEncoder, PetRepository petRepository,
+                         PartnerRepository partnerRepository
+    ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.joinService = joinService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.petRepository = petRepository;
+        this.partnerRepository = partnerRepository;
     }
     public boolean checkPinNumber(String accessToken, int pinNumber) {
         accessToken = accessToken.split(" ")[1];
@@ -179,7 +189,7 @@ public class MyPageService {
     public void editPetStep1(int petId, String petName, int petAge, String species,String gender, String imageUrl) {
         PetEntity pet = petRepository.findById(petId);
         if (pet == null) {
-            throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다.");
+            throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다");
         }
         // 반려동물 생년 계산
         int currentYear = Year.now().getValue();
@@ -198,7 +208,7 @@ public class MyPageService {
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
         List<PetEntity> petList = petRepository.findByOwner(user);
         return petList.stream()
@@ -226,10 +236,10 @@ public class MyPageService {
         UserEntity user = userRepository.findByUsername(username);
         PetEntity pet = petRepository.findById(petId);
         if (pet == null) {
-            throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다.");
+            throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다");
         }
         if (pet.getOwner().getId() != user.getId()) {
-            throw new IllegalArgumentException("해당 반려동물의 주인이 아닙니다.");
+            throw new IllegalArgumentException("해당 반려동물의 주인이 아닙니다");
         }
         petRepository.delete(pet);
     }
@@ -239,10 +249,10 @@ public class MyPageService {
         UserEntity user = userRepository.findByUsername(username);
         PetEntity pet = petRepository.findById(petId);
         if (pet == null) {
-            throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다.");
+            throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다");
         }
         if (pet.getOwner().getId() != user.getId()) {
-            throw new IllegalArgumentException("해당 반려동물의 주인이 아닙니다.");
+            throw new IllegalArgumentException("해당 반려동물의 주인이 아닙니다");
         }
         return mapToDTO3(pet);
     }
@@ -251,8 +261,141 @@ public class MyPageService {
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
         return user.getCoin();
+    }
+    public int getPartnerApplyCheck(String accessToken) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
+        if (partner == null) {
+            return 0;
+        }
+        return partner.getPartnerStep();
+    }
+    public int getPartnerTestCount(String accessToken) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
+        return partner.getTestCount();
+    }
+    public LocalDate getNextTestDate(String accessToken) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
+        LocalDate testDate = partner.getTestDate();
+
+        return testDate.plusDays(3);
+    }
+    public void identifyIdentification(String accessToken, MultipartFile identificationImage) {
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        //이미지를 파이썬 서버로 post로 이미지를 넣어서 요청
+        //이미지를 받아서 결과를 확인 및 비교
+        //결과가 일치하면 partnerStep을 1로 변경
+        PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
+        partner.setPartnerStep(1);
+        partnerRepository.save(partner);
+    }
+    @Transactional
+    public void addPartnerStep2(String accessToken, String imageUrl, String address,String career){
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
+        if (partner == null) {
+            throw new IllegalArgumentException("파트너 정보를 찾을 수 없습니다");
+        }
+        if(partner.getPartnerStep() != 1){
+            throw new IllegalArgumentException("신분증 인증을 먼저 해주세요");
+        }
+        partner.setPartnerProfileImage(imageUrl);
+        partner.setAddress(address);
+        partner.setCareer(career);
+        partner.setPartnerStep(2);
+        partnerRepository.save(partner);
+    }
+    @Transactional
+    public int checkQuiz(String accessToken, QuizDTO quizDTO){
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
+        if (partner == null) {
+            throw new IllegalArgumentException("파트너 정보를 찾을 수 없습니다");
+        }
+        //여기는 step이 2이면서, testCount가 3이하인 경우만 가능
+        if(partner.getPartnerStep() != 2){
+            throw new IllegalArgumentException("step2를 먼저 해주세요");
+        }
+        if (partner.getTestCount() > 3) {
+            throw new IllegalArgumentException("퀴즈 풀기 횟수를 초과하였습니다 시간이 지나고 다시 진행해주세요");
+        }
+        partner.setTestCount(partner.getTestCount() + 1);
+        partner.setTestDate(LocalDate.now());
+        partnerRepository.save(partner);
+
+        int score = 0;
+        if(quizDTO.getQ1() == 1){
+            score += 10;
+        }
+        if(quizDTO.getQ2() == 2){
+            score += 10;
+        }
+        if(quizDTO.getQ3() == 3){
+            score += 10;
+        }
+        if(quizDTO.getQ4() == 4){
+            score += 10;
+        }
+        if(quizDTO.getQ5() == 5){
+            score += 10;
+        }
+        if (quizDTO.getQ6() == 6) {
+            score += 10;
+        }
+        if (quizDTO.getQ7() == 7) {
+            score += 10;
+        }
+        if (quizDTO.getQ8() == 8) {
+            score += 10;
+        }
+        if (quizDTO.getQ9() == 9) {
+            score += 10;
+        }
+        if (quizDTO.getQ10() == 10) {
+            score += 10;
+        }
+        if(score >=80){
+            partner.setPartnerStep(4);
+            partner.setPartnerDate(LocalDateTime.now());
+            user.setPartnership(1);
+            userRepository.save(user);
+        }else if (partner.getTestCount()==3) partner.setPartnerStep(3);
+        partnerRepository.save(partner);
+        return score;
     }
 }

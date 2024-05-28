@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,7 +24,7 @@ public class PartnerEntity {
     private String career;                //경력
 
     private int testScore;            //테스트 점수
-    private LocalDateTime testDate;            //테스트 응시일
+    private LocalDate testDate;            //테스트 응시일
     private int testCount;            //테스트 응시횟수
 
     private LocalDateTime partnerDate;        //파트너 등록일

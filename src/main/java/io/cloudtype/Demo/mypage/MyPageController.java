@@ -214,48 +214,110 @@ public class MyPageController {
             //유저로서 산책 상태값이 2인 것이 있는가 - 0,1
             int userWalkStatus2 = walkMatchingService.getUserWalkStatus(accessToken,2);
 
-            if(userWalkStatus2 == 1) status.put("유저로서 산책 상태", "유저로서 산책을 진행중");
-            else if(userWalkStatus1 == 1) status.put("유저로서 산책 상태", "유저로서 산책매칭이 완료");
-            else if(userWalkStatus0 == 1) status.put("유저로서 산책 상태", "유저로서 산책매칭을 신청중");
-            else status.put("유저로서 산책 상태", "유저로서 산책매칭을 신청한 적이 없습니다");
+            if(userWalkStatus2 == 1) status.put("userWalk", "유저로서 산책을 진행중");
+            else if(userWalkStatus1 == 1) status.put("userWalk", "유저로서 산책매칭이 완료");
+            else if(userWalkStatus0 == 1) status.put("userWalk", "유저로서 산책매칭을 신청중");
+            else status.put("userWalk", "유저로서 산책매칭을 신청한 적이 없습니다");
 
             //유저로서 돌봄 상채값이 0인 것이 몇개 있는가
             int userCareStatus0 = careMatchingService.getUserCareStatus(accessToken,0);
-            status.put("유저로서 돌봄 예약신청 수", userCareStatus0);
+            status.put("유저로서돌봄예약신청수", userCareStatus0);
             //유저로서 돌봄 상태값이 1인 것이 몇개 있는가
             int userCareStatus1 = careMatchingService.getUserCareStatus(accessToken,1);
-            status.put("유저로서 돌봄 예약확정 수", userCareStatus1);
+            status.put("유저로서돌봄예약확정수", userCareStatus1);
             //유저로서 돌봄 상태값이 2인 것이 몇개 있는가
             int userCareStatus2 = careMatchingService.getUserCareStatus(accessToken,2);
-            status.put("유저로서 돌봄 진행중 수", userCareStatus2);
+            status.put("유저로서돌봄진행중수", userCareStatus2);
 
             //파트너로서 산책 상태값이 1인 것이 있는가
             int walkerWalkStatus1 = walkMatchingService.getWalkerStatus(accessToken,1);
             //파트너로서 산책 상태값이 2인 것이 있는가
             int walkerWalkStatus2 = walkMatchingService.getWalkerStatus(accessToken,2);
-            if(walkerWalkStatus1 == 1) status.put("파트너로서 산책매칭이 완료", walkerWalkStatus1);
-            else if(walkerWalkStatus2 == 1) status.put("파트너로서 산책을 진행중", walkerWalkStatus2);
+            if(walkerWalkStatus1 == 1) status.put("partnerWalk", "매칭만완료");
+            else if(walkerWalkStatus2 == 1) status.put("partnerWalk", "현재산책중");
 
             //파트너로서 돌봄 상태값이 1인 것이 몇개 있는가
             int caregiverCareStatus1 = careMatchingService.getCaregiverStatus(accessToken,1);
-            status.put("파트너로서 돌봄 예약확정 수", caregiverCareStatus1);
+            status.put("파트너로서돌봄예약확정수", caregiverCareStatus1);
             //파트너로서 돌봄 상태값이 2인 것이 몇개 있는가
             int caregiverCareStatus2 = careMatchingService.getCaregiverStatus(accessToken,2);
-            status.put("파트너로서 돌봄 진행중 수", caregiverCareStatus2);
+            status.put("파트너로서돌봄진행중수", caregiverCareStatus2);
 
             return ResponseEntity.ok(status);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-//    //파트너 엔티티 예상 ( id, 유저엔티티, 파트너프로필사진, 거주지, 반려동물경력, 시험성적, 시험횟수, 시험날짜, 파트너등록일, 파트너등록단계(임시저장체크용) )
-//    //파트너 권한 신청 임시저장 체크 - 어느 과정까지 했는가 / 몇번째 시험인가 / 시험을 볼 수 있는가 등
-//    @GetMapping("/partner/apply/check")
-//    //파트너 권한 신청과정 1 - 신청하는 유저의 신분증사진을 받아서 ocr을 하는 서브 서버의 api를 호출,
-//    // 데이터베이스의 정보(이름,생년월일,성별)와 비교하여 일치하면 성공 일치하지않거나 인식이 안되면 재요청 / 성공시 파트너 신청 엔티티에 유저엔티티 가져와서 저장
-//    @PostMapping("/partner/apply/step1")
-//    //파트너 권한 신청과정 2 - 신청 하는 유저의 추가 정보 입력 ( 얼굴사진(파트너프로필용), 거주지, 반려동물 경력 )
-//    @PostMapping("/partner/apply/step2")
-//    //파트너 권한 신청과정 3 - 문제풀기 ( 문제 풀고 서버에서 채점 / 패스시 파트너 등록 완료 / 논패스시 재요청 / 3회 논패스시 3일 지나야 재요청 가능 )
-//    @PostMapping("/partner/apply/step3")
+    //파트너 엔티티 예상 ( id, 유저엔티티, 파트너프로필사진, 거주지, 반려동물경력, 시험성적, 시험횟수, 시험날짜, 파트너등록일, 파트너등록단계(임시저장체크용) )
+    //파트너 권한 신청 임시저장 체크 - 어느 과정까지 했는가 / 몇번째 시험인가 / 시험을 볼 수 있는가 등
+    @GetMapping("/partner/apply/check")
+    public ResponseEntity<?> partnerApplyCheck(@RequestHeader("Authorization") String accessToken
+    ) {
+        try {
+            int partnerStep = myPageService.getPartnerApplyCheck(accessToken);
+            Map<String, Object> response = new HashMap<>();
+            response.put("partnerStep", partnerStep);       //0: 신청전, 1: 신분증인식완료, 2: 추가정보입력완료, 3: 시험불가 4: 시험완료(파트너등록완료)
+            if(partnerStep == 3){
+                response.put("testCount", myPageService.getPartnerTestCount(accessToken));
+            }else if(partnerStep == 4){
+                response.put("nextTestDate", myPageService.getNextTestDate(accessToken));
+            }
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //파트너 권한 신청과정 1 - 신청하는 유저의 신분증사진을 받아서 ocr을 하는 서브 서버의 api를 호출,
+    // 데이터베이스의 정보(이름,생년월일,성별)와 비교하여 일치하면 성공 일치하지않거나 인식이 안되면 재요청 / 성공시 파트너 신청 엔티티에 유저엔티티 가져와서 저장
+    @PostMapping("/partner/apply/step1")
+    public ResponseEntity<String> partnerApplyStep1(@RequestHeader("Authorization") String accessToken,
+                                                    @RequestPart("identification_image") MultipartFile identificationImage
+    ) {
+        try {
+            if(identificationImage == null){
+                throw new IllegalArgumentException("신분증 이미지를 첨부해주세요");
+            }
+            // 신분증 인식 서비스 호출
+            myPageService.identifyIdentification(accessToken, identificationImage);
+            return ResponseEntity.ok("신분증 인식 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //파트너 권한 신청과정 2 - 신청 하는 유저의 추가 정보 입력 ( 얼굴사진(파트너프로필용), 거주지, 반려동물 경력 )
+    @PostMapping("/partner/apply/step2")
+    public ResponseEntity<String> partnerApplyStep2(@RequestHeader("Authorization") String accessToken,
+                                                    @RequestPart("face_image") MultipartFile faceImage,
+                                                    @RequestBody Map<String, String> requestBody
+    ) {
+        try {
+            if(faceImage == null){
+                throw new IllegalArgumentException("얼굴 사진을 첨부해주세요");
+            }
+            // 이미지 업로드 서비스 호출
+            String imageUrl = communityBoardService.uploadImage(faceImage);
+            // 파트너 추가 정보 입력
+            myPageService.addPartnerStep2(accessToken, imageUrl, requestBody.get("address"), requestBody.get("career"));
+            return ResponseEntity.ok("추가 정보 입력 완료");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //파트너 권한 신청과정 3 - 문제풀기 ( 문제 풀고 서버에서 채점 / 패스시 파트너 등록 완료 / 논패스시 재요청 / 3회 논패스시 3일 지나야 재요청 가능 )
+    @PostMapping("/partner/apply/step3")
+    public ResponseEntity<?> partnerApplyStep3(@RequestHeader("Authorization") String accessToken,
+                                                    @RequestBody QuizDTO quizDTO
+    ) {
+        try {
+            // 문제 풀기
+            int score = myPageService.checkQuiz(accessToken, quizDTO);
+            if(score >= 80){
+                return ResponseEntity.ok("파트너 등록 완료");
+            }else{
+                return ResponseEntity.badRequest().body("파트너 등록 실패");
+            }
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
