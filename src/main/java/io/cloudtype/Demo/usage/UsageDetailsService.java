@@ -154,22 +154,22 @@ public class UsageDetailsService {
                 .map(this::getCareUsageDetailSimplified)
                 .collect(Collectors.toList());
     }
-    public CareUsageDetailsDTO getUserCareUsageDetail(String accessToken, int careRecodeId) {
+    public CareUsageDetailsDTO getUserCareUsageDetail(String accessToken, int careRecordId) {
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        CareRecordEntity careRecode = careRecordRepository.findById(careRecodeId);
-        if (careRecode == null) {
+        CareRecordEntity careRecord = careRecordRepository.findById(careRecordId);
+        if (careRecord == null) {
             throw new IllegalArgumentException("해당 돌봄기록을 찾을 수 없습니다");
         }
-        if (careRecode.getOwner().getId() != user.getId() && careRecode.getCaregiver().getId() != user.getId()){
+        if (careRecord.getOwner().getId() != user.getId() && careRecord.getCaregiver().getId() != user.getId()){
             throw new IllegalArgumentException("해당 돌봄기록의 작성자가 혹은 돌봄사가 아닙니다");
         }
-        CarePostEntity carePost = carePostRepository.findById(careRecode.getCaregiver().getId());
-        return getCareUsageDetail(careRecode, carePost);
+        CarePostEntity carePost = carePostRepository.findByCaregiver_Id(careRecord.getCaregiver().getId());
+        return getCareUsageDetail(careRecord, carePost);
     }
     private CareUsageDetailsDTO getCareUsageDetail(CareRecordEntity careRecordEntity, CarePostEntity carePostEntity) {
         CareUsageDetailsDTO careUsageDTO = new CareUsageDetailsDTO();

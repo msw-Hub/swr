@@ -73,10 +73,10 @@ public class UsageDetailsController {
     //유저와 파트너의 돌봄 이용내역 상세보기
     @GetMapping("/care/detail")
     public ResponseEntity<?> geCareUsageDetail(@RequestHeader("Authorization") String accessToken,
-                                              @RequestParam("care_recode_id") int careRecodeId
+                                              @RequestParam("care_record_id") int careRecordId
     ) {
         try {
-            CareUsageDetailsDTO careUsage = usageDetailsService.getUserCareUsageDetail(accessToken, careRecodeId);
+            CareUsageDetailsDTO careUsage = usageDetailsService.getUserCareUsageDetail(accessToken, careRecordId);
             return ResponseEntity.ok(careUsage);
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
