@@ -20,4 +20,5 @@ public class WalkUsageSimpleDTO {
     private LocalDateTime endTime;
     
     private int amount;
+    private boolean review;
 }

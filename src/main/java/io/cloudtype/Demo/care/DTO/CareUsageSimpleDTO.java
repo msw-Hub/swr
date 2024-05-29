@@ -19,4 +19,5 @@ public class CareUsageSimpleDTO {
     private LocalDateTime startDate;
     
     private int amount;
+    private boolean review;
 }
