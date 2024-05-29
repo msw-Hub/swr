@@ -64,9 +64,16 @@ public class WalkMatchingService {
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        if(user.getCoin()< walkMatchingEntity.getAmount()) {
+        int amount;
+        if (walkMatchingEntity.getWalkTime()==30) amount=15000;
+        else if (walkMatchingEntity.getWalkTime()==60) amount=25000;
+        else if (walkMatchingEntity.getWalkTime()==90) amount=30000;
+        else if (walkMatchingEntity.getWalkTime()==120) amount=35000;
+        else throw new IllegalArgumentException("산책 시간이 잘못되었습니다");
+        if(user.getCoin()< amount) {
             throw new IllegalArgumentException("코인이 부족합니다 (산책비용 부족)");
         }
+
         int petId = walkMatchingEntity.getPetId();
         PetEntity pet = petRepository.findById(petId);
         if (pet == null) {
@@ -110,7 +117,7 @@ public class WalkMatchingService {
         post.setDetailAddress(walkMatchingEntity.getDetailAddress());
         post.setTitle(walkMatchingEntity.getTitle());
         post.setContent(walkMatchingEntity.getContent());
-        post.setAmount(walkMatchingEntity.getAmount());
+        post.setAmount(amount);
 
         walkMatchingRepository.save(post);
         //저장되면 DB 트리거에 의해서 자동 5분이 지나면 삭제, 단 status가 0인 경우에만 해당. 1로 바뛰면 유지
