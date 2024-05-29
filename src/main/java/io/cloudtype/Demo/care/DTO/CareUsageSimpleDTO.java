@@ -20,4 +20,5 @@ public class CareUsageSimpleDTO {
     
     private int amount;
     private boolean review;
+    private int status;
 }

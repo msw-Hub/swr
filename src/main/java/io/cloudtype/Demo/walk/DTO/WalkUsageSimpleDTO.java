@@ -21,4 +21,6 @@ public class WalkUsageSimpleDTO {
     
     private int amount;
     private boolean review;
+
+    private int status;
 }

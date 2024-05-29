@@ -62,6 +62,7 @@ public class UsageDetailsService {
         walkUsageDTO.setEndTime(walkRecordEntity.getEndTime());
         walkUsageDTO.setAmount(walkRecordEntity.getAmount());
         walkUsageDTO.setReview(walkRecordEntity.isReview());
+        walkUsageDTO.setStatus(walkRecordEntity.getStatus());
         return walkUsageDTO;
     }
 
@@ -142,6 +143,7 @@ public class UsageDetailsService {
         careUsageDTO.setStartDate(careRecordEntity.getStartDate());
         careUsageDTO.setAmount(careRecordEntity.getAmount());
         careUsageDTO.setReview(careRecordEntity.isReview());
+        careUsageDTO.setStatus(careRecordEntity.getStatus());
         return careUsageDTO;
     }
     public List<CareUsageSimpleDTO> getPartnerCareUsageList(String accessToken) {
