@@ -395,7 +395,6 @@ public class MyPageService {
         partnerRepository.save(partner);
         return score;
     }
-
     private static int getScore(QuizDTO quizDTO) {
         int score = 0;
         if(quizDTO.isQ1()) score+=5;

@@ -7,6 +7,7 @@ import io.cloudtype.Demo.mypage.pet.PetDTO;
 import io.cloudtype.Demo.walk.WalkMatchingService;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,7 @@ public class MyPageController {
     private final WalkMatchingService walkMatchingService;
     private final CareMatchingService careMatchingService;
 
+    @Autowired
     public MyPageController(MyPageService myPageService, CommunityBoardService communityBoardService,
                             WalkMatchingService walkMatchingService, CareMatchingService careMatchingService
     ) {
