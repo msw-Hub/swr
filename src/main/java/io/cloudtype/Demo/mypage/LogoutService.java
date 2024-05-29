@@ -21,6 +21,7 @@ public class LogoutService {
         this.userRepository = userRepository;
         this.blacklistRepository = blacklistRepository;
     }
+
     //블랙 리스트에 추가하고 나중에 비교함
     @Transactional
     public void logout(String accessToken, String refreshToken) {
