@@ -72,12 +72,7 @@ public class CareMatchingService {
     @Transactional
     public int createPost(String accessToken, String title, String content,
                            String administrativeAddress1, String administrativeAddress2, String streetNameAddress, String detailAddress) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         //파트너쉽이 있는지 확인
         if (user.getPartnership() != 1) {
             throw new IllegalStateException("파트너쉽이 없습니다");
@@ -96,22 +91,19 @@ public class CareMatchingService {
         carePost.setStreetNameAddress(streetNameAddress);
         carePost.setDetailAddress(detailAddress);
         carePostRepository.save(carePost);
+        log.info("carePost: {}",carePost);
         return carePost.getId();
     }
     @Transactional
     public void addImage(int carePostId, String imageUrl, String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        getUserEntity(accessToken);
         //carePostId로 CarePostEntity 찾고 이미지 저장
         CarePostEntity carePost = carePostRepository.findById(carePostId);
         CareImgEntity careImg = new CareImgEntity();
         careImg.setCarePost(carePost);
         careImg.setImgUrl(imageUrl);
         careImg.setUploadDate(LocalDateTime.now());
+        log.info("careImg: {}",careImg);
         careImgRepository.save(careImg);
     }
     //돌봄글 첫 작성시
@@ -127,6 +119,7 @@ public class CareMatchingService {
                 throw new RuntimeException("Invalid date format", e);
             }
         }).toList();
+        log.info("input dates: {}",dates);
 
         for (Date unavailableDate : dates) {
             ReservationSchedulerEntity unavailableDateEntity = new ReservationSchedulerEntity();
@@ -138,12 +131,7 @@ public class CareMatchingService {
 
     @Transactional
     public void applyCare(String accessToken, CareApplyDTO careApplyDTO) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CarePostEntity carePost = carePostRepository.findById(careApplyDTO.getCarePostId());
         if (carePost == null) {
             throw new IllegalArgumentException("돌봄글을 찾을 수 없습니다");
@@ -151,7 +139,6 @@ public class CareMatchingService {
         if (carePost.getCaregiver().getId() == user.getId()) {
             throw new IllegalStateException("자신의 글에는 신청할 수 없습니다");
         }
-
         // 예약 시작일과 종료일을 LocalDate로 변환하여 날짜 리스트를 만듭니다.
         LocalDate startDate = careApplyDTO.getReservationStartDate().toLocalDate();
         LocalDate endDate = careApplyDTO.getReservationEndDate().toLocalDate();
@@ -182,10 +169,9 @@ public class CareMatchingService {
                 throw new IllegalStateException("예약 기간에 예약 불가 날짜가 포함되어 있습니다.");
             }
         }
-
-        //예약 날짜가 현재 날짜보다 이후여야함
-        if (careApplyDTO.getReservationEndDate().isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("예약 날짜가 현재 날짜보다 이전입니다");
+        //신청한 날짜와 시간이 현재 시간+3시간보다 이후인지를 확인하고해야함.
+        if (careApplyDTO.getReservationEndDate().isBefore(LocalDateTime.now().plusHours(3))) {
+            throw new IllegalStateException("3시간 전에만 예약할 수 있습니다");
         }
         PetEntity pet = petRepository.findById(careApplyDTO.getPetId());
         if(pet == null) {
@@ -194,10 +180,6 @@ public class CareMatchingService {
         int dtoPetOwnerId = pet.getOwner().getId();
         if(dtoPetOwnerId != user.getId()) {
             throw new IllegalArgumentException("자신의 펫이 아닙니다");
-        }
-        //신청한 날짜와 시간이 현재 시간+3시간보다 이후인지를 확인하고해야함.
-        if (careApplyDTO.getReservationEndDate().isBefore(LocalDateTime.now().plusHours(3))) {
-            throw new IllegalStateException("3시간 전에만 예약할 수 있습니다");
         }
         CareMatchingEntity careMatching = new CareMatchingEntity();
         careMatching.setCarePost(carePost);
@@ -208,19 +190,14 @@ public class CareMatchingService {
         careMatching.setReservationStartDate(careApplyDTO.getReservationStartDate());
         careMatching.setReservationEndDate(careApplyDTO.getReservationEndDate());
         careMatching.setRequestMessage(careApplyDTO.getRequestMessage());
+        log.info("careMatching: {}",careMatching);
         careMatchingRepository.save(careMatching);
-
         //신청한거 메세지 보내야함
     }
 
     @Transactional
     public void deleteImages(int carePostId, String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CarePostEntity carePost = carePostRepository.findById(carePostId);
         if (carePost == null) {
             throw new IllegalArgumentException("돌봄글을 찾을 수 없습니다");
@@ -245,7 +222,6 @@ public class CareMatchingService {
         CarePostEntity carePost = carePostRepository.findById(carePostId);
 
         List<ReservationSchedulerEntity> existingReservations = reservationSchedulerRepository.findByCarePost(carePost);
-
         Set<LocalDate> existingDates = existingReservations.stream()
                 .map(reservation -> reservation.getUnavailableDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
                 .collect(Collectors.toSet());
@@ -256,11 +232,12 @@ public class CareMatchingService {
         Set<LocalDate> datesToAdd = newDatesSet.stream()
                 .filter(date -> !existingDates.contains(date))
                 .collect(Collectors.toSet());
-
+        log.info("datesToAdd: {}", datesToAdd);
         // 삭제해야 할 날짜 (existingDates - newDatesSet)
         Set<LocalDate> datesToRemove = existingDates.stream()
                 .filter(date -> !newDatesSet.contains(date))
                 .collect(Collectors.toSet());
+        log.info("datesToRemove: {}", datesToRemove);
 
         // 이용불가 날짜 추가
         for (LocalDate localDate : datesToAdd) {
@@ -275,7 +252,6 @@ public class CareMatchingService {
                 reservationSchedulerRepository.save(reservation);
             }
         }
-
         // 이용불가 날짜 -> 이용가능 날짜 변경 (이용불가날짜 리스트에서 삭제)
         for (LocalDate localDate : datesToRemove) {
             Date dateToRemove = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -287,12 +263,7 @@ public class CareMatchingService {
     }
     @Transactional
     public void editPost(String accessToken, int carePostId, String title, String content) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CarePostEntity carePost = carePostRepository.findById(carePostId);
         if (carePost == null) {
             throw new IllegalArgumentException("돌봄글을 찾을 수 없습니다");
@@ -302,6 +273,7 @@ public class CareMatchingService {
         }
         carePost.setTitle(title);
         carePost.setContent(content);
+        log.info("carePost: {}",carePost);
         carePostRepository.save(carePost);
     }
     public boolean checkReservation(int carePostId) {
@@ -309,12 +281,7 @@ public class CareMatchingService {
     }
     @Transactional
     public void deletePost(String accessToken, int carePostId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CarePostEntity carePost = carePostRepository.findById(carePostId);
         if (carePost == null) {
             throw new IllegalArgumentException("돌봄글을 찾을 수 없습니다");
@@ -338,12 +305,7 @@ public class CareMatchingService {
         carePostRepository.delete(carePost);
     }
     public Page<CarePostListDTO> list(String accessToken, int page, String administrativeAddress1, String administrativeAddress2, double homeLatitude, double homeLongitude) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        getUserEntity(accessToken);
         List<CarePostEntity> carePostList = carePostRepository.findByAdministrativeAddress1AndAdministrativeAddress2(administrativeAddress1, administrativeAddress2); //1차적으로 시도, 시군구로 필터링
         List<CarePostListDTO> filteredCarePostList = carePostList.stream()
                 .map(entity -> entityToDto(entity,homeLatitude, homeLongitude))
@@ -359,7 +321,6 @@ public class CareMatchingService {
         }
         List<CarePostListDTO> pageContent = filteredCarePostList.subList(start, end);
         return new PageImpl<>(pageContent, pageable, filteredCarePostList.size());
-
     }
     private CarePostListDTO entityToDto(CarePostEntity entity, double homeLatitude, double homeLongitude) {
         double distance = getDistance(entity.getLatitude(), entity.getLongitude(), homeLatitude, homeLongitude);
@@ -390,12 +351,7 @@ public class CareMatchingService {
         return bd.doubleValue();
     }
     public CarePostDetailsDTO detail(String accessToken, int carePostId, double homeLatitude, double homeLongitude) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        getUserEntity(accessToken);
         CarePostEntity carePost = carePostRepository.findById(carePostId);
         if (carePost == null) {
             throw new IllegalArgumentException("돌봄글을 찾을 수 없습니다");
@@ -419,12 +375,7 @@ public class CareMatchingService {
         return dto;
     }
     public CarePostDetailsDTO myPost(String accessToken){
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CarePostEntity carePost = carePostRepository.findByCaregiver_Id(user.getId());
         if (carePost == null) {
             throw new IllegalArgumentException("돌봄글을 찾을 수 없습니다");
@@ -447,12 +398,7 @@ public class CareMatchingService {
         return dto;
     }
     public List<CareApplyDetailDTO> getApplierList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
 
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByCarePost_Caregiver_IdAndStatus(user.getId(), 0);
 
@@ -478,12 +424,7 @@ public class CareMatchingService {
         return dto;
     }
     public List<CareApplyDetailDTO> getReservationList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
 
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByCarePost_Caregiver_IdAndStatus(user.getId(), 1);
 
@@ -491,27 +432,8 @@ public class CareMatchingService {
                 .map(this::applierListToDTO)
                 .toList();
     }
-    public  List<CareApplyDetailDTO> getProgressList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
-
-        List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByCarePost_Caregiver_IdAndStatus(user.getId(), 2);
-
-        return careMatchingList.stream()
-                .map(this::applierListToDTO)
-                .toList();
-    }
     public List<CareApplyDetailDTO> myApplyList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
 
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByOwner_IdAndStatus(user.getId(), 0);
 
@@ -520,12 +442,7 @@ public class CareMatchingService {
                 .toList();
     }
     public CarePostDetailsDTO reservationPost(String accessToken, int careMatchingId, double homeLatitude, double homeLongitude) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
 
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
@@ -558,12 +475,7 @@ public class CareMatchingService {
         return dto;
     }
     public List<CareApplyDetailDTO> myConfirmedList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
 
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByOwner_IdAndStatus(user.getId(), 1);
 
@@ -572,12 +484,7 @@ public class CareMatchingService {
                 .toList();
     }
     public List<CareApplyDetailDTO> myProgressList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
 
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByOwner_IdAndStatus(user.getId(), 2);
 
@@ -586,28 +493,15 @@ public class CareMatchingService {
                 .toList();
     }
     public List<CareApplyDetailDTO> myPostProgressList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
-
+        UserEntity user = getUserEntity(accessToken);
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByCarePost_Caregiver_IdAndStatus(user.getId(), 2);
-
         return careMatchingList.stream()
                 .map(this::applierListToDTO)
                 .toList();
     }
     @Transactional
     public void acceptCare(String accessToken, int careMatchingId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
-
+        UserEntity user = getUserEntity(accessToken);
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약신청내역을 찾을 수 없습니다");
@@ -678,12 +572,7 @@ public class CareMatchingService {
     }
     @Transactional
     public void rejectCare(String accessToken, int careMatchingId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약신청내역을 찾을 수 없습니다");
@@ -699,12 +588,7 @@ public class CareMatchingService {
     }
     @Transactional
     public void cancelApply(String accessToken, int careMatchingId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약신청내역을 찾을 수 없습니다");
@@ -719,12 +603,7 @@ public class CareMatchingService {
     }
     @Transactional
     public void cancelReservation(String accessToken, int careMatchingId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약내역을 찾을 수 없습니다");
@@ -747,6 +626,7 @@ public class CareMatchingService {
         LocalDate startDate = careMatching.getReservationStartDate().toLocalDate();
         LocalDate endDate = careMatching.getReservationEndDate().toLocalDate();
         List<LocalDate> reservationDates = startDate.datesUntil(endDate.plusDays(1)).collect(Collectors.toList());
+        log.info("reservationDates: {}",reservationDates);
         // 예약 스케줄러 업데이트
         for (LocalDate localDate : reservationDates) {
             Date dateToAdd = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -767,12 +647,7 @@ public class CareMatchingService {
     }
     @Transactional
     public void startCare(String accessToken, int careMatchingId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약내역을 찾을 수 없습니다");
@@ -794,12 +669,7 @@ public class CareMatchingService {
     }
     @Transactional
     public int completeCare(String accessToken, int careMatchingId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약내역을 찾을 수 없습니다");
@@ -833,12 +703,7 @@ public class CareMatchingService {
     }
     @Transactional
     public void incompleteCare(String accessToken, int careMatchingId,String reason) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CareMatchingEntity careMatching = careMatchingRepository.findById(careMatchingId);
         if (careMatching == null) {
             throw new IllegalArgumentException("예약내역을 찾을 수 없습니다");
@@ -871,26 +736,25 @@ public class CareMatchingService {
         //돌봄 미완료 메세지 보내야함 양쪽
     }
     public int getUserCareStatus(String accessToken,int status) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         if (status == 0) return careMatchingRepository.countByOwner_IdAndStatus(user.getId(), 0);
         else if (status == 1) return careMatchingRepository.countByOwner_IdAndStatus(user.getId(), 1);
         else if (status == 2) return careMatchingRepository.countByOwner_IdAndStatus(user.getId(), 2);
         return 0;
     }
     public int getCaregiverStatus(String accessToken,int status) {
+        UserEntity user = getUserEntity(accessToken);
+        if (status == 1) return careMatchingRepository.countByCarePost_Caregiver_IdAndStatus(user.getId(), 1);
+        else if (status == 2) return careMatchingRepository.countByCarePost_Caregiver_IdAndStatus(user.getId(), 2);
+        return 0;
+    }
+    private UserEntity getUserEntity(String accessToken){
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        if (status == 1) return careMatchingRepository.countByCarePost_Caregiver_IdAndStatus(user.getId(), 1);
-        else if (status == 2) return careMatchingRepository.countByCarePost_Caregiver_IdAndStatus(user.getId(), 2);
-        return 0;
+        return user;
     }
 }

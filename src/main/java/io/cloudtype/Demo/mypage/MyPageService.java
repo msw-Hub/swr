@@ -55,12 +55,7 @@ public class MyPageService {
     }
     //username을 받아 nickname, phoneNumber, pinNumber를 가져와서 DTO로 반환
     public List<JoinDetailsDTO> getUserInfoByUsername(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-        }
+        UserEntity user = getUserEntity(accessToken);
         return List.of(mapToDTO4(user));
     }
     private JoinDetailsDTO mapToDTO4(UserEntity entity) {
@@ -72,12 +67,7 @@ public class MyPageService {
     }
     @Transactional
     public void editInfo(String accessToken, String nickname, String phoneNumber, int pinNumber) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         // 닉네임 중복 체크 및 설정
         if (nickname != null && !nickname.isEmpty() && joinService.nicknameCheck(nickname) > 0) {
             throw new IllegalArgumentException("이미 사용중인 닉네임입니다");
@@ -104,9 +94,7 @@ public class MyPageService {
     }
     @Transactional
     public void editPassword(String accessToken, String password) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = getUserEntity(accessToken);
         // 새 비밀번호가 이전 비밀번호와 같은지 확인
         if (bCryptPasswordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("새 비밀번호는 이전 비밀번호와 달라야 합니다.");
@@ -116,19 +104,12 @@ public class MyPageService {
     }
     @Transactional
     public boolean checkPassword(String accessToken, String password) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = getUserEntity(accessToken);
         return bCryptPasswordEncoder.matches(password, user.getPassword());
     }
     @Transactional
     public int addPetStep1(String accessToken, String petName, int petAge, String species,String gender, String imgURL) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-        }
+        UserEntity user = getUserEntity(accessToken);
         // 반려동물 생년 계산
         int currentYear = Year.now().getValue();
         int birthYear = currentYear - petAge;
@@ -147,12 +128,7 @@ public class MyPageService {
     }
     @Transactional
     public void addPetStep2(String accessToken, PetDTO petDTO) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         double weight = petDTO.getWeight();
         boolean neutering = petDTO.isNeutering();
         String animalHospital = petDTO.getAnimalHospital();
@@ -177,9 +153,7 @@ public class MyPageService {
         return petRepository.findImageUrlById(id);
     }
     public void checkOwner(String accessToken, int petId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = getUserEntity(accessToken);
         PetEntity pet = petRepository.findById(petId);
         if (pet == null) {
             throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다");
@@ -207,12 +181,7 @@ public class MyPageService {
         petRepository.save(pet);
     }
     public List<PetDTO> getPetList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         List<PetEntity> petList = petRepository.findByOwner(user);
         return petList.stream()
                 .map(this::mapToDTO3)
@@ -234,9 +203,7 @@ public class MyPageService {
         return dto;
     }
     public void removePet(String accessToken, int petId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = getUserEntity(accessToken);
         PetEntity pet = petRepository.findById(petId);
         if (pet == null) {
             throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다");
@@ -247,9 +214,7 @@ public class MyPageService {
         petRepository.delete(pet);
     }
     public PetDTO getPet(String accessToken, int petId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = getUserEntity(accessToken);
         PetEntity pet = petRepository.findById(petId);
         if (pet == null) {
             throw new IllegalArgumentException("해당 반려동물을 찾을 수 없습니다");
@@ -260,21 +225,11 @@ public class MyPageService {
         return mapToDTO3(pet);
     }
     public int getCoin(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         return user.getCoin();
     }
     public int getPartnerApplyCheck(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
         if (partner == null) {
             return 0;
@@ -282,22 +237,12 @@ public class MyPageService {
         return partner.getPartnerStep();
     }
     public int getPartnerTestCount(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
         return partner.getTestCount();
     }
     public LocalDate getNextTestDate(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
         LocalDate testDate = partner.getTestDate();
 
@@ -305,12 +250,7 @@ public class MyPageService {
     }
     @Transactional
     public void identifyIdentification(String accessToken, MultipartFile identificationImage) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         String url = "http://43.201.218.68:8000/detect/";
         // Send image to Python server
         String result = webClientBuilder.build()
@@ -342,12 +282,7 @@ public class MyPageService {
     }
     @Transactional
     public void addPartnerStep2(String accessToken, String imageUrl, String address,String career){
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
         if (partner == null) {
             throw new IllegalArgumentException("파트너 정보를 찾을 수 없습니다");
@@ -363,12 +298,7 @@ public class MyPageService {
     }
     @Transactional
     public int checkQuiz(String accessToken, QuizDTO quizDTO){
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         PartnerEntity partner = partnerRepository.findByUser_Id(user.getId());
         if (partner == null) {
             throw new IllegalArgumentException("파트너 정보를 찾을 수 없습니다");
@@ -418,5 +348,14 @@ public class MyPageService {
         if(quizDTO.getQ19()==1) score+=5;
         if(quizDTO.getQ20()==3) score+=5;
         return score;
+    }
+    private UserEntity getUserEntity(String accessToken){
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        return user;
     }
 }

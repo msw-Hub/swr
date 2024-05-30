@@ -129,26 +129,17 @@ public class CommunityBoardService {
 
     @Transactional
     public void writePost(String accessToken, String title, String content, String imgUrl) {
-        // 액세스 토큰에서 'Bearer ' 접두사를 제거하고 사용자 이름을 추출
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-
-        // username을 이용해 UserEntity를 조회
-        UserEntity user = userRepository.findByUsername(username);
-
+        UserEntity user = getUserEntity(accessToken);
         // 새로운 CommunityBoardEntity 인스턴스 생성 및 세부 정보 설정
         CommunityBoardEntity post = new CommunityBoardEntity();
         post.setTitle(title);
         post.setContent(content);
         post.setImgUrl(imgUrl);
-
         // CommunityBoardEntity에 UserEntity를 연결
         post.setUser(user);  // UserEntity 객체를 직접 연결
-
         // Repository를 사용해 CommunityBoardEntity를 저장
         communityBoardRepository.save(post);
     }
-
     public List<CommunityBoardDTO> getCommunityBoardPosts(int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, 10, Sort.by("createDate").descending());
         Page<CommunityBoardEntity> page = communityBoardRepository.findAllByOrderByCreateDateDesc(pageable);
@@ -158,7 +149,6 @@ public class CommunityBoardService {
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
-
     private CommunityBoardDTO mapToDTO(CommunityBoardEntity entity) {
         CommunityBoardDTO dto = new CommunityBoardDTO();
         dto.setId(entity.getId());
@@ -201,9 +191,7 @@ public class CommunityBoardService {
 
     @Transactional
     public void writeComment(String accessToken, int communityBoardId, String content) {
-        accessToken = accessToken.split(" ")[1]; // Remove Bearer prefix
-        String username = jwtUtil.getUsername(accessToken, 1); // Extract username from token
-        UserEntity user = userRepository.findByUsername(username);  //댓글 작성자
+        UserEntity user = getUserEntity(accessToken);
 
         Optional<CommunityBoardEntity> board = Optional.ofNullable(communityBoardRepository.findById(communityBoardId));
         // 옵셔널에서 게시글을 가져오거나 게시글이 없는 경우 예외를 던집니다.
@@ -223,9 +211,7 @@ public class CommunityBoardService {
 
     @Transactional
     public void removeComment(String accessToken, int commentId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);  //댓글 작성자
+        UserEntity user = getUserEntity(accessToken);
         // 댓글 ID를 사용하여 해당 댓글을 찾습니다.
         Optional<CommentEntity> commentOptional = Optional.ofNullable(commentRepository.findById(commentId));
         // 옵셔널에서 댓글을 가져오거나 댓글이 없는 경우 예외
@@ -245,11 +231,7 @@ public class CommunityBoardService {
     }
     @Transactional
     public void removePost(String accessToken, int postId) {
-        accessToken = accessToken.split(" ")[1]; // Remove Bearer prefix
-        // 토큰에서 사용자 이름 추출
-        String username = jwtUtil.getUsername(accessToken, 1);
-        // 사용자 이름으로 UserEntity 조회
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = getUserEntity(accessToken);
         // 게시글 ID를 사용하여 해당 게시글을 찾습니다.
         Optional<CommunityBoardEntity> postOptional = Optional.ofNullable(communityBoardRepository.findById(postId));
         // 옵셔널에서 게시글을 가져오거나 게시글이 없는 경우 예외를 던집니다.
@@ -283,11 +265,7 @@ public class CommunityBoardService {
 
     @Transactional
     public void likePost(String accessToken, int postId) {
-        accessToken = accessToken.split(" ")[1]; // Remove Bearer prefix
-        // 토큰에서 사용자 이름 추출
-        String username = jwtUtil.getUsername(accessToken, 1);
-        // 사용자 이름으로 UserEntity 조회
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = getUserEntity(accessToken);
         // 게시글 ID를 사용하여 해당 게시글을 찾습니다.
         Optional<CommunityBoardEntity> postOptional = Optional.ofNullable(communityBoardRepository.findById(postId));
         // 옵셔널에서 게시글을 가져오거나 게시글이 없는 경우 예외를 던집니다.
@@ -312,11 +290,7 @@ public class CommunityBoardService {
     }
     @Transactional
     public void likeComment(String accessToken, int commentId){
-        accessToken = accessToken.split(" ")[1]; // Remove Bearer prefix
-        // 토큰에서 사용자 이름 추출
-        String username = jwtUtil.getUsername(accessToken, 1);
-        // 사용자 이름으로 UserEntity 조회
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = getUserEntity(accessToken);
         // 댓글 ID를 사용하여 해당 댓글을 찾습니다.
         Optional<CommentEntity> commentOptional = Optional.ofNullable(commentRepository.findById(commentId));
         // 옵셔널에서 댓글을 가져오거나 댓글이 없는 경우 예외
@@ -341,11 +315,7 @@ public class CommunityBoardService {
     }
     @Transactional
     public void editPost(String accessToken, int postId, String title, String content, String imgUrl) {
-        accessToken = accessToken.split(" ")[1];
-        // 토큰에서 사용자 이름 추출
-        String username = jwtUtil.getUsername(accessToken, 1);
-        // 사용자 이름으로 UserEntity 조회
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = getUserEntity(accessToken);
         // 게시글 ID를 사용하여 해당 게시글을 찾습니다.
         Optional<CommunityBoardEntity> postOptional = Optional.ofNullable(communityBoardRepository.findById(postId));
         // 옵셔널에서 게시글을 가져오거나 게시글이 없는 경우 예외를 던집니다.
@@ -362,11 +332,7 @@ public class CommunityBoardService {
     }
     @Transactional
     public void editComment(String accessToken, int commentId, String content) {
-        accessToken = accessToken.split(" ")[1];
-        // 토큰에서 사용자 이름 추출
-        String username = jwtUtil.getUsername(accessToken, 1);
-        // 사용자 이름으로 UserEntity 조회
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = getUserEntity(accessToken);
         // 댓글 ID를 사용하여 해당 댓글을 찾습니다.
         Optional<CommentEntity> commentOptional = Optional.ofNullable(commentRepository.findById(commentId));
         // 옵셔널에서 댓글을 가져오거나 댓글이 없는 경우 예외
@@ -378,5 +344,14 @@ public class CommunityBoardService {
         // 댓글 수정
         comment.setContent(content);
         commentRepository.save(comment);
+    }
+    private UserEntity getUserEntity(String accessToken){
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        return user;
     }
 }

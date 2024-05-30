@@ -55,12 +55,7 @@ public class ReviewService {
     }
     @Transactional
     public void createReview(String accessToken, int walkRecordId, String content, double rating, String imgUrl) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         WalkRecordEntity walkRecord = walkRecordRepository.findById(walkRecordId);
         if (walkRecord == null) {
             throw new IllegalArgumentException("해당 산책기록을 찾을 수 없습니다");
@@ -103,12 +98,7 @@ public class ReviewService {
         userRepository.save(walker);
     }
     public List<WalkReviewDTO> getUserWalkReviewList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         List<WalkReviewEntity> walkReviewList = walkReviewRepository.findByWalkRecord_User_IdOrderByCreateDateDesc(user.getId());
         return walkReviewList.stream()
                 .map(this::mapToWalkReviewDTO)
@@ -128,24 +118,14 @@ public class ReviewService {
         return walkReviewDTO;
     }
     public List<WalkReviewDTO> getPartnerWalkReviewList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         List<WalkReviewEntity> walkReviewList = walkReviewRepository.findByWalkRecord_Walker_IdOrderByCreateDateDesc(user.getId());
         return walkReviewList.stream()
                 .map(this::mapToWalkReviewDTO)
                 .collect(Collectors.toList());
     }
     public List<WalkReviewDTO> getWalkReviewList(int partnerId,String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         List<WalkReviewEntity> walkReviewList = walkReviewRepository.findByWalkRecord_Walker_IdOrderByCreateDateDesc(partnerId);
         return walkReviewList.stream()
                 .map(this::mapToWalkReviewDTO)
@@ -153,12 +133,7 @@ public class ReviewService {
     }
     @Transactional
     public void deleteWalkReview(String accessToken, int walkReviewId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         WalkReviewEntity walkReview = walkReviewRepository.findById(walkReviewId);
         if (walkReview == null) {
             throw new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다");
@@ -189,12 +164,7 @@ public class ReviewService {
     }
     @Transactional
     public void createCareReview(String accessToken, int careRecordId, String content, double rating, String imgUrl) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CareRecordEntity careRecord = careRecordRepository.findById(careRecordId);
         if (careRecord == null) {
             throw new IllegalArgumentException("해당 돌봄기록을 찾을 수 없습니다");
@@ -235,12 +205,7 @@ public class ReviewService {
         userRepository.save(caregiver);
     }
     public List<CareReviewDTO> getUserCareReviewList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         //care_recode_id로 접근해서
         List<CareReviewEntity> careReviewList = careReviewRepository.findByCareRecord_Owner_IdOrderByCreateDateDesc(user.getId());
         return careReviewList.stream()
@@ -262,12 +227,7 @@ public class ReviewService {
     }
     @Transactional
     public void deleteCareReview(String accessToken, int careReviewId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CareReviewEntity careReview = careReviewRepository.findById(careReviewId);
         if (careReview == null) {
             throw new IllegalArgumentException("해당 리뷰를 찾을 수 없습니다");
@@ -297,28 +257,27 @@ public class ReviewService {
         careReviewRepository.delete(careReview);
     }
     public List<CareReviewDTO> getPartnerCareReviewList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         List<CareReviewEntity> careReviewList = careReviewRepository.findByCareRecord_Caregiver_IdOrderByCreateDateDesc(user.getId());
         return careReviewList.stream()
                 .map(this::mapToCareReviewDTO)
                 .collect(Collectors.toList());
     }
     public List<CareReviewDTO> getCareReviewList(int carePostId,String accessToken) {
+        getUserEntity(accessToken);
+        int caregiverId = carePostRepository.findById(carePostId).getCaregiver().getId();
+        List<CareReviewEntity> careReviewList = careReviewRepository.findByCareRecord_Caregiver_IdOrderByCreateDateDesc(caregiverId);
+        return careReviewList.stream()
+                .map(this::mapToCareReviewDTO)
+                .collect(Collectors.toList());
+    }
+    private UserEntity getUserEntity(String accessToken){
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        int caregiverId = carePostRepository.findById(carePostId).getCaregiver().getId();
-        List<CareReviewEntity> careReviewList = careReviewRepository.findByCareRecord_Caregiver_IdOrderByCreateDateDesc(caregiverId);
-        return careReviewList.stream()
-                .map(this::mapToCareReviewDTO)
-                .collect(Collectors.toList());
+        return user;
     }
 }

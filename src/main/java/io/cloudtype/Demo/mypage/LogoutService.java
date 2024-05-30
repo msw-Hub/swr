@@ -25,12 +25,7 @@ public class LogoutService {
     //블랙 리스트에 추가하고 나중에 비교함
     @Transactional
     public void logout(String accessToken, String refreshToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         user.setRefreshToken(null);
         userRepository.save(user);
         //먼저 있는 지를 찾아서 없으면 추가
@@ -41,5 +36,23 @@ public class LogoutService {
         blacklistEntity.setAccessToken(accessToken);
         blacklistEntity.setRefreshToken(refreshToken);
         blacklistRepository.save(blacklistEntity);
+    }
+    @Transactional
+    public void signOut(String accessToken){
+        UserEntity user = getUserEntity(accessToken);
+        //회원 정보 삭제 전에 고려 해야할 사항
+        //데이터베이스의 엔티티 설정을 cascade로 변경시, 어떻게 되는지를 고려해야한다
+
+        //회원 정보 삭제
+        userRepository.delete(user);
+    }
+    private UserEntity getUserEntity(String accessToken){
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        return user;
     }
 }

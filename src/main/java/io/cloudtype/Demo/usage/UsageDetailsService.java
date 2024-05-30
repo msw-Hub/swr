@@ -39,12 +39,7 @@ public class UsageDetailsService {
     }
     //유저의 산책이용내역보기
     public List<WalkUsageSimpleDTO> getUserWalkUsageList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         List<WalkRecordEntity> walkRecodeList = walkRecordRepository.findByUser_IdOrderByCreateDateDesc(user.getId());
         return walkRecodeList.stream()
                 .map(this::getWalkUsageDetailSimplified)
@@ -67,12 +62,7 @@ public class UsageDetailsService {
     }
 
     public WalkUsageDetailsDTO getUserWalkUsageDetail(String accessToken, int walkRecodeId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         WalkRecordEntity walkRecode = walkRecordRepository.findById(walkRecodeId);
         if (walkRecode == null) {
             throw new IllegalArgumentException("해당 산책기록을 찾을 수 없습니다");
@@ -109,24 +99,14 @@ public class UsageDetailsService {
         return walkUsageDTO;
     }
     public List<WalkUsageSimpleDTO> getPartnerWalkUsageList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         List<WalkRecordEntity> walkRecodeList = walkRecordRepository.findByWalker_IdOrderByCreateDateDesc(user.getId());
         return walkRecodeList.stream()
                 .map(this::getWalkUsageDetailSimplified)
                 .collect(Collectors.toList());
     }
     public List<CareUsageSimpleDTO> getUserCareUsageList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         List<CareRecordEntity> careRecodeList = careRecordRepository.findByOwner_IdOrderByEndDateDesc(user.getId());
         return careRecodeList.stream()
                 .map(this::getCareUsageDetailSimplified)
@@ -147,24 +127,14 @@ public class UsageDetailsService {
         return careUsageDTO;
     }
     public List<CareUsageSimpleDTO> getPartnerCareUsageList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         List<CareRecordEntity> careRecodeList = careRecordRepository.findByCaregiver_IdOrderByEndDateDesc(user.getId());
         return careRecodeList.stream()
                 .map(this::getCareUsageDetailSimplified)
                 .collect(Collectors.toList());
     }
     public CareUsageDetailsDTO getUserCareUsageDetail(String accessToken, int careRecordId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         CareRecordEntity careRecord = careRecordRepository.findById(careRecordId);
         if (careRecord == null) {
             throw new IllegalArgumentException("해당 돌봄기록을 찾을 수 없습니다");
@@ -205,5 +175,14 @@ public class UsageDetailsService {
         careUsageDTO.setReason(careRecordEntity.getReason());
         careUsageDTO.setAmount(careRecordEntity.getAmount());
         return careUsageDTO;
+    }
+    private UserEntity getUserEntity(String accessToken){
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        return user;
     }
 }

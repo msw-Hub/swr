@@ -58,12 +58,7 @@ public class WalkMatchingService {
 
     @Transactional
     public void createPost(String accessToken, WalkMatchingEntity walkMatchingEntity, int isEdit) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         int amount;
         if (walkMatchingEntity.getWalkTime()==30) amount=15000;
         else if (walkMatchingEntity.getWalkTime()==60) amount=25000;
@@ -124,12 +119,7 @@ public class WalkMatchingService {
     }
     @Transactional
     public Page<WalkMatchingDTO> getList(String accessToken, int pageNumber, double nowLatitude, double nowLongitude, double maxDistance) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         if (user.getPartnership() == 0) {
             throw new IllegalArgumentException("파트너쉽이 없습니다");
         }
@@ -198,12 +188,7 @@ public class WalkMatchingService {
     }
     @Transactional
     public void apply(String accessToken, int postId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         if (user.getPartnership() == 0) {
             throw new IllegalArgumentException("파트너쉽이 없습니다");
         }
@@ -228,12 +213,7 @@ public class WalkMatchingService {
         //신청이 완료되었음으로 주인에게 신청 알람을 보내야함
     }
     public WalkMatchingDetailsDTO myPost(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         WalkMatchingEntity post = walkMatchingRepository.findByUser_Id(user.getId());
         if (post == null) {
             throw new IllegalArgumentException("작성한 게시글이 없습니다");
@@ -270,9 +250,7 @@ public class WalkMatchingService {
         return dto;
     }
     public List<WaiterDTO> getApplierList(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
+        UserEntity user = getUserEntity(accessToken);
         WalkMatchingEntity post = walkMatchingRepository.findByUser_Id(user.getId());
 
         List<WaiterEntity> waiters = waiterRepository.findByWalkMatchingId(post.getId());
@@ -293,12 +271,7 @@ public class WalkMatchingService {
         return dto;
     }
     public List<WalkMatchingDTO> myApply(String accessToken,double nowLatitude, double nowLongitude) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         if(user.getPartnership()==0) {
             throw new IllegalArgumentException("파트너쉽이 없습니다");
         }
@@ -329,12 +302,7 @@ public class WalkMatchingService {
         return dto;
     }
     public WalkMatchingDetailsDTO myApplyProgress(String accessToken) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         WalkMatchingEntity post = walkMatchingRepository.findByWalker_Id(user.getId());
         if (post == null) {
             throw new IllegalArgumentException("진행중인 산책이 없습니다");
@@ -346,12 +314,7 @@ public class WalkMatchingService {
     }
     @Transactional
     public void accept(String accessToken, int waiterListId, int postId, int waiterId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         //교차검증
         WaiterEntity waiter = waiterRepository.findById(waiterListId);
         if(waiter == null || waiter.getId()!=waiterListId || waiter.getWalkMatching().getId()!=postId
@@ -372,12 +335,7 @@ public class WalkMatchingService {
     }
     @Transactional
     public void deletePost(String accessToken, int postId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         WalkMatchingEntity post = walkMatchingRepository.findById(postId);
         if (post == null) {
             throw new IllegalArgumentException("해당 게시글을 찾을 수 없습니다");
@@ -393,12 +351,7 @@ public class WalkMatchingService {
     }
     @Transactional
     public void deleteApply(String accessToken, int postId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         WalkMatchingEntity post = walkMatchingRepository.findById(postId);
         if (post == null) {
             throw new IllegalArgumentException("해당 게시글을 찾을 수 없습니다");
@@ -414,12 +367,7 @@ public class WalkMatchingService {
     }
     @Transactional
     public void start(String accessToken, int postId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         WalkMatchingEntity post = walkMatchingRepository.findById(postId);
         if (post == null) {
             throw new IllegalArgumentException("해당 게시글을 찾을 수 없습니다");
@@ -437,12 +385,7 @@ public class WalkMatchingService {
     }
     @Transactional
     public int end(String accessToken, int postId) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         WalkMatchingEntity post = walkMatchingRepository.findById(postId);
         if (post == null) {
             throw new IllegalArgumentException("해당 게시글을 찾을 수 없습니다");
@@ -503,12 +446,7 @@ public class WalkMatchingService {
     }
     @Transactional
     public void incomplete(String accessToken, int postId, String reason) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         WalkMatchingEntity post = walkMatchingRepository.findById(postId);
         if (post == null) {
             throw new IllegalArgumentException("해당 게시글을 찾을 수 없습니다");
@@ -527,26 +465,25 @@ public class WalkMatchingService {
         walkMatchingRepository.delete(post);
     }
     public int getUserWalkStatus(String accessToken,int status) {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         if(status==0) return walkMatchingRepository.countByUser_IdAndStatus(user.getId(),0);
         else if (status==1) return walkMatchingRepository.countByUser_IdAndStatus(user.getId(),1);
         else if (status==2) return walkMatchingRepository.countByUser_IdAndStatus(user.getId(),2);
         else return 0;
     }
     public int getWalkerStatus(String accessToken,int status) {
+        UserEntity user = getUserEntity(accessToken);
+        if (status==1) return walkMatchingRepository.countByWalker_IdAndStatus(user.getId(),1);
+        else if (status==2) return walkMatchingRepository.countByWalker_IdAndStatus(user.getId(),2);
+        else return 0;
+    }
+    private UserEntity getUserEntity(String accessToken){
         accessToken = accessToken.split(" ")[1];
         String username = jwtUtil.getUsername(accessToken, 1);
         UserEntity user = userRepository.findByUsername(username);
         if (user == null) {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
-        if (status==1) return walkMatchingRepository.countByWalker_IdAndStatus(user.getId(),1);
-        else if (status==2) return walkMatchingRepository.countByWalker_IdAndStatus(user.getId(),2);
-        else return 0;
+        return user;
     }
 }

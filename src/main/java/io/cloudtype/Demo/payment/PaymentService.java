@@ -46,12 +46,7 @@ public class PaymentService {
         this.paymentRepository = paymentRepository;
     }
     public void checkPayment(String accessToken, String orderId, int amount, String paymentKey) throws IOException {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         //orderId로 db의 결제 정보 조회
         PaymentEntity paymentEntity = paymentRepository.findByOrderId(orderId);
         if (paymentEntity == null) {
@@ -117,12 +112,7 @@ public class PaymentService {
     }
     @Transactional
     public void tossPay(String accessToken, String orderId, int amount, String paymentKey) throws IOException {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
 
         // toss POST 요청 URL
         String reqURL = "https://api.tosspayments.com/v1/payments/confirm";
@@ -202,12 +192,7 @@ public class PaymentService {
     }
     @Transactional
     public void beforePayment(String accessToken, String orderId, int amount) throws IOException {
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         //데이터베이스에 결제 요청 정보 저장
         PaymentEntity paymentEntity = new PaymentEntity();
         paymentEntity.setAmount(amount);
@@ -219,12 +204,7 @@ public class PaymentService {
         paymentRepository.save(paymentEntity);
     }
     public List<PaymentListDTO> paymentList(String accessToken){
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         List<PaymentEntity> paymentList = paymentRepository.findByConsumer_IdOrderByOrderAtDesc(user.getId());
         return paymentList.stream()
                 .map(this::createPaymentListDTO)
@@ -241,12 +221,7 @@ public class PaymentService {
         return paymentListDTO;
     }
     public Map<String,String> getInfo(String accessToken){
-        accessToken = accessToken.split(" ")[1];
-        String username = jwtUtil.getUsername(accessToken, 1);
-        UserEntity user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
-        }
+        UserEntity user = getUserEntity(accessToken);
         if(user.getPhoneNumber() == null){
             throw new IllegalArgumentException("전화번호를 등록해주세요");
         }
@@ -254,5 +229,14 @@ public class PaymentService {
         userInfo.put("phoneNumber", user.getPhoneNumber());
         userInfo.put("name", user.getName());
         return userInfo;
+    }
+    private UserEntity getUserEntity(String accessToken){
+        accessToken = accessToken.split(" ")[1];
+        String username = jwtUtil.getUsername(accessToken, 1);
+        UserEntity user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
+        return user;
     }
 }
