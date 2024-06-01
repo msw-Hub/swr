@@ -10,13 +10,13 @@ import java.util.List;
 @Getter
 public class CarePostDetailsDTO {
 
-    int carePostId;
-    String caregiverNickname;
-    double caregiverRating;
-    int caregiverReviewCount;
+    private int carePostId;
+    private String caregiverNickname;
+    private double caregiverRating;
+    private int caregiverReviewCount;
 
-    String title;
-    String content;
+    private String title;
+    private String content;
 
     private String administrativeAddress1;      //행정주소1 - 시도
     private String administrativeAddress2;      //행정주소2 - 시군구
@@ -25,8 +25,8 @@ public class CarePostDetailsDTO {
 
     private double distance;                    //집으로부터의 거리
 
-    List<Date> unavailableDate;   // 돌봄 불가능 날짜
+    private List<Date> unavailableDate;   // 돌봄 불가능 날짜
 
-    List<String> careImages;  // 돌봄 이미지
+    private List<String> careImages;  // 돌봄 이미지
 
 }

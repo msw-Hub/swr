@@ -5,9 +5,13 @@ import io.cloudtype.Demo.mypage.user.BlacklistEntity;
 import io.cloudtype.Demo.mypage.user.BlacklistRepository;
 import io.cloudtype.Demo.mypage.user.UserEntity;
 import io.cloudtype.Demo.mypage.user.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
+@Service
 public class LogoutService {
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;

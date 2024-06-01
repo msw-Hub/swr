@@ -5,6 +5,8 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import io.cloudtype.Demo.care.DTO.CarePostListDTO;
+import io.cloudtype.Demo.care.entity.CarePostEntity;
 import io.cloudtype.Demo.community.DTO.CommentDTO;
 import io.cloudtype.Demo.community.DTO.CommunityBoardDTO;
 import io.cloudtype.Demo.community.entity.CommentEntity;
@@ -18,10 +20,7 @@ import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.mypage.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
@@ -31,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -353,5 +353,23 @@ public class CommunityBoardService {
             throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
         }
         return user;
+    }
+    public Page<CommunityBoardDTO> filterTitle (String accessToken, String keywordTitle, int page){
+        getUserEntity(accessToken);
+        List<CommunityBoardEntity> communityPosts = communityBoardRepository.findByTitle(keywordTitle);
+        List<CommunityBoardDTO> filterCommunityPosts = communityPosts.stream()
+                .map(this::mapToDTO)
+                .sorted(Comparator.comparing(CommunityBoardDTO::getId))
+                .toList();
+        Pageable pageable = PageRequest.of(page, 10);
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), filterCommunityPosts.size());
+        if (start >= end) {
+            log.info("Requested page is out of filtered data range.");
+            throw new IllegalArgumentException("요청한 페이지가 존재하지 않습니다 (페이지 범위 초과) 혹은 글이 없을 수 있습니다");
+        }
+        List<CommunityBoardDTO> pageContent = filterCommunityPosts.subList(start, end);
+        return new PageImpl<>(pageContent, pageable, filterCommunityPosts.size());
+
     }
 }

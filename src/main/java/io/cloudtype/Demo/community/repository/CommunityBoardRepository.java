@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface CommunityBoardRepository extends JpaRepository<CommunityBoardEntity, Long> {
     //최신글 기준 인덱스 나열해서 시작게시글로부터 10개 반환
@@ -19,4 +21,6 @@ public interface CommunityBoardRepository extends JpaRepository<CommunityBoardEn
     //게시글 번호로 imageUrl 조회
     @Query("SELECT c.imgUrl FROM CommunityBoardEntity c WHERE c.id = :id")
     String findImageUrlById(int id);
+
+    List<CommunityBoardEntity> findByTitle(String keywordTitle);
 }

@@ -333,7 +333,12 @@ public class CareMatchingService {
         dto.setAdministrativeAddress1(entity.getAdministrativeAddress1());
         dto.setAdministrativeAddress2(entity.getAdministrativeAddress2());
         dto.setDistance(distance);
-        dto.setCareImages(entity.getCareImages().stream().map(CareImgEntity::getImgUrl).collect(Collectors.toList()));
+        dto.setCareImages(entity.getCareImages().stream()
+                .map(CareImgEntity::getImgUrl)
+                /*
+                이미지 생성 순서로 정렬해야 함
+                 */
+                .collect(Collectors.toList()));
         return dto;
     }
     private double getDistance(double lat1, double lon1, double lat2, double lon2) {

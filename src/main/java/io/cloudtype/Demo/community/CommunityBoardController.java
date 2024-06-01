@@ -3,6 +3,7 @@ package io.cloudtype.Demo.community;
 import io.cloudtype.Demo.community.DTO.CommentDTO;
 import io.cloudtype.Demo.community.DTO.CommunityBoardDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -173,4 +174,20 @@ public class CommunityBoardController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    //검색 필터링 - 제목에 포함된 것으로 검색
+    @GetMapping("/keyword/title")
+    public ResponseEntity<?> keywordTitle(@RequestHeader("Authorization") String accessToken,
+                                          @RequestParam("keywordTitle") String keywordTitle,
+                                          @RequestParam("page") int page
+    ) {
+        try {
+            Page<CommunityBoardDTO> posts =  communityBoardService.filterTitle(accessToken, keywordTitle,page);
+            Map<String, Object> response = new HashMap<>();
+            response.put("posts", posts);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    //검색 필터링 - 유저 닉네임으로 검색
 }

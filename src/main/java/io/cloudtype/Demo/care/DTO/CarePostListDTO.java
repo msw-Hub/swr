@@ -9,16 +9,17 @@ import java.util.List;
 @Getter
 public class CarePostListDTO {
 
-    int carePostId;
-    String caregiverNickname;
-    double caregiverRating;
-    int caregiverReviewCount;
+    private int carePostId;
+    private String caregiverNickname;
 
-    String title;
+    private double caregiverRating;
+    private int caregiverReviewCount;
+
+    private String title;
 
     private String administrativeAddress1;      //행정주소1 - 시도
     private String administrativeAddress2;      //행정주소2 - 시군구
     private double distance;                    //집으로부터의 거리
 
-    List<String> careImages;  // 돌봄 이미지
+    private List<String> careImages;  // 돌봄 이미지
 }
