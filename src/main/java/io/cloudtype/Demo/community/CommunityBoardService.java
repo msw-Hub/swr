@@ -102,6 +102,35 @@ public class CommunityBoardService {
             return CompletableFuture.completedFuture(null);
         }
     }
+    // 동기 메서드 유지
+    public String uploadImage(MultipartFile image) {
+        try {
+            if (image.isEmpty()) {
+                log.warn("Empty image provided for upload.");
+                return null;
+            }
+
+            InputStream keyFile = ResourceUtils.getURL(keyFileName).openStream();
+            String uuid = UUID.randomUUID().toString();
+            String ext = StringUtils.getFilenameExtension(image.getOriginalFilename());
+            Storage storage = StorageOptions.newBuilder()
+                    .setCredentials(GoogleCredentials.fromStream(keyFile))
+                    .build()
+                    .getService();
+
+            BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, uuid)
+                    .setContentType(ext)
+                    .build();
+            Blob blob = storage.create(blobInfo, image.getBytes());
+
+            String imgUrl = "https://storage.googleapis.com/" + bucketName + "/" + uuid;
+            log.info("Image uploaded successfully. URL: {}", imgUrl);
+            return imgUrl;
+        } catch (IOException e) {
+            log.error("Failed to upload image to Google Cloud Storage.", e);
+            return null;
+        }
+    }
     public String findImageUrlById(int communityBoardId) {
         return communityBoardRepository.findImageUrlById(communityBoardId);
     }
