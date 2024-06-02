@@ -86,14 +86,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             int roomId = Integer.parseInt(payload.get("roomId"));
             String sender = payload.get("sender");
             String msgContent = payload.get("message");
-
-            if (roomId == 0 || sender == null || msgContent == null) {
+            if (roomId == 0 || sender == null) {
                 log.error("필수 정보가 누락되었습니다");
                 return;
             }
             if ("join".equals(type)) {
                 handleJoinRoom(session, roomId, sender);
             } else if ("message".equals(type)) {
+                if (msgContent == null) {
+                    log.error("필수 정보가 누락되었습니다");
+                    return;
+                }
                 handleChatMessage(roomId, sender, msgContent);
             } else {
                 log.error("전송 타입이 잘못되었습니다: {}", type);
