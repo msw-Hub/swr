@@ -6,6 +6,7 @@ import io.cloudtype.Demo.care.DTO.CarePostDetailsDTO;
 import io.cloudtype.Demo.care.DTO.CarePostListDTO;
 import io.cloudtype.Demo.care.entity.*;
 import io.cloudtype.Demo.care.repository.*;
+import io.cloudtype.Demo.chat.ChatRoomService;
 import io.cloudtype.Demo.community.CommunityBoardService;
 import io.cloudtype.Demo.mypage.pet.PetEntity;
 import io.cloudtype.Demo.mypage.user.UserEntity;
@@ -45,6 +46,7 @@ public class CareMatchingService {
     private final CareMatchingRepository careMatchingRepository;
     private final CommunityBoardService communityBoardService;
     private final CareRecordRepository careRecordRepository;
+    private final ChatRoomService chatRoomService;
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -56,7 +58,8 @@ public class CareMatchingService {
             PetRepository petRepository,
             CareMatchingRepository careMatchingRepository,
             CommunityBoardService communityBoardService,
-            CareRecordRepository careRecordRepository
+            CareRecordRepository careRecordRepository,
+            ChatRoomService chatRoomService
     ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
@@ -67,6 +70,7 @@ public class CareMatchingService {
         this.communityBoardService = communityBoardService;
         this.reservationSchedulerRepository = reservationSchedulerRepository;
         this.careRecordRepository = careRecordRepository;
+        this.chatRoomService = chatRoomService;
     }
 
     @Transactional
@@ -583,6 +587,10 @@ public class CareMatchingService {
         careMatchingRepository.save(careMatching);
         carePost.setReservations(carePost.getReservations() + 1);
         carePostRepository.save(carePost);
+
+        UserEntity consumer = careMatching.getOwner();
+        // 채팅방 생성(name : username+walkername, username : username, walkername : )
+        chatRoomService.createChatRoom(consumer, user);
         //예약 수락한거 메세지 보내야함 양쪽
 
         //결제 - 차감만 하면됌
