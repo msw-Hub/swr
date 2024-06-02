@@ -66,9 +66,9 @@ public class ChatRoomService {
         }
 
         if (iterator.hasNext()) {
-            userMap.put("walker", iterator.next());
+            userMap.put("partner", iterator.next());
         } else {
-            log.error("No walker found in room {}", roomId);
+            log.error("No partner found in room {}", roomId);
         }
         // ObjectMapper를 사용하여 맵을 JSON 문자열로 변환
         ObjectMapper objectMapper = new ObjectMapper();
