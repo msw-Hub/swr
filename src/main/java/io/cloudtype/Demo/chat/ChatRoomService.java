@@ -192,8 +192,7 @@ public class ChatRoomService {
         }
         return user;
     }
-
-    @Transactional
+    //채팅 메시지 저장
     public void saveChatMessage(int roomId, String sender, String msgContent) {
         // 들어온 roomId로 채팅방 목록을 조회 - 없으면 다시 반환
         ChatRoomEntity chatRoom = chatRoomRepository.findByRoomId(roomId);
