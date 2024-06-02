@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
@@ -35,11 +36,18 @@ public class ReviewController {
                                           @RequestPart(value = "image", required=false) MultipartFile image
     ) {
         try {
+            CompletableFuture<String> imageUrlFuture = null;
             String imageUrl = null;
+
             if (image != null && !image.isEmpty()) {
-                // 이미지 업로드 서비스 호출
-                imageUrl = communityBoardService.uploadImage(image);
+                // 비동기 이미지 업로드 서비스 호출
+                imageUrlFuture = communityBoardService.uploadImageAsync(image);
             }
+
+            if (imageUrlFuture != null) {
+                imageUrl = imageUrlFuture.join(); // 이미지 업로드가 완료될 때까지 대기하고 결과 받기
+            }
+
             // 후기 작성
             reviewService.createReview(accessToken, walkRecordId, content, rating, imageUrl);
             return ResponseEntity.ok("후기 작성 성공");
@@ -106,11 +114,18 @@ public class ReviewController {
                                              @RequestPart(value = "image", required=false) MultipartFile image
     ) {
         try {
+            CompletableFuture<String> imageUrlFuture = null;
             String imageUrl = null;
+
             if (image != null && !image.isEmpty()) {
-                // 이미지 업로드 서비스 호출
-                imageUrl = communityBoardService.uploadImage(image);
+                // 비동기 이미지 업로드 서비스 호출
+                imageUrlFuture = communityBoardService.uploadImageAsync(image);
             }
+
+            if (imageUrlFuture != null) {
+                imageUrl = imageUrlFuture.join(); // 이미지 업로드가 완료될 때까지 대기하고 결과 받기
+            }
+
             // 후기 작성
             reviewService.createCareReview(accessToken, careRecordId, content, rating, imageUrl);
             return ResponseEntity.ok("후기 작성 성공");

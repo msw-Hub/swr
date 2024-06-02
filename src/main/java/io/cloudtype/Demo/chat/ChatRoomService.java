@@ -54,16 +54,21 @@ public class ChatRoomService {
         log.info("Chat room created" + chatRoom.getRoomId());
     }
     // 해당 roomId에 들어있는 유저집합을 반환 - 해당 채팅방에 참여중인 사람을 조회할 수 있음 - 입장시 확인용으로 사용가능?
-    @Transactional
     public String getUsersInRoom(int roomId) {
         Set<String> usersInRoom = chatRooms.getOrDefault(String.valueOf(roomId), new ConcurrentSkipListSet<>());
         Map<String, String> userMap = new HashMap<>();
         Iterator<String> iterator = usersInRoom.iterator();
+
         if (iterator.hasNext()) {
             userMap.put("user", iterator.next());
+        } else {
+            log.error("No user found in room {}", roomId);
         }
+
         if (iterator.hasNext()) {
             userMap.put("walker", iterator.next());
+        } else {
+            log.error("No walker found in room {}", roomId);
         }
         // ObjectMapper를 사용하여 맵을 JSON 문자열로 변환
         ObjectMapper objectMapper = new ObjectMapper();
@@ -72,7 +77,7 @@ public class ChatRoomService {
             System.out.println(json); // {"A":"user1","B":"user2"}
             return json;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error converting user map to JSON", e);
             throw new IllegalArgumentException("사용자 조회 실패");
             // 예외 처리 로직
         }

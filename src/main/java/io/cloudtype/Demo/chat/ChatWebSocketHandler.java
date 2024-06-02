@@ -131,11 +131,14 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             WebSocketSession userSession = sessions.get(user);
             if (userSession != null && userSession.isOpen()) {
                 try {
-                    userSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(msgContent)));
-                    log.info("Message sent to user {}", userSession);
+                    String messageJson = objectMapper.writeValueAsString(msgContent);
+                    userSession.sendMessage(new TextMessage(messageJson));
+                    log.info("Message sent to user {}", user);
                 } catch (Exception e) {
                     log.error("Error sending message to user " + user, e);
                 }
+            } else {
+                log.error("Session not found or not open for user {}", user);
             }
         }
     }

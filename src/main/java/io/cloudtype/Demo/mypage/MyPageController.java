@@ -127,15 +127,25 @@ public class MyPageController {
             @RequestPart(value = "image", required=false) MultipartFile image
     ) {
         try {
-            //주인인지 체크
+            // 주인인지 체크
             myPageService.checkOwner(accessToken, petId);
             String imageUrl = myPageService.findImageUrlById(petId);
-            if(imageChangeCheck && image == null){
-                throw new IllegalArgumentException("이미지 변경시 반드시 이미지를 첨부해야 합니다.");
-            } else if (imageChangeCheck) {  //이미지 삭제후 새로운 이미지 등록후 url받아오기
-                if(imageUrl != null) communityBoardService.deleteImageGcs(imageUrl);
-                imageUrl = communityBoardService.uploadImage(image);
+
+            CompletableFuture<String> imageUrlFuture = null;
+
+            if (imageChangeCheck && image == null) {
+                throw new IllegalArgumentException("이미지 변경 시 반드시 이미지를 첨부해야 합니다.");
+            } else if (imageChangeCheck) { // 이미지 삭제 후 새로운 이미지 등록 후 URL 받아오기
+                if (imageUrl != null) {
+                    communityBoardService.deleteImageGcs(imageUrl);
+                }
+                imageUrlFuture = communityBoardService.uploadImageAsync(image);
             }
+
+            if (imageUrlFuture != null) {
+                imageUrl = imageUrlFuture.join(); // 이미지 업로드가 완료될 때까지 대기하고 결과 받기
+            }
+
             // 반려동물 정보 수정
             myPageService.editPetStep1(petId, petName, petAge, species,gender, imageUrl);
             return ResponseEntity.ok("반려동물 기본정보 수정 완료, 추가 정보 입력으로 이동");
@@ -302,11 +312,14 @@ public class MyPageController {
                                                     @ModelAttribute("career") String career
     ) {
         try {
-            if(faceImage == null){
+            if (faceImage == null || faceImage.isEmpty()) {
                 throw new IllegalArgumentException("얼굴 사진을 첨부해주세요");
             }
-            // 이미지 업로드 서비스 호출
-            String imageUrl = communityBoardService.uploadImage(faceImage);
+
+            // 비동기 이미지 업로드 서비스 호출
+            CompletableFuture<String> imageUrlFuture = communityBoardService.uploadImageAsync(faceImage);
+            String imageUrl = imageUrlFuture.join(); // 이미지 업로드가 완료될 때까지 대기하고 결과 받기
+
             // 파트너 추가 정보 입력
             myPageService.addPartnerStep2(accessToken, imageUrl, address, career);
             return ResponseEntity.ok("추가 정보 입력 완료");
