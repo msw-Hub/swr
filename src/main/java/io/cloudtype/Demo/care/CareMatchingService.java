@@ -71,7 +71,9 @@ public class CareMatchingService {
 
     @Transactional
     public int createPost(String accessToken, String title, String content,
-                           String administrativeAddress1, String administrativeAddress2, String streetNameAddress, String detailAddress) {
+                           String administrativeAddress1, String administrativeAddress2, String streetNameAddress,
+                          String detailAddress, double latitude, double longitude
+    ) {
         UserEntity user = getUserEntity(accessToken);
         //파트너쉽이 있는지 확인
         if (user.getPartnership() != 1) {
@@ -90,6 +92,8 @@ public class CareMatchingService {
         carePost.setAdministrativeAddress2(administrativeAddress2);
         carePost.setStreetNameAddress(streetNameAddress);
         carePost.setDetailAddress(detailAddress);
+        carePost.setLatitude(latitude);
+        carePost.setLongitude(longitude);
         carePostRepository.save(carePost);
         log.info("carePost: {}",carePost);
         return carePost.getId();
@@ -408,10 +412,10 @@ public class CareMatchingService {
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByCarePost_Caregiver_IdAndStatus(user.getId(), 0);
 
         return careMatchingList.stream()
-                .map(this::applierListToDTO)
+                .map(entity-> applierListToDTO(entity,0))
                 .toList();
     }
-    private CareApplyDetailDTO applierListToDTO(CareMatchingEntity entity) {
+    private CareApplyDetailDTO applierListToDTO(CareMatchingEntity entity,int i) {
         CareApplyDetailDTO dto = new CareApplyDetailDTO();
         dto.setCareMatchingId(entity.getId());
         dto.setPetName(entity.getPet().getPetName());
@@ -426,6 +430,8 @@ public class CareMatchingService {
         dto.setReservationStartDate(entity.getReservationStartDate());
         dto.setReservationEndDate(entity.getReservationEndDate());
         dto.setRequestMessage(entity.getRequestMessage());
+        if(i==1) dto.setCareStartDate(entity.getStartDate());
+        else dto.setCareStartDate(null);
         return dto;
     }
     public List<CareApplyDetailDTO> getReservationList(String accessToken) {
@@ -434,7 +440,7 @@ public class CareMatchingService {
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByCarePost_Caregiver_IdAndStatus(user.getId(), 1);
 
         return careMatchingList.stream()
-                .map(this::applierListToDTO)
+                .map(entity-> applierListToDTO(entity,0))
                 .toList();
     }
     public List<CareApplyDetailDTO> myApplyList(String accessToken) {
@@ -443,7 +449,7 @@ public class CareMatchingService {
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByOwner_IdAndStatus(user.getId(), 0);
 
         return careMatchingList.stream()
-                .map(this::applierListToDTO)
+                .map(entity -> applierListToDTO(entity,0))
                 .toList();
     }
     public CarePostDetailsDTO reservationPost(String accessToken, int careMatchingId, double homeLatitude, double homeLongitude) {
@@ -485,7 +491,7 @@ public class CareMatchingService {
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByOwner_IdAndStatus(user.getId(), 1);
 
         return careMatchingList.stream()
-                .map(this::applierListToDTO)
+                .map(entity -> applierListToDTO(entity,0))
                 .toList();
     }
     public List<CareApplyDetailDTO> myProgressList(String accessToken) {
@@ -494,14 +500,14 @@ public class CareMatchingService {
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByOwner_IdAndStatus(user.getId(), 2);
 
         return careMatchingList.stream()
-                .map(this::applierListToDTO)
+                .map(entity -> applierListToDTO(entity,1))
                 .toList();
     }
     public List<CareApplyDetailDTO> myPostProgressList(String accessToken) {
         UserEntity user = getUserEntity(accessToken);
         List<CareMatchingEntity> careMatchingList = careMatchingRepository.findByCarePost_Caregiver_IdAndStatus(user.getId(), 2);
         return careMatchingList.stream()
-                .map(this::applierListToDTO)
+                .map(entity -> applierListToDTO(entity,1))
                 .toList();
     }
     @Transactional

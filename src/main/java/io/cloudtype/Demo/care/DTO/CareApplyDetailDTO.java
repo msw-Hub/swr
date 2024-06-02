@@ -31,4 +31,7 @@ public class CareApplyDetailDTO {
     private LocalDateTime reservationEndDate;
 
     private String requestMessage;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime careStartDate;
 }

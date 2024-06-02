@@ -325,7 +325,6 @@ public class WalkMatchingService {
         post.setWalker(waiter.getWaiter());
         post.setStatus(1);
         walkMatchingRepository.save(post);
-
         //해당글의 신청자들 삭제
         waiterRepository.deleteByWalkMatchingId(postId);
         //매칭이 된 신청자의 다른 신청들삭제
