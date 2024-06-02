@@ -338,10 +338,8 @@ public class CareMatchingService {
         dto.setAdministrativeAddress2(entity.getAdministrativeAddress2());
         dto.setDistance(distance);
         dto.setCareImages(entity.getCareImages().stream()
+                .sorted(Comparator.comparing(CareImgEntity::getId))
                 .map(CareImgEntity::getImgUrl)
-                /*
-                이미지 생성 순서로 정렬해야 함
-                 */
                 .collect(Collectors.toList()));
         return dto;
     }
