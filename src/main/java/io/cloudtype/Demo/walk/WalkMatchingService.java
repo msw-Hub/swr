@@ -1,5 +1,6 @@
 package io.cloudtype.Demo.walk;
 
+import io.cloudtype.Demo.chat.ChatRoomService;
 import io.cloudtype.Demo.mypage.pet.PetEntity;
 import io.cloudtype.Demo.mypage.user.UserEntity;
 import io.cloudtype.Demo.walk.DTO.WaiterDTO;
@@ -41,12 +42,14 @@ public class WalkMatchingService {
     private final WalkMatchingRepository walkMatchingRepository;
     private final WaiterRepository waiterRepository;
     private final WalkRecordRepository walkRecordRepository;
+    private final ChatRoomService chatRoomService;
 
     @Autowired
     public WalkMatchingService(UserRepository userRepository, PetRepository petRepository, JWTUtil jwtUtil,
                                WalkMatchingRepository walkMatchingRepository,
                                WaiterRepository waiterRepository,
-                               WalkRecordRepository walkRecordRepository
+                               WalkRecordRepository walkRecordRepository,
+                                 ChatRoomService chatRoomService
     ) {
         this.userRepository = userRepository;
         this.petRepository = petRepository;
@@ -54,6 +57,7 @@ public class WalkMatchingService {
         this.walkMatchingRepository = walkMatchingRepository;
         this.waiterRepository = waiterRepository;
         this.walkRecordRepository = walkRecordRepository;
+        this.chatRoomService = chatRoomService;
     }
 
     @Transactional
@@ -329,6 +333,11 @@ public class WalkMatchingService {
         waiterRepository.deleteByWalkMatchingId(postId);
         //매칭이 된 신청자의 다른 신청들삭제
         waiterRepository.deleteByWaiterId(waiterId);
+
+        UserEntity partner = post.getWalker();
+        // 채팅방 생성(name : username+walkername, username : username, walkername : )
+        chatRoomService.createChatRoom(user, partner);
+
         //서브 서버에게 매칭완료 메세지와 채팅방 개설 요청을 보내야함
         //양쪽에게 매칭완료 메세지를 보내야함
     }
