@@ -2,6 +2,7 @@ package io.cloudtype.Demo.chat;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cloudtype.Demo.chat.DTO.ChatMessageDTO;
 import io.cloudtype.Demo.chat.entity.ChatMessageEntity;
 import io.cloudtype.Demo.chat.entity.ChatRoomEntity;
 import io.cloudtype.Demo.chat.repository.ChatMessageRepository;
@@ -119,7 +120,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     // 채팅방 입장 후 채팅 메시지 전송할 때 동작
     private void handleChatMessage(int roomId, String sender, String msgContent) {
-        chatRoomService.saveChatMessage(roomId, sender, msgContent);
+        ChatMessageEntity chatMessage = chatRoomService.saveChatMessage(roomId, sender, msgContent);
+        if (chatMessage == null) {
+            log.error("Failed to save chat message");
+            return;
+        }
+        ChatMessageDTO chatMessageDTO = new ChatMessageDTO(chatMessage);
 
         // Set<String> : 중복저장이 안되는 집합
         Set<String> users = chatRoomService.getChatRoom(roomId);
@@ -133,8 +139,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             WebSocketSession userSession = sessions.get(user);
             if (userSession != null && userSession.isOpen()) {
                 try {
-                    String messageJson = objectMapper.writeValueAsString(msgContent);
-                    userSession.sendMessage(new TextMessage(messageJson));
+                    userSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(chatMessageDTO)));
                     log.info("Message sent to user {}", user);
                 } catch (Exception e) {
                     log.error("Error sending message to user " + user, e);

@@ -199,12 +199,12 @@ public class ChatRoomService {
         return user;
     }
     //채팅 메시지 저장
-    public void saveChatMessage(int roomId, String sender, String msgContent) {
+    public ChatMessageEntity saveChatMessage(int roomId, String sender, String msgContent) {
         // 들어온 roomId로 채팅방 목록을 조회 - 없으면 다시 반환
         ChatRoomEntity chatRoom = chatRoomRepository.findByRoomId(roomId);
         if (chatRoom == null) {
             log.error("roomId에 해당하는 채팅방이 없습니다");
-            return;
+            return null;
         }
         log.info("chatRoomEntity : {}", chatRoom);
         // 유저 타입 구분 (user : 0, partner : 1)
@@ -221,8 +221,12 @@ public class ChatRoomService {
             userType = 1;
         } else {
             log.error("해당 유저가 채팅방에 속해있지 않습니다");
-            return;
+            return null;
         }
+        //채팅방 정보도 업데이트
+        chatRoom.setUpdatedAt(LocalDateTime.now());
+        chatRoomRepository.save(chatRoom);
+
         //채팅 내역 db에 저장
         ChatMessageEntity chatMessage = new ChatMessageEntity();
         chatMessage.setChatRoom(chatRoom);
@@ -231,8 +235,7 @@ public class ChatRoomService {
         chatMessage.setSendTime(LocalDateTime.now());
         chatMessageRepository.save(chatMessage);
         log.info("Received chat message: " + msgContent);
-        //채팅방 정보도 업데이트
-        chatRoom.setUpdatedAt(LocalDateTime.now());
-        chatRoomRepository.save(chatRoom);
+
+        return chatMessage;
     }
 }
