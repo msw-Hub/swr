@@ -15,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -46,18 +48,30 @@ public class CareMatchingController {
             int carePostId = careMatchingService.createPost(accessToken, title, content,
                     administrativeAddress1, administrativeAddress2, streetNameAddress, detailAddress, latitude, longitude);
 
-            if (images != null) {
-                for (MultipartFile image : images) {
-                    if (!image.isEmpty()) {
-                        String imageUrl = communityBoardService.uploadImage(image); // 이미지를 저장하고 URL을 반환하는 메서드
-                        careMatchingService.addImage(carePostId, imageUrl, accessToken); // 이미지 URL을 CareImgEntity에 저장
-                    }
-                }
-            }else throw new IllegalArgumentException("돌봄 장소 이미지를 필수적으로 등록해주세요");
+            if (images == null || images.isEmpty()) {
+                throw new IllegalArgumentException("돌봄 장소 이미지를 필수적으로 등록해주세요");
+            }
+
+            // 비동기 이미지 업로드 호출
+            List<CompletableFuture<String>> futures = images.stream()
+                    .filter(image -> image != null && !image.isEmpty())
+                    .map(communityBoardService::uploadImageAsync)
+                    .collect(Collectors.toList());
+
+            // 이미지 업로드가 완료될 때까지 대기하고 결과 받기
+            List<String> imageUrls = futures.stream()
+                    .map(CompletableFuture::join)
+                    .collect(Collectors.toList());
+
+            // 이미지 URL을 CareImgEntity에 저장
+            for (String imageUrl : imageUrls) {
+                careMatchingService.addImage(carePostId, imageUrl, accessToken);
+            }
 
             if (unavailableDates != null) {
                 careMatchingService.addUnavailableDates(carePostId, unavailableDates);
             }
+
             return ResponseEntity.ok("돌봄글 작성 완료");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -86,19 +100,35 @@ public class CareMatchingController {
                                       @RequestPart(value = "unavailableDates", required = false) List<String> unavailableDates
     ) {
         try {
-            //예약요청이 있는지를 확인해서 없으면 수정
-            if(careMatchingService.checkReservation(carePostId)) throw new IllegalStateException("예약신청이 있는 글은 수정할 수 없습니다 예약신청취소 후 다시 진행해주세요");
-            careMatchingService.editPost(accessToken,carePostId, title, content);
-            if(imageChangeCheck) { //기존 이미지 삭제후 재업로드
+            // 예약 요청이 있는지를 확인해서 없으면 수정
+            if (careMatchingService.checkReservation(carePostId)) {
+                throw new IllegalStateException("예약신청이 있는 글은 수정할 수 없습니다 예약신청취소 후 다시 진행해주세요");
+            }
+
+            careMatchingService.editPost(accessToken, carePostId, title, content);
+
+            if (imageChangeCheck) { // 기존 이미지 삭제 후 재업로드
                 careMatchingService.deleteImages(carePostId, accessToken);
-                if (images != null) {
-                    for (MultipartFile image : images) {
-                        if (!image.isEmpty()) {
-                            String imageUrl = communityBoardService.uploadImage(image); // 이미지를 저장하고 URL을 반환하는 메서드
-                            careMatchingService.addImage(carePostId, imageUrl, accessToken); // 이미지 URL을 CareImgEntity에 저장
-                        }
+
+                if (images != null && !images.isEmpty()) {
+                    // 비동기 이미지 업로드 호출
+                    List<CompletableFuture<String>> futures = images.stream()
+                            .filter(image -> image != null && !image.isEmpty())
+                            .map(communityBoardService::uploadImageAsync)
+                            .collect(Collectors.toList());
+
+                    // 이미지 업로드가 완료될 때까지 대기하고 결과 받기
+                    List<String> imageUrls = futures.stream()
+                            .map(CompletableFuture::join)
+                            .collect(Collectors.toList());
+
+                    // 이미지 URL을 CareImgEntity에 저장
+                    for (String imageUrl : imageUrls) {
+                        careMatchingService.addImage(carePostId, imageUrl, accessToken);
                     }
-                }else throw new IllegalArgumentException("이미지가 없어 이미지를 변경할 수 없습니다");
+                } else {
+                    throw new IllegalArgumentException("이미지가 없어 이미지를 변경할 수 없습니다");
+                }
             }
             if (datesChangeCheck) { // 기존 날짜와 비교하여 변경된 부분만 업데이트
                 careMatchingService.updateUnavailableDates(carePostId, unavailableDates);

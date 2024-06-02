@@ -41,7 +41,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ObjectMapper objectMapper;
     private final ConcurrentHashMap<String, String> sessionRoomMap = new ConcurrentHashMap<>();
     private ScheduledExecutorService heartBeatExecutor;
-    private final ConcurrentHashMap<String, String> sessionUserTypeMap = new ConcurrentHashMap<>();
 
     @Autowired
     public ChatWebSocketHandler(ChatRoomService chatRoomService, ObjectMapper objectMapper
@@ -49,6 +48,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         this.chatRoomService = chatRoomService;
         this.objectMapper = objectMapper;
     }
+
 
     @PostConstruct
     public void init() {
@@ -86,6 +86,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             int roomId = Integer.parseInt(payload.get("roomId"));
             String sender = payload.get("sender");
             String msgContent = payload.get("message");
+
             if (roomId == 0 || sender == null) {
                 log.error("필수 정보가 누락되었습니다");
                 return;
@@ -119,6 +120,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     // 채팅방 입장 후 채팅 메시지 전송할 때 동작
     private void handleChatMessage(int roomId, String sender, String msgContent) {
         chatRoomService.saveChatMessage(roomId, sender, msgContent);
+
         // Set<String> : 중복저장이 안되는 집합
         Set<String> users = chatRoomService.getChatRoom(roomId);
         if (users == null) {

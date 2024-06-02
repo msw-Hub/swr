@@ -70,6 +70,7 @@ public class ChatRoomService {
         } else {
             log.error("No partner found in room {}", roomId);
         }
+
         // ObjectMapper를 사용하여 맵을 JSON 문자열로 변환
         ObjectMapper objectMapper = new ObjectMapper();
         try {
@@ -207,7 +208,10 @@ public class ChatRoomService {
         }
         log.info("chatRoomEntity : {}", chatRoom);
         // 유저 타입 구분 (user : 0, partner : 1)
-        UserEntity userEntity = getUserEntity(sender);
+        UserEntity userEntity = userRepository.findByUsername(sender);
+        if (userEntity == null) {
+            throw new IllegalArgumentException("사용자를 찾을 수 없습니다");
+        }
 
         //체크한 유저 타입 구분 (user : 0, walker : 1)
         int userType;
