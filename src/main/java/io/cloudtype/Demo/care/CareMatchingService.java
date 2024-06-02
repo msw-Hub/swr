@@ -378,7 +378,10 @@ public class CareMatchingService {
         dto.setUnavailableDate(reservationSchedulerRepository.findByCarePost(carePost).stream()
                 .map(ReservationSchedulerEntity::getUnavailableDate)
                 .collect(Collectors.toList()));
-        dto.setCareImages(carePost.getCareImages().stream().map(CareImgEntity::getImgUrl).collect(Collectors.toList()));
+        dto.setCareImages(carePost.getCareImages().stream()
+                .sorted(Comparator.comparing(CareImgEntity::getId))
+                .map(CareImgEntity::getImgUrl)
+                .collect(Collectors.toList()));
         return dto;
     }
     public CarePostDetailsDTO myPost(String accessToken){
@@ -401,7 +404,10 @@ public class CareMatchingService {
         dto.setUnavailableDate(reservationSchedulerRepository.findByCarePost(carePost).stream()
                 .map(ReservationSchedulerEntity::getUnavailableDate)
                 .collect(Collectors.toList()));
-        dto.setCareImages(carePost.getCareImages().stream().map(CareImgEntity::getImgUrl).collect(Collectors.toList()));
+        dto.setCareImages(carePost.getCareImages().stream()
+                .sorted(Comparator.comparing(CareImgEntity::getId))
+                .map(CareImgEntity::getImgUrl)
+                .collect(Collectors.toList()));
         return dto;
     }
     public List<CareApplyDetailDTO> getApplierList(String accessToken) {
@@ -480,7 +486,10 @@ public class CareMatchingService {
                 .map(ReservationSchedulerEntity::getUnavailableDate)
                 .filter(Objects::nonNull) // null 값을 필터링
                 .collect(Collectors.toList()));
-        dto.setCareImages(carePost.getCareImages().stream().map(CareImgEntity::getImgUrl).collect(Collectors.toList()));
+        dto.setCareImages(carePost.getCareImages().stream()
+                .sorted(Comparator.comparing(CareImgEntity::getId))
+                .map(CareImgEntity::getImgUrl)
+                .collect(Collectors.toList()));
         return dto;
     }
     public List<CareApplyDetailDTO> myConfirmedList(String accessToken) {
