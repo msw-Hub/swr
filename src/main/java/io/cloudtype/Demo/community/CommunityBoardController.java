@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
@@ -58,13 +59,23 @@ public class CommunityBoardController {
                                        @RequestPart(value = "image", required=false) MultipartFile image
     ) {
         try {
-            String imageUrl = null;
+            CompletableFuture<String> imageUrlFuture;
             if (image != null && !image.isEmpty()) {
-                // 이미지 업로드 서비스 호출
-                imageUrl = communityBoardService.uploadImage(image);
+                // 비동기 이미지 업로드 호출
+                imageUrlFuture = communityBoardService.uploadImageAsync(image);
+            } else {
+                imageUrlFuture = null;
             }
-            // 게시글 작성
-            communityBoardService.writePost(accessToken, title, content, imageUrl);
+
+            // 비동기 이미지 업로드 결과를 기다리지 않고 바로 응답
+            CompletableFuture.runAsync(() -> {
+                String imageUrl = null;
+                if (imageUrlFuture != null) {
+                    imageUrl = imageUrlFuture.join();
+                }
+                // 게시글 작성
+                communityBoardService.writePost(accessToken, title, content, imageUrl);
+            });
             return ResponseEntity.ok("게시글 작성 성공");
         } catch (IllegalStateException | IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

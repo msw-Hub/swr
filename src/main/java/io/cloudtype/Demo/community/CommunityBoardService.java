@@ -21,6 +21,7 @@ import io.cloudtype.Demo.mypage.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
@@ -34,6 +35,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -66,12 +68,13 @@ public class CommunityBoardService {
         this.likeRepository = likeRepository;
     }
 
-    public String uploadImage(MultipartFile image) {
+    @Async("taskExecutor")
+    public CompletableFuture<String> uploadImageAsync(MultipartFile image) {
         try {
             // 이미지가 비어 있는지 확인
             if (image.isEmpty()) {
                 log.warn("Empty image provided for upload.");
-                return null;
+                return CompletableFuture.completedFuture(null);
             }
 
             // Google Cloud Storage에 이미지 업로드
@@ -93,10 +96,10 @@ public class CommunityBoardService {
 
             // 성공 시 정보 로그 작성
             log.info("Image uploaded successfully. URL: {}", imgUrl);
-            return imgUrl;
+            return CompletableFuture.completedFuture(imgUrl);
         } catch (IOException e) {
             log.error("Failed to upload image to Google Cloud Storage.", e);
-            return null;
+            return CompletableFuture.completedFuture(null);
         }
     }
     public String findImageUrlById(int communityBoardId) {
