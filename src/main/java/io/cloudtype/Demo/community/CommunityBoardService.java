@@ -354,22 +354,4 @@ public class CommunityBoardService {
         }
         return user;
     }
-    public Page<CommunityBoardDTO> filterTitle (String accessToken, String keywordTitle, int page){
-        getUserEntity(accessToken);
-        List<CommunityBoardEntity> communityPosts = communityBoardRepository.findByTitle(keywordTitle);
-        List<CommunityBoardDTO> filterCommunityPosts = communityPosts.stream()
-                .map(this::mapToDTO)
-                .sorted(Comparator.comparing(CommunityBoardDTO::getId))
-                .toList();
-        Pageable pageable = PageRequest.of(page, 10);
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), filterCommunityPosts.size());
-        if (start >= end) {
-            log.info("Requested page is out of filtered data range.");
-            throw new IllegalArgumentException("요청한 페이지가 존재하지 않습니다 (페이지 범위 초과) 혹은 글이 없을 수 있습니다");
-        }
-        List<CommunityBoardDTO> pageContent = filterCommunityPosts.subList(start, end);
-        return new PageImpl<>(pageContent, pageable, filterCommunityPosts.size());
-
-    }
 }

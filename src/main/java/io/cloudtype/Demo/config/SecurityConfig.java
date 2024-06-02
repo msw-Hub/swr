@@ -4,6 +4,7 @@ package io.cloudtype.Demo.config;
 import io.cloudtype.Demo.jwt.JWTFilter;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.jwt.LoginFilter;
+import io.cloudtype.Demo.mypage.user.BlacklistRepository;
 import io.cloudtype.Demo.mypage.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
@@ -30,11 +31,15 @@ public class SecurityConfig {
     //JWTUtil 주입
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
+    private final BlacklistRepository blacklistRepository;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, UserRepository userRepository) {
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, UserRepository userRepository,
+                          BlacklistRepository blacklistRepository
+    ) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.blacklistRepository = blacklistRepository;
     }
 
     @Bean
@@ -89,7 +94,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
         //JWTFilter 등록
         http
-                .addFilterBefore(new JWTFilter(jwtUtil, userRepository), LoginFilter.class);
+                .addFilterBefore(new JWTFilter(jwtUtil, userRepository,blacklistRepository), LoginFilter.class);
 
         //AuthenticationManager()와 JWTUtil 인수 전달
         http
