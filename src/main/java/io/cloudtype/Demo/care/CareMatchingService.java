@@ -698,10 +698,11 @@ public class CareMatchingService {
         if (careMatching.getStatus() != 2) {
             throw new IllegalStateException("시작되지 않은 예약은 완료할 수 없습니다");
         }
+        //Carepost의 예약수 -1
         CarePostEntity carePost = careMatching.getCarePost();
         carePost.setReservations(carePost.getReservations() - 1);
         carePostRepository.save(carePost);
-
+        //CareRecord에 추가
         CareRecordEntity careRecode = new CareRecordEntity();
         careRecode.setCaregiver(user);
         careRecode.setPet(careMatching.getPet());
@@ -715,8 +716,10 @@ public class CareMatchingService {
         careRecode.setRequestMessage(careMatching.getRequestMessage());
         careRecode.setReview(false);
         careRecordRepository.save(careRecode);
-        //돌봄 완료 메세지 보내야함 양쪽
+        //CareMatching 삭제
+        careMatchingRepository.delete(careMatching);
 
+        //돌봄 완료 메세지 보내야함 양쪽
         return careRecode.getId();
     }
     @Transactional
