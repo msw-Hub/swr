@@ -153,6 +153,8 @@ public class CommunityBoardController {
     ) {
         try {
             String imgUrl = communityBoardService.findImageUrlById(communityBoardId);   //ingUrl을 반환 없으면 null
+            CompletableFuture<String> futureImgUrl = null;
+
             if (imageChangeCheck && image == null) {    //이미지를 삭제해서 올린경우 - gcs에서 이미지 삭제후 imgUrl 변경
                 if(imgUrl != null) {  //기존 이미지가 존재하면 삭제
                     communityBoardService.deleteImageGcs(imgUrl);
@@ -161,11 +163,15 @@ public class CommunityBoardController {
                     throw new IllegalStateException("db내 삭제할 이미지가 없습니다. image_change_check를 false로 변경해주세요");
                 }
             }else if (imageChangeCheck) {
-                if(imgUrl!= null) { //이미지를 변경해서 올린경우 - gcs에서 이미지 삭제후 새이미지업로두 후 imgUrl 변경
+                if (imgUrl != null) { // 이미지를 변경해서 올린 경우
                     communityBoardService.deleteImageGcs(imgUrl);
                 }
-                imgUrl = communityBoardService.uploadImage(image);  //변경된url임
+                futureImgUrl = communityBoardService.uploadImageAsync(image); // 비동기 이미지 업로드
             }
+            if (futureImgUrl != null) {
+                imgUrl = futureImgUrl.join(); // 이미지 업로드가 완료될 때까지 대기하고 결과 받기
+            }
+
             communityBoardService.editPost(accessToken, communityBoardId, title, content, imgUrl);
             return ResponseEntity.ok().body("게시글 수정을 성공적으로 완료했습니다");
         } catch (IllegalStateException | IllegalArgumentException e) {

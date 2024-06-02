@@ -44,6 +44,10 @@ public class ChatRoomEntity{
         this.updatedAt = LocalDateTime.now();
     }
 
+    // 기본 생성자
+    public ChatRoomEntity() {
+    }
+
     // 생성자 추가
     public ChatRoomEntity(UserEntity user, UserEntity partner) {
         this.user = user;

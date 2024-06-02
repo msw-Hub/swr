@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @RestController
@@ -93,14 +94,20 @@ public class MyPageController {
             @RequestPart("pet_profile_image") MultipartFile petProfileImage
     ) {
         try {
-            String imageUrl = null;
-            if(petProfileImage != null){
-                // 이미지 업로드 서비스 호출
-                imageUrl = communityBoardService.uploadImage(petProfileImage);
+            CompletableFuture<String> imageUrlFuture = null;
+            if (petProfileImage != null && !petProfileImage.isEmpty()) {
+                // 비동기 이미지 업로드 서비스 호출
+                imageUrlFuture = communityBoardService.uploadImageAsync(petProfileImage);
             }
+
+            String imageUrl = null;
+            if (imageUrlFuture != null) {
+                imageUrl = imageUrlFuture.join(); // 이미지 업로드가 완료될 때까지 대기하고 결과 받기
+            }
+
             // 유저의 반려동물 정보 추가
             int petId = myPageService.addPetStep1(accessToken, petName, petAge, species, gender, imageUrl);
-            //petId를 반환
+            // petId를 반환
             Map<String, Object> response = new HashMap<>();
             response.put("petId", petId);
             return ResponseEntity.ok(response);
