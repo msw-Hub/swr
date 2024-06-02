@@ -76,6 +76,7 @@ public class CommunityBoardService {
                 log.warn("Empty image provided for upload.");
                 return CompletableFuture.completedFuture(null);
             }
+            byte[] imageBytes = image.getBytes(); // 파일을 ByteArray로 읽음
 
             // Google Cloud Storage에 이미지 업로드
             InputStream keyFile = ResourceUtils.getURL(keyFileName).openStream();
@@ -89,12 +90,9 @@ public class CommunityBoardService {
             BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, uuid)
                     .setContentType(ext)
                     .build();
-            Blob blob = storage.create(blobInfo, image.getBytes());
+            Blob blob = storage.create(blobInfo, imageBytes); // ByteArray를 사용하여 업로드
 
-            // 업로드된 이미지의 URL 반환
             String imgUrl = "https://storage.googleapis.com/" + bucketName + "/" + uuid;
-
-            // 성공 시 정보 로그 작성
             log.info("Image uploaded successfully. URL: {}", imgUrl);
             return CompletableFuture.completedFuture(imgUrl);
         } catch (IOException e) {
