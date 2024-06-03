@@ -303,25 +303,27 @@ public class MyPageService {
         if (partner == null) {
             throw new IllegalArgumentException("파트너 정보를 찾을 수 없습니다");
         }
-        //여기는 step이 2이면서, testCount가 3이하인 경우만 가능
-        if(partner.getPartnerStep() != 2){
-            throw new IllegalArgumentException("step2를 먼저 해주세요");
+        //step2 -> step3
+        if(partner.getPartnerStep() == 2 && partner.getTestCount() == 0){
+            partner.setPartnerStep(3);  //파트너 등록 단계 3으로 변경
         }
         if (partner.getTestCount() > 3) {
-            throw new IllegalArgumentException("퀴즈 풀기 횟수를 초과하였습니다 시간이 지나고 다시 진행해주세요");
+            if(partner.getTestDate().plusDays(3).isBefore(LocalDate.now())) {
+                partner.setTestCount(0);
+            }else {
+                throw new IllegalArgumentException("퀴즈 풀기 횟수를 초과하였습니다 시간이 지나고 다시 진행해주세요");
+            }
         }
         partner.setTestCount(partner.getTestCount() + 1);
         partner.setTestDate(LocalDate.now());
         partnerRepository.save(partner);
-
         int score = getScore(quizDTO);
-
         if(score >=80){
-            partner.setPartnerStep(4);
+            partner.setPartnerStep(5);
             partner.setPartnerDate(LocalDateTime.now());
             user.setPartnership(1);
             userRepository.save(user);
-        }else if (partner.getTestCount()==3) partner.setPartnerStep(3);
+        }else if (partner.getTestCount()==3) partner.setPartnerStep(4);
         partnerRepository.save(partner);
         return score;
     }

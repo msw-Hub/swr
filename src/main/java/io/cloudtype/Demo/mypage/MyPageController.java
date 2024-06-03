@@ -276,7 +276,7 @@ public class MyPageController {
         try {
             int partnerStep = myPageService.getPartnerApplyCheck(accessToken);
             Map<String, Object> response = new HashMap<>();
-            response.put("partnerStep", partnerStep);       //0: 신청전, 1: 신분증인식완료, 2: 추가정보입력완료, 3: 시험불가 4: 시험완료(파트너등록완료)
+            response.put("partnerStep", partnerStep);       //0: 신청전, 1: 신분증인식완료, 2: 추가정보입력완료, 3: 시험본 횟수 4: 시험불가다음날짜 5:시험완료
             if(partnerStep == 3){
                 response.put("testCount", myPageService.getPartnerTestCount(accessToken));
             }else if(partnerStep == 4){
