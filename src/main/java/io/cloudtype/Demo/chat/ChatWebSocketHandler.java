@@ -24,6 +24,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Set;
@@ -125,7 +126,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             log.error("Failed to save chat message");
             return;
         }
-        ChatMessageDTO chatMessageDTO = new ChatMessageDTO(chatMessage);
 
         // Set<String> : 중복저장이 안되는 집합
         Set<String> users = chatRoomService.getChatRoom(roomId);
@@ -139,7 +139,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             WebSocketSession userSession = sessions.get(user);
             if (userSession != null && userSession.isOpen()) {
                 try {
-                    userSession.sendMessage(new TextMessage(objectMapper.writeValueAsString(chatMessageDTO)));
+                    Map<String, String> messagePayload = new HashMap<>();
+                    messagePayload.put("type", "message");
+                    messagePayload.put("roomId", String.valueOf(roomId));
+                    messagePayload.put("sender", sender);
+                    messagePayload.put("message", msgContent);
+                    messagePayload.put("sendTime", chatMessage.getSendTime().toString());
+
+                    String messageJson = objectMapper.writeValueAsString(messagePayload);
+                    userSession.sendMessage(new TextMessage(messageJson));
                     log.info("Message sent to user {}", user);
                 } catch (Exception e) {
                     log.error("Error sending message to user " + user, e);
