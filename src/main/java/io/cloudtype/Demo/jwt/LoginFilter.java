@@ -71,6 +71,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String profileImage = user.getProfileImage();
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
+        String email = user.getUsername();
 
         //데이터베이스에 JoinDetails가 저장되어있는지를 확인
         String birth = user.getBirth();
@@ -87,6 +88,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.addHeader("partnership", String.valueOf(partner));
         response.addHeader("nickname", nickname);
         response.addHeader("profileImage", profileImage);
+        response.addHeader("email", email);
     }
 
     //로그인 실패시 실행하는 메소드

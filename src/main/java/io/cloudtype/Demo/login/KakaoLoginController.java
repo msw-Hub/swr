@@ -95,6 +95,7 @@ public class KakaoLoginController {
             headers.add("partnership", String.valueOf(partner));
             headers.add("nickname", nickname);
             headers.add("profileImage", profileImage2);
+            headers.add("email", email);
         }else {
             return ResponseEntity.badRequest().body("error");
         }
