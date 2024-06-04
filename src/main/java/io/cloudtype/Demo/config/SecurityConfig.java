@@ -73,7 +73,7 @@ public class SecurityConfig {
                         configuration.setMaxAge(3600L);
 
                         configuration.setExposedHeaders(Arrays.asList("Authorization","refresh_token","profileImage",
-                                "JoinDetails","X-Refresh-Token","partnership","nickname"));
+                                "JoinDetails","X-Refresh-Token","partnership","nickname","email"));
 
                         return configuration;
                     }

@@ -47,7 +47,7 @@ public class KakaoLoginController {
 
         Map<String, Object> userInfo = kakaoService.getUserInfo(accessToken);
         String email = (String) userInfo.get("email");
-        String profileImage = (String) userInfo.get("profileImage");
+        String profileImage = "https://storage.googleapis.com/swr-bucket/default.jpg"; //기본 이미지로 설정
         String name = (String) userInfo.get("name");
         String gender = (String) userInfo.get("gender");
 
