@@ -534,9 +534,10 @@ public class CareMatchingService {
         if (careMatching.getStatus() != 0) {
             throw new IllegalStateException("이미 수락한 예약입니다");
         }
-        //예약 시간이 현재 시간보다 이후여야함
-        if (careMatching.getReservationStartDate().isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("예약 시간이 현재 시간보다 이전입니다");
+        // 예약 시간이 현재 날짜와 같거나 이후여야 함 (시간을 무시하고 날짜만 비교)
+        LocalDate today = LocalDate.now();
+        if (careMatching.getReservationStartDate().toLocalDate().isBefore(today)) {
+            throw new IllegalStateException("예약 시간이 현재 날짜보다 이전입니다");
         }
         if(careMatching.getAmount()> careMatching.getOwner().getCoin()){
             throw new IllegalStateException("상대방이 코인이 부족합니다 다른 고객을 선택해주세요");
