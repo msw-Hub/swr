@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Slf4j
@@ -92,6 +94,8 @@ public class KakaoLoginController {
                 //JoinDetails가 있는 경우
                 headers.add("JoinDetails", "true");
             }
+            nickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
+            
             headers.add("partnership", String.valueOf(partner));
             headers.add("nickname", nickname);
             headers.add("profileImage", profileImage2);

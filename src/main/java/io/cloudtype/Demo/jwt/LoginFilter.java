@@ -13,6 +13,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -82,6 +85,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             //JoinDetails가 있는 경우
             response.addHeader("JoinDetails", "true");
         }
+
+        nickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
 
         response.addHeader("Authorization", "Bearer " + accessToken);
         response.addHeader("refresh_token", refreshToken);
