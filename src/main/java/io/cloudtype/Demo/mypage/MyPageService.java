@@ -349,7 +349,6 @@ public class MyPageService {
         if(quizDTO.getQ18()==3) score+=5;
         if(quizDTO.getQ19()==1) score+=5;
         if(quizDTO.getQ20()==3) score+=5;
-        log.info("score: " + score);
         return score;
     }
     private UserEntity getUserEntity(String accessToken){
