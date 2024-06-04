@@ -86,8 +86,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             response.addHeader("JoinDetails", "true");
         }
 
-        nickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
-
         response.addHeader("Authorization", "Bearer " + accessToken);
         response.addHeader("refresh_token", refreshToken);
         response.addHeader("partnership", String.valueOf(partner));

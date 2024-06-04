@@ -94,8 +94,6 @@ public class KakaoLoginController {
                 //JoinDetails가 있는 경우
                 headers.add("JoinDetails", "true");
             }
-            nickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
-            
             headers.add("partnership", String.valueOf(partner));
             headers.add("nickname", nickname);
             headers.add("profileImage", profileImage2);
