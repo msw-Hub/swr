@@ -116,6 +116,7 @@ public class KakaoService {
             return user.isKakaoLogin() ? 1 : 2; // 카카오 로그인 여부에 따라 반환값 설정
         }
     }
+    @Transactional
     public void signUp(String email, String role, String profile, String name, String gender, String jwtRefreshToken) {
         UserEntity user = new UserEntity();
         user.setUsername(email);
