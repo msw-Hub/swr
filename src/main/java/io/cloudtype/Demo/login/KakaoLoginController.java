@@ -94,14 +94,15 @@ public class KakaoLoginController {
                 //JoinDetails가 있는 경우
                 headers.add("JoinDetails", "true");
             }
+            // URL 인코딩하여 닉네임을 헤더에 추가
+            String encodedNickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
             headers.add("partnership", String.valueOf(partner));
-            headers.add("nickname", nickname);
+            headers.add("nickname", encodedNickname);
             headers.add("profileImage", profileImage2);
             headers.add("email", email);
         }else {
             return ResponseEntity.badRequest().body("error");
         }
-
         headers.add("Authorization", "Bearer " + jwtAccessToken);
         headers.add("refresh_token", jwtRefreshToken);
 

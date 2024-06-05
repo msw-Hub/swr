@@ -92,6 +92,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.addHeader("nickname", nickname);
         response.addHeader("profileImage", profileImage);
         response.addHeader("email", email);
+
+        // URL 인코딩하여 닉네임을 헤더에 추가
+        String encodedNickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
+        response.addHeader("nickname", encodedNickname);
     }
 
     //로그인 실패시 실행하는 메소드
