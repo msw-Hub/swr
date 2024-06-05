@@ -44,7 +44,6 @@ public class UserEntity {
 
     @PrePersist
     public void prePersist() {
-        this.kakaoLogin = false;    //카카오로그인 여부 설정
         this.partnership = 0;        //제휴사 설정
         this.walkRating = 0.0;            //산책서비스 평점 설정
         this.walkReviewCount = 0;        //산책서비스 리뷰수 설정

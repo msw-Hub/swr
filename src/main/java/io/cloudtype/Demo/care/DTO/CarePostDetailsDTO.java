@@ -29,4 +29,6 @@ public class CarePostDetailsDTO {
 
     private List<String> careImages;  // 돌봄 이미지
 
+    private String caregiverProfileImage; // 돌봄인 프로필 이미지
+
 }

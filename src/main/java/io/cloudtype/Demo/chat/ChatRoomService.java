@@ -12,6 +12,7 @@ import io.cloudtype.Demo.mypage.user.PartnerEntity;
 import io.cloudtype.Demo.mypage.user.PartnerRepository;
 import io.cloudtype.Demo.mypage.user.UserEntity;
 import io.cloudtype.Demo.mypage.user.UserRepository;
+import io.cloudtype.Demo.notification.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,15 +33,18 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final PartnerRepository partnerRepository;
+    private final NotificationService notificationService;
 
     @Autowired
     public ChatRoomService(ChatRoomRepository chatRoomRepository, JWTUtil jwtUtil, ChatMessageRepository chatMessageRepository, UserRepository userRepository,
-                           PartnerRepository partnerRepository) {
+                           PartnerRepository partnerRepository, NotificationService notificationService
+    ) {
         this.chatRoomRepository = chatRoomRepository;
         this.jwtUtil = jwtUtil;
         this.chatMessageRepository = chatMessageRepository;
         this.userRepository = userRepository;
         this.partnerRepository = partnerRepository;
+        this.notificationService = notificationService;
     }
 
     // 채팅방 생성 요청 처리
@@ -52,6 +56,18 @@ public class ChatRoomService {
         // 리포지토리에 접근하여 방금전 입력 받은 채팅방 정보 db에 저장
         chatRoomRepository.save(chatRoom);
         log.info("Chat room created" + chatRoom.getRoomId());
+
+        // 채팅방 생성 시, 두 사용자에게 알림을 보냄
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "채팅방이 생성되었습니다.");
+        } else {
+            log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        if (notificationService.isUserConnected(partner.getUsername())) {
+            notificationService.notifyUser(partner.getUsername(), "채팅방이 생성되었습니다.");
+        }else {
+            log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
+        }
     }
     // 해당 roomId에 들어있는 유저집합을 반환 - 해당 채팅방에 참여중인 사람을 조회할 수 있음 - 입장시 확인용으로 사용가능?
     public String getUsersInRoom(int roomId) {

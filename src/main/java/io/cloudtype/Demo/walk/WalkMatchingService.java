@@ -2,6 +2,7 @@ package io.cloudtype.Demo.walk;
 
 import io.cloudtype.Demo.chat.ChatRoomService;
 import io.cloudtype.Demo.mypage.pet.PetEntity;
+import io.cloudtype.Demo.mypage.user.PartnerRepository;
 import io.cloudtype.Demo.mypage.user.UserEntity;
 import io.cloudtype.Demo.walk.DTO.WaiterDTO;
 import io.cloudtype.Demo.walk.DTO.WalkMatchingDTO;
@@ -43,13 +44,15 @@ public class WalkMatchingService {
     private final WaiterRepository waiterRepository;
     private final WalkRecordRepository walkRecordRepository;
     private final ChatRoomService chatRoomService;
+    private final PartnerRepository partnerRepository;
 
     @Autowired
     public WalkMatchingService(UserRepository userRepository, PetRepository petRepository, JWTUtil jwtUtil,
                                WalkMatchingRepository walkMatchingRepository,
                                WaiterRepository waiterRepository,
                                WalkRecordRepository walkRecordRepository,
-                                 ChatRoomService chatRoomService
+                                 ChatRoomService chatRoomService,
+                                 PartnerRepository partnerRepository
     ) {
         this.userRepository = userRepository;
         this.petRepository = petRepository;
@@ -58,6 +61,7 @@ public class WalkMatchingService {
         this.waiterRepository = waiterRepository;
         this.walkRecordRepository = walkRecordRepository;
         this.chatRoomService = chatRoomService;
+        this.partnerRepository = partnerRepository;
     }
 
     @Transactional
@@ -246,7 +250,7 @@ public class WalkMatchingService {
         }
         if (entity.getWalker() != null) {
             dto.setWalkerNickname(entity.getWalker().getNickname());
-            dto.setWalkerProfile(entity.getWalker().getProfileImage());
+            dto.setWalkerProfile(partnerRepository.findByUser_Id(entity.getWalker().getId()).getPartnerProfileImage());
         } else {
             dto.setWalkerNickname(null);
             dto.setWalkerProfile(null);
@@ -269,7 +273,7 @@ public class WalkMatchingService {
         dto.setId(id);
         dto.setUserId(user.getId());
         dto.setName(user.getName());
-        dto.setProfileImage(user.getProfileImage());
+        dto.setProfileImage(partnerRepository.findByUser_Id(user.getId()).getPartnerProfileImage());
         dto.setRating(user.getWalkRating());
         dto.setReviewCount(user.getWalkReviewCount());
         return dto;

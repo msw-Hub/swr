@@ -11,6 +11,7 @@ public class CarePostListDTO {
 
     private int carePostId;
     private String caregiverNickname;
+    private String caregiverProfileImage;
 
     private double caregiverRating;
     private int caregiverReviewCount;

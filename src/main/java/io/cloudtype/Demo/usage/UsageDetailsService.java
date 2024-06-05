@@ -2,6 +2,8 @@ package io.cloudtype.Demo.usage;
 
 import io.cloudtype.Demo.care.DTO.CareUsageDetailsDTO;
 import io.cloudtype.Demo.care.DTO.CareUsageSimpleDTO;
+import io.cloudtype.Demo.mypage.user.PartnerEntity;
+import io.cloudtype.Demo.mypage.user.PartnerRepository;
 import io.cloudtype.Demo.mypage.user.UserEntity;
 import io.cloudtype.Demo.mypage.user.UserRepository;
 import io.cloudtype.Demo.walk.DTO.WalkUsageDetailsDTO;
@@ -28,14 +30,19 @@ public class UsageDetailsService {
     private final WalkRecordRepository walkRecordRepository;
     private final CareRecordRepository careRecordRepository;
     private final CarePostRepository carePostRepository;
+    private final PartnerRepository partnerRepository;
+
     @Autowired
     public UsageDetailsService(UserRepository userRepository, JWTUtil jwtUtil, WalkRecordRepository walkRecordRepository,
-                               CareRecordRepository careRecordRepository, CarePostRepository carePostRepository) {
+                               CareRecordRepository careRecordRepository, CarePostRepository carePostRepository,
+                               PartnerRepository partnerRepository
+    ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.walkRecordRepository = walkRecordRepository;
         this.careRecordRepository = careRecordRepository;
         this.carePostRepository = carePostRepository;
+        this.partnerRepository = partnerRepository;
     }
     //유저의 산책이용내역보기
     public List<WalkUsageSimpleDTO> getUserWalkUsageList(String accessToken) {
@@ -51,7 +58,7 @@ public class UsageDetailsService {
         walkUsageDTO.setUserNickname(walkRecordEntity.getUser().getNickname());
         walkUsageDTO.setUserImage(walkRecordEntity.getUser().getProfileImage());
         walkUsageDTO.setWalkerNickname(walkRecordEntity.getWalker().getNickname());
-        walkUsageDTO.setWalkerImage(walkRecordEntity.getWalker().getProfileImage());
+        walkUsageDTO.setWalkerImage(partnerRepository.findByUser_Id(walkRecordEntity.getWalker().getId()).getPartnerProfileImage());
         walkUsageDTO.setPetName(walkRecordEntity.getPet().getPetName());
         walkUsageDTO.setWalkTime(walkRecordEntity.getWalkTime());
         walkUsageDTO.setEndTime(walkRecordEntity.getEndTime());
@@ -78,7 +85,7 @@ public class UsageDetailsService {
         walkUsageDTO.setUserNickname(walkRecordEntity.getUser().getNickname());
         walkUsageDTO.setUserImage(walkRecordEntity.getUser().getProfileImage());
         walkUsageDTO.setWalkerNickname(walkRecordEntity.getWalker().getNickname());
-        walkUsageDTO.setWalkerImage(walkRecordEntity.getWalker().getProfileImage());
+        walkUsageDTO.setWalkerImage(partnerRepository.findByUser_Id(walkRecordEntity.getWalker().getId()).getPartnerProfileImage());
         walkUsageDTO.setPetName(walkRecordEntity.getPet().getPetName());
         walkUsageDTO.setPetImage(walkRecordEntity.getPet().getPetImage());
         walkUsageDTO.setPetGender(walkRecordEntity.getPet().getGender());
@@ -118,7 +125,7 @@ public class UsageDetailsService {
         careUsageDTO.setUserNickname(careRecordEntity.getOwner().getNickname());
         careUsageDTO.setUserImage(careRecordEntity.getOwner().getProfileImage());
         careUsageDTO.setCaregiverNickname(careRecordEntity.getCaregiver().getNickname());
-        careUsageDTO.setCaregiverImage(careRecordEntity.getCaregiver().getProfileImage());
+        careUsageDTO.setCaregiverImage(partnerRepository.findByUser_Id(careRecordEntity.getCaregiver().getId()).getPartnerProfileImage());
         careUsageDTO.setPetName(careRecordEntity.getPet().getPetName());
         careUsageDTO.setStartDate(careRecordEntity.getStartDate());
         careUsageDTO.setAmount(careRecordEntity.getAmount());
@@ -151,7 +158,7 @@ public class UsageDetailsService {
         careUsageDTO.setUserNickname(careRecordEntity.getOwner().getNickname());
         careUsageDTO.setUserImage(careRecordEntity.getOwner().getProfileImage());
         careUsageDTO.setCaregiverNickname(careRecordEntity.getCaregiver().getNickname());
-        careUsageDTO.setCaregiverImage(careRecordEntity.getCaregiver().getProfileImage());
+        careUsageDTO.setCaregiverImage(partnerRepository.findByUser_Id(careRecordEntity.getCaregiver().getId()).getPartnerProfileImage());
 
         careUsageDTO.setPetName(careRecordEntity.getPet().getPetName());
         careUsageDTO.setPetImage(careRecordEntity.getPet().getPetImage());

@@ -9,6 +9,8 @@ import io.cloudtype.Demo.care.repository.*;
 import io.cloudtype.Demo.chat.ChatRoomService;
 import io.cloudtype.Demo.community.CommunityBoardService;
 import io.cloudtype.Demo.mypage.pet.PetEntity;
+import io.cloudtype.Demo.mypage.user.PartnerEntity;
+import io.cloudtype.Demo.mypage.user.PartnerRepository;
 import io.cloudtype.Demo.mypage.user.UserEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.mypage.pet.PetRepository;
@@ -47,6 +49,7 @@ public class CareMatchingService {
     private final CommunityBoardService communityBoardService;
     private final CareRecordRepository careRecordRepository;
     private final ChatRoomService chatRoomService;
+    private final PartnerRepository partnerRepository;
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -59,7 +62,7 @@ public class CareMatchingService {
             CareMatchingRepository careMatchingRepository,
             CommunityBoardService communityBoardService,
             CareRecordRepository careRecordRepository,
-            ChatRoomService chatRoomService
+            ChatRoomService chatRoomService, PartnerRepository partnerRepository
     ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
@@ -71,6 +74,7 @@ public class CareMatchingService {
         this.reservationSchedulerRepository = reservationSchedulerRepository;
         this.careRecordRepository = careRecordRepository;
         this.chatRoomService = chatRoomService;
+        this.partnerRepository = partnerRepository;
     }
 
     @Transactional
@@ -345,6 +349,7 @@ public class CareMatchingService {
                 .sorted(Comparator.comparing(CareImgEntity::getId))
                 .map(CareImgEntity::getImgUrl)
                 .collect(Collectors.toList()));
+        dto.setCaregiverProfileImage(partnerRepository.findByUser_Id(entity.getCaregiver().getId()).getPartnerProfileImage());
         return dto;
     }
     private double getDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -367,6 +372,7 @@ public class CareMatchingService {
         if (carePost == null) {
             throw new IllegalArgumentException("돌봄글을 찾을 수 없습니다");
         }
+        PartnerEntity partner = partnerRepository.findByUser_Id(carePost.getCaregiver().getId());
         CarePostDetailsDTO dto = new CarePostDetailsDTO();
         dto.setCarePostId(carePost.getId());
         dto.setCaregiverNickname(carePost.getCaregiver().getNickname());
@@ -381,11 +387,13 @@ public class CareMatchingService {
         dto.setDistance(getDistance(carePost.getLatitude(), carePost.getLongitude(), homeLatitude, homeLongitude));
         dto.setUnavailableDate(reservationSchedulerRepository.findByCarePost(carePost).stream()
                 .map(ReservationSchedulerEntity::getUnavailableDate)
+                .filter(Objects::nonNull) // null 값 제외
                 .collect(Collectors.toList()));
         dto.setCareImages(carePost.getCareImages().stream()
                 .sorted(Comparator.comparing(CareImgEntity::getId))
                 .map(CareImgEntity::getImgUrl)
                 .collect(Collectors.toList()));
+        dto.setCaregiverProfileImage(partner.getPartnerProfileImage());
         return dto;
     }
     public CarePostDetailsDTO myPost(String accessToken){

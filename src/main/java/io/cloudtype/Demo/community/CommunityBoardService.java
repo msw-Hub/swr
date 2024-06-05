@@ -5,8 +5,6 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-import io.cloudtype.Demo.care.DTO.CarePostListDTO;
-import io.cloudtype.Demo.care.entity.CarePostEntity;
 import io.cloudtype.Demo.community.DTO.CommentDTO;
 import io.cloudtype.Demo.community.DTO.CommunityBoardDTO;
 import io.cloudtype.Demo.community.entity.CommentEntity;

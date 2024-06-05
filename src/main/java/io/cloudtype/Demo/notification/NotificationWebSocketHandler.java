@@ -1,7 +1,9 @@
 package io.cloudtype.Demo.notification;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.cloudtype.Demo.jwt.JWTUtil;
 import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -12,20 +14,26 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import javax.annotation.PostConstruct;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Component
 public class NotificationWebSocketHandler extends TextWebSocketHandler {
 
-    private final ConcurrentHashMap<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, String> userSessionMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, WebSocketSession> userSessions = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> sessionIdToUserIdMap = new ConcurrentHashMap<>();
     private ScheduledExecutorService heartBeatExecutor;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JWTUtil jwtUtil;
+
+    public NotificationWebSocketHandler(JWTUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @PostConstruct
     public void init() {
@@ -39,13 +47,13 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void sendHeartBeat() {
-        sessions.forEach((id, session) -> {
+        userSessions.forEach((userId, session) -> {
             if (session.isOpen()) {
                 try {
                     session.sendMessage(new PingMessage(ByteBuffer.wrap("ping".getBytes())));
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.err.println("Error sending ping message to session " + id + ": " + e.getMessage());
+                    System.err.println("Error sending ping message to session " + userId + ": " + e.getMessage());
                 }
             }
         });
@@ -53,50 +61,52 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(@NotNull WebSocketSession session) throws Exception {
-        sessions.put(session.getId(), session);
-        String userId = getUserIdFromSession(session); // 사용자 식별자 추출 로직 추가 필요
+        String userId = getUserIdFromSession(session);
         if (userId != null) {
-            userSessionMap.put(userId, session.getId());
+            userSessions.put(userId, session);
+            sessionIdToUserIdMap.put(session.getId(), userId);
+            log.info("socket connected userId : " + userId);
+            log.info("userSessions : " + userSessions);
+            log.info("sessionIdToUserIdMap : " + sessionIdToUserIdMap);
+        } else {
+            session.close(CloseStatus.BAD_DATA);
+            log.info("WebSocket connection closed due to missing userId");
         }
         System.out.println("Notification WebSocket connection established: " + session.getId());
     }
-
     @Override
     protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
         System.out.println("Received notification message: " + message.getPayload());
-        // 알림 메시지 처리 로직
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, @NotNull CloseStatus status) throws Exception {
-        sessions.remove(session.getId());
-        userSessionMap.values().remove(session.getId());
+        String userId = sessionIdToUserIdMap.remove(session.getId());
+        if (userId != null) {
+            userSessions.remove(userId);
+        }
         System.out.println("Notification WebSocket connection closed: " + session.getId() + " - " + status.getReason());
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        sessions.remove(session.getId());
-        userSessionMap.values().remove(session.getId());
+        String userId = sessionIdToUserIdMap.remove(session.getId());
+        if (userId != null) {
+            userSessions.remove(userId);
+        }
         System.err.println("WebSocket transport error: " + exception.getMessage());
         session.close(CloseStatus.SERVER_ERROR);
     }
 
     public void sendNotificationToUser(String userId, String notificationMessage) {
-        String sessionId = userSessionMap.get(userId);
-        WebSocketSession session = sessions.get(sessionId);
+        WebSocketSession session = userSessions.get(userId);
         if (session != null && session.isOpen()) {
             try {
-                // Construct the notification payload
                 Map<String, String> notificationPayload = Map.of(
                         "type", "notification",
                         "message", notificationMessage
                 );
-
-                // Convert the payload to a JSON string
                 String jsonResponse = objectMapper.writeValueAsString(notificationPayload);
-
-                // Send the JSON message
                 session.sendMessage(new TextMessage(jsonResponse));
                 System.out.println("Sent notification message to: " + session.getId() + " - " + jsonResponse);
             } catch (Exception e) {
@@ -109,16 +119,15 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
     }
 
     private String getUserIdFromSession(WebSocketSession session) {
-        return Optional.ofNullable(session.getUri())
-                .map(uri -> uri.getQuery())
-                .flatMap(query -> {
-                    for (String param : query.split("&")) {
-                        String[] keyValue = param.split("=");
-                        if (keyValue.length == 2 && keyValue[0].equals("userId")) {
-                            return Optional.of(keyValue[1]);
-                        }
-                    }
-                    return Optional.empty();
-                }).orElse(null);
+        List<String> authHeaders = session.getHandshakeHeaders().get("Authorization");
+        if (authHeaders != null && !authHeaders.isEmpty()) {
+            String token = authHeaders.get(0).split(" ")[1];
+            System.out.println(token);
+            return jwtUtil.getUsername(token, 1); // JWT 토큰에서 사용자 ID 추출
+        }
+        return null;
+    }
+    public boolean isUserConnected(String userId) {
+        return userSessions.containsKey(userId);
     }
 }
