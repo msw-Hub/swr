@@ -87,6 +87,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             String nickname = user.getNickname();
             String encodedNickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
             response.addHeader("nickname", encodedNickname);
+            log.info("nickname: " + encodedNickname);
         }
 
         response.addHeader("Authorization", "Bearer " + accessToken);
