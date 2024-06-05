@@ -74,7 +74,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
         String email = user.getUsername();
-
+        String nickname;
+        String encodedNickname;
         //데이터베이스에 JoinDetails가 저장되어있는지를 확인
         String birth = user.getBirth();
         if(birth == null) {
@@ -84,8 +85,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             //JoinDetails가 있는 경우
             response.addHeader("JoinDetails", "true");
             // URL 인코딩하여 닉네임을 헤더에 추가
-            String nickname = user.getNickname();
-            String encodedNickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
+            nickname = user.getNickname();
+            encodedNickname = URLEncoder.encode(nickname, StandardCharsets.UTF_8);
             response.addHeader("nickname", encodedNickname);
             log.info("nickname: " + encodedNickname);
         }
