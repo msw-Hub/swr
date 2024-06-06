@@ -73,14 +73,18 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         if ("Authorization".equals(type)) {
             String token = messagePayload.get("token");
             if (token != null && !token.isEmpty()) {
-                token = token.split(" ")[1];
-                String userId = jwtUtil.getUsername(token, 1);
-                if (userId != null) {
-                    userSessions.put(userId, session);
-                    sessionIdToUserIdMap.put(session.getId(), userId);
-                    System.out.println("WebSocket authorized userId: " + userId);
-                    session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type", "Authorization", "status", "success"))));
-                    return;
+                try {
+                    token = token.split(" ")[1];
+                    String userId = jwtUtil.getUsername(token, 1);
+                    if (userId != null) {
+                        userSessions.put(userId, session);
+                        sessionIdToUserIdMap.put(session.getId(), userId);
+                        System.out.println("WebSocket authorized userId: " + userId);
+                        session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type", "Authorization", "status", "success"))));
+                        return;
+                    }
+                } catch (Exception e) {
+                    log.error("Authorization error for token: " + token, e);
                 }
             }
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type", "Authorization", "status", "fail"))));
