@@ -33,6 +33,7 @@ public class LocationWebSocketHandler  extends TextWebSocketHandler {
     private final JWTUtil jwtUtil;
     private final LocationService locationService;
     private ScheduledExecutorService executorService;
+    private final ConcurrentHashMap<String, ScheduledFuture<?>> userTasks = new ConcurrentHashMap<>(); // 사용자별 주기적 작업 관리
     public LocationWebSocketHandler(JWTUtil jwtUtil, LocationService locationService) {
         this.locationService = locationService;
         this.jwtUtil = jwtUtil;
@@ -98,7 +99,17 @@ public class LocationWebSocketHandler  extends TextWebSocketHandler {
                 log.info("Received location message from senderId: {}", senderId);
                 // (보낸사람, {위도: , 경도 : }) 형식으로 LocationMap에 저장
                 // 동일한 senderId로 put 요청이 들어오면 덮어씌워짐
-                userLocationMap.put(senderId, message.getPayload());
+                String latitude = messagePayload.get("latitude");
+                String longitude = messagePayload.get("longitude");
+
+                if (latitude != null && longitude != null) {
+                    // JSON 문자열로 변환
+                    String locationJson = objectMapper.writeValueAsString(Map.of("latitude", latitude, "longitude", longitude));
+                    userLocationMap.put(senderId, locationJson);
+                }
+                else{
+                    log.warn("Received location message with missing latitude or longitude: {}", message.getPayload());
+                }
             } else {
                 log.warn("Received location message from unknown session: {}", session.getId());
             }
@@ -113,9 +124,12 @@ public class LocationWebSocketHandler  extends TextWebSocketHandler {
         if (userId != null) {
             userSessions.remove(userId);
             userLocationMap.remove(userId);
+            ScheduledFuture<?> task = userTasks.remove(userId);
+            if (task != null) {
+                task.cancel(true);
+            }
         }
-        System.out.println("Location WebSocket connection closed: " + session.getId() + " - " + status.getReason());
-        stopPeriodicTask();
+        log.info("Location WebSocket connection closed: {} - {}", session.getId(), status.getReason());
     }
 
     @Override
@@ -124,26 +138,31 @@ public class LocationWebSocketHandler  extends TextWebSocketHandler {
         if (userId != null) {
             userSessions.remove(userId);
             userLocationMap.remove(userId);
+            ScheduledFuture<?> task = userTasks.remove(userId);
+            if (task != null) {
+                task.cancel(true);
+            }
         }
-        System.err.println("WebSocket transport error: " + exception.getMessage());
+        log.error("WebSocket transport error: {} - session: {}", exception.getMessage(), session.getId());
         session.close(CloseStatus.SERVER_ERROR);
-        stopPeriodicTask();
     }
 
     private void startPeriodicTask(String userName) {
+        if (userTasks.containsKey(userName)) {
+            return; // 이미 주기적 작업이 실행 중인 경우 중복 실행 방지
+        }
         executorService = Executors.newScheduledThreadPool(1);
-        executorService.scheduleAtFixedRate(() -> {
+        ScheduledFuture<?> task = executorService.scheduleAtFixedRate(() -> {
             try {
-                // userName으로 DB조회를 통해 상대편(산책을 맡긴 사람)의 username 불러옴
                 String receiver = locationService.checkCondition(userName);
                 if (receiver != null) {
-                    // 상대측 username이 존재(= 산책에 위치정보가 필요한 status)
                     sendLatestLocation(userName, receiver);
                 }
             } catch (Exception e) {
                 log.error("Error checking condition or sending location: {}", e.getMessage(), e);
             }
-        }, 0, 5, TimeUnit.SECONDS); // 주기적으로 5초마다 실행
+        }, 0, 5, TimeUnit.SECONDS);
+        userTasks.put(userName, task);
     }
 
 
@@ -160,9 +179,14 @@ public class LocationWebSocketHandler  extends TextWebSocketHandler {
             WebSocketSession session = userSessions.get(receiverId);
             if (session != null && session.isOpen()) { // 현재 수신자가 접속중이면
                 try {
+                    Map<String, String> locationMap = objectMapper.readValue(location, Map.class);
+                    String latitude = locationMap.get("latitude");
+                    String longitude = locationMap.get("longitude");
+
                     Map<String, String> locationPayload = Map.of(
                             "type", "location",
-                            "location", location
+                            "latitude", latitude,
+                            "longitude", longitude
                     );
                     String jsonResponse = objectMapper.writeValueAsString(locationPayload);
                     session.sendMessage(new TextMessage(jsonResponse));
@@ -173,17 +197,6 @@ public class LocationWebSocketHandler  extends TextWebSocketHandler {
             }
         }
 
-    }
-
-
-    private String getUserIdFromSession(WebSocketSession session) {
-        List<String> authHeaders = session.getHandshakeHeaders().get("Authorization");
-        if (authHeaders != null && !authHeaders.isEmpty()) {
-            String token = authHeaders.get(0).split(" ")[1];
-            System.out.println(token);
-            return jwtUtil.getUsername(token, 1); // JWT 토큰에서 사용자 ID 추출
-        }
-        return null;
     }
 
 }
