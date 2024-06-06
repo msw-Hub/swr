@@ -61,22 +61,33 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(@NotNull WebSocketSession session) throws Exception {
-        String userId = getUserIdFromSession(session);
-        if (userId != null) {
-            userSessions.put(userId, session);
-            sessionIdToUserIdMap.put(session.getId(), userId);
-            log.info("socket connected userId : " + userId);
-            log.info("userSessions : " + userSessions);
-            log.info("sessionIdToUserIdMap : " + sessionIdToUserIdMap);
-        } else {
-            session.close(CloseStatus.BAD_DATA);
-            log.info("WebSocket connection closed due to missing userId");
-        }
-        System.out.println("Notification WebSocket connection established: " + session.getId());
+        // 초기에는 세션을 등록하지 않습니다.
+        System.out.println("WebSocket connection established: " + session.getId());
     }
+
     @Override
     protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
-        System.out.println("Received notification message: " + message.getPayload());
+        Map<String, String> messagePayload = objectMapper.readValue(message.getPayload(), Map.class);
+        String type = messagePayload.get("type");
+
+        if ("Authorization".equals(type)) {
+            String token = messagePayload.get("token");
+            if (token != null && !token.isEmpty()) {
+                String userId = jwtUtil.getUsername(token, 1);
+                if (userId != null) {
+                    userSessions.put(userId, session);
+                    sessionIdToUserIdMap.put(session.getId(), userId);
+                    System.out.println("WebSocket authorized userId: " + userId);
+                    session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type", "Authorization", "status", "success"))));
+                    return;
+                }
+            }
+            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type", "Authorization", "status", "fail"))));
+            session.close(CloseStatus.BAD_DATA);
+        } else {
+            System.out.println("Received notification message: " + message.getPayload());
+            // Handle other message types here
+        }
     }
 
     @Override
@@ -118,15 +129,6 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private String getUserIdFromSession(WebSocketSession session) {
-        List<String> authHeaders = session.getHandshakeHeaders().get("Authorization");
-        if (authHeaders != null && !authHeaders.isEmpty()) {
-            String token = authHeaders.get(0).split(" ")[1];
-            System.out.println(token);
-            return jwtUtil.getUsername(token, 1); // JWT 토큰에서 사용자 ID 추출
-        }
-        return null;
-    }
     public boolean isUserConnected(String userId) {
         return userSessions.containsKey(userId);
     }
