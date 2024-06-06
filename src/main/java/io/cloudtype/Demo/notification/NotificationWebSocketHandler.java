@@ -73,6 +73,7 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
         if ("Authorization".equals(type)) {
             String token = messagePayload.get("token");
             if (token != null && !token.isEmpty()) {
+                token = token.split(" ")[1];
                 String userId = jwtUtil.getUsername(token, 1);
                 if (userId != null) {
                     userSessions.put(userId, session);
