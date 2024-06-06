@@ -360,12 +360,12 @@ public class WalkMatchingService {
 
         // 매칭 완료 시, 두 사용자에게 알림을 보냄
         if (notificationService.isUserConnected(user.getUsername())) {
-            notificationService.notifyUser(user.getUsername(), "매칭이 성사되었습니다 채팅방을 이용해보세요");
+            notificationService.notifyUser(user.getUsername(), "매칭이 성사되었습니다");
         } else {
             log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
         }
         if (notificationService.isUserConnected(partner.getUsername())) {
-            notificationService.notifyUser(partner.getUsername(), "매칭이 성사되었습니다 채팅방을 이용해보세요");
+            notificationService.notifyUser(partner.getUsername(), "매칭이 성사되었습니다");
         }else {
             log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
         }
