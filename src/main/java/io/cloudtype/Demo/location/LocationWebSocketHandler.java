@@ -1,5 +1,6 @@
 package io.cloudtype.Demo.location;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import jakarta.annotation.PreDestroy;
@@ -14,26 +15,23 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import javax.annotation.PostConstruct;
 import java.nio.ByteBuffer;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Slf4j
 @Component
-public class LocationWebSocketHandler  extends TextWebSocketHandler {
+public class LocationWebSocketHandler extends TextWebSocketHandler {
 
     private final ConcurrentHashMap<String, WebSocketSession> userSessions = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, String> sessionIdToUserIdMap = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, String> userLocationMap = new ConcurrentHashMap<>(); // 사용자의 위치정보를 저장하기 위함
+    private final ConcurrentHashMap<String, String> userLocationMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ScheduledFuture<?>> userTasks = new ConcurrentHashMap<>();
     private ScheduledExecutorService heartBeatExecutor;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final JWTUtil jwtUtil;
     private final LocationService locationService;
-    private ScheduledExecutorService executorService;
-    private final ConcurrentHashMap<String, ScheduledFuture<?>> userTasks = new ConcurrentHashMap<>(); // 사용자별 주기적 작업 관리
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(10);
+
     public LocationWebSocketHandler(JWTUtil jwtUtil, LocationService locationService) {
         this.locationService = locationService;
         this.jwtUtil = jwtUtil;
@@ -48,6 +46,7 @@ public class LocationWebSocketHandler  extends TextWebSocketHandler {
     @PreDestroy
     public void destroy() {
         heartBeatExecutor.shutdown();
+        executorService.shutdown();
     }
 
     private void sendHeartBeat() {
@@ -56,35 +55,31 @@ public class LocationWebSocketHandler  extends TextWebSocketHandler {
                 try {
                     session.sendMessage(new PingMessage(ByteBuffer.wrap("ping".getBytes())));
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    System.err.println("Error sending ping message to session " + userId + ": " + e.getMessage());
+                    log.error("Error sending ping message to session {}: {}", userId, e.getMessage(), e);
                 }
             }
         });
     }
 
     @Override
-    public void afterConnectionEstablished(@NotNull WebSocketSession session) throws Exception {
-
-        System.out.println("Location WebSocket connection established: " + session.getId());
+    public void afterConnectionEstablished(@NotNull WebSocketSession session) {
+        log.info("Location WebSocket connection established: {}", session.getId());
     }
 
     @Override
     protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) throws Exception {
-        Map<String, String> messagePayload = objectMapper.readValue(message.getPayload(), Map.class);
+        Map<String, String> messagePayload = objectMapper.readValue(message.getPayload(), new TypeReference<>() {});
         String type = messagePayload.get("type");
 
         if ("Authorization".equals(type)) {
             String token = messagePayload.get("token");
-            if (token != null && !token.isEmpty()) {
-                token = token.split(" ")[1];
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
                 String userName = jwtUtil.getUsername(token, 1);
                 if (userName != null) {
-                    // userName과 WebSocket Session을 매핑
                     userSessions.put(userName, session);
-                    // Session ID와 userName을 매핑
                     sessionIdToUserIdMap.put(session.getId(), userName);
-                    log.info("Location socket connected userId : " + userName);
+                    log.info("Location socket connected userId: {}", userName);
                     startPeriodicTask(userName);
                     session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type", "Authorization", "status", "success"))));
                     return;
@@ -93,66 +88,55 @@ public class LocationWebSocketHandler  extends TextWebSocketHandler {
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(Map.of("type", "Authorization", "status", "fail"))));
             session.close(CloseStatus.BAD_DATA);
         } else if ("location".equals(type)) {
-            // 보낸 사람의 userName을 조회 후 senderId에 저장
             String senderId = sessionIdToUserIdMap.get(session.getId());
             if (senderId != null) {
                 log.info("Received location message from senderId: {}", senderId);
-                // (보낸사람, {위도: , 경도 : }) 형식으로 LocationMap에 저장
-                // 동일한 senderId로 put 요청이 들어오면 덮어씌워짐
                 String latitude = messagePayload.get("latitude");
                 String longitude = messagePayload.get("longitude");
 
                 if (latitude != null && longitude != null) {
-                    // JSON 문자열로 변환
                     String locationJson = objectMapper.writeValueAsString(Map.of("latitude", latitude, "longitude", longitude));
                     userLocationMap.put(senderId, locationJson);
-                }
-                else{
+                } else {
                     log.warn("Received location message with missing latitude or longitude: {}", message.getPayload());
                 }
             } else {
                 log.warn("Received location message from unknown session: {}", session.getId());
             }
         } else {
-            System.out.println("Received unknown message: " + message.getPayload());
+            log.warn("Received unknown message: {}", message.getPayload());
         }
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, @NotNull CloseStatus status) throws Exception {
+    public void afterConnectionClosed(@NotNull WebSocketSession session, @NotNull CloseStatus status) {
         String userId = sessionIdToUserIdMap.remove(session.getId());
         if (userId != null) {
             userSessions.remove(userId);
             userLocationMap.remove(userId);
-            ScheduledFuture<?> task = userTasks.remove(userId);
-            if (task != null) {
-                task.cancel(true);
-            }
+            stopPeriodicTask(userId);
         }
         log.info("Location WebSocket connection closed: {} - {}", session.getId(), status.getReason());
     }
 
     @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+    public void handleTransportError(@NotNull WebSocketSession session, @NotNull Throwable exception) {
         String userId = sessionIdToUserIdMap.remove(session.getId());
         if (userId != null) {
             userSessions.remove(userId);
             userLocationMap.remove(userId);
-            ScheduledFuture<?> task = userTasks.remove(userId);
-            if (task != null) {
-                task.cancel(true);
-            }
+            stopPeriodicTask(userId);
         }
-        log.error("WebSocket transport error: {} - session: {}", exception.getMessage(), session.getId());
-        session.close(CloseStatus.SERVER_ERROR);
+        log.error("WebSocket transport error: {}", exception.getMessage(), exception);
+        try {
+            session.close(CloseStatus.SERVER_ERROR);
+        } catch (Exception e) {
+            log.error("Error closing WebSocket session: {}", e.getMessage(), e);
+        }
     }
 
     private void startPeriodicTask(String userName) {
-        if (userTasks.containsKey(userName)) {
-            return; // 이미 주기적 작업이 실행 중인 경우 중복 실행 방지
-        }
-        executorService = Executors.newScheduledThreadPool(1);
-        ScheduledFuture<?> task = executorService.scheduleAtFixedRate(() -> {
+        ScheduledFuture<?> scheduledFuture = executorService.scheduleAtFixedRate(() -> {
             try {
                 String receiver = locationService.checkCondition(userName);
                 if (receiver != null) {
@@ -162,24 +146,23 @@ public class LocationWebSocketHandler  extends TextWebSocketHandler {
                 log.error("Error checking condition or sending location: {}", e.getMessage(), e);
             }
         }, 0, 5, TimeUnit.SECONDS);
-        userTasks.put(userName, task);
+        userTasks.put(userName, scheduledFuture);
     }
 
-
-    private void stopPeriodicTask() {
-        if (executorService != null && !executorService.isShutdown()) {
-            executorService.shutdown();
+    private void stopPeriodicTask(String userName) {
+        ScheduledFuture<?> scheduledFuture = userTasks.remove(userName);
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(true);
         }
     }
+
     private void sendLatestLocation(String senderId, String receiverId) {
-        // senderId로 저장된 location 정보 get
         String location = userLocationMap.get(senderId);
         if (location != null) {
-            // 수신자의 세션 get
             WebSocketSession session = userSessions.get(receiverId);
-            if (session != null && session.isOpen()) { // 현재 수신자가 접속중이면
+            if (session != null && session.isOpen()) {
                 try {
-                    Map<String, String> locationMap = objectMapper.readValue(location, Map.class);
+                    Map<String, String> locationMap = objectMapper.readValue(location, new TypeReference<>() {});
                     String latitude = locationMap.get("latitude");
                     String longitude = locationMap.get("longitude");
 
@@ -196,7 +179,5 @@ public class LocationWebSocketHandler  extends TextWebSocketHandler {
                 }
             }
         }
-
     }
-
 }
