@@ -91,7 +91,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login", "/", "/join","/join/emailCheck","/callback","/code").permitAll()
-                        .requestMatchers("/notifications/**", "/chat/**", "/api/chat/**").permitAll()
+                        .requestMatchers("/notifications/**", "/chat/**", "/api/chat/**", "/location/**").permitAll()
                         .anyRequest().authenticated());
         //JWTFilter 등록
         http
@@ -105,7 +105,7 @@ public class SecurityConfig {
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/notifications/**", "/chat/**").disable());
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/notifications/**", "/chat/**","/location/**").disable());
 
 
         return http.build();

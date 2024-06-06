@@ -1,6 +1,7 @@
 package io.cloudtype.Demo.config;
 
 import io.cloudtype.Demo.chat.ChatWebSocketHandler;
+import io.cloudtype.Demo.location.LocationWebSocketHandler;
 import io.cloudtype.Demo.notification.NotificationWebSocketHandler;
 import io.cloudtype.Demo.video.VideoWebSocketHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +21,16 @@ public class WebSocketConfig implements WebSocketConfigurer {
     private final NotificationWebSocketHandler notificationWebSocketHandler;
     private final ChatWebSocketHandler chatWebSocketHandler;
     private final VideoWebSocketHandler videoWebSocketHandler;
-    public WebSocketConfig(NotificationWebSocketHandler notificationWebSocketHandler, ChatWebSocketHandler chatWebSocketHandler, VideoWebSocketHandler videoWebSocketHandler) {
+    private final LocationWebSocketHandler locationWebSocketHandler;
+    public WebSocketConfig(NotificationWebSocketHandler notificationWebSocketHandler,
+                           ChatWebSocketHandler chatWebSocketHandler,
+                           VideoWebSocketHandler videoWebSocketHandler,
+                            LocationWebSocketHandler locationWebSocketHandler
+    ) {
         this.notificationWebSocketHandler = notificationWebSocketHandler;
         this.chatWebSocketHandler = chatWebSocketHandler;
         this.videoWebSocketHandler = videoWebSocketHandler;
+        this.locationWebSocketHandler = locationWebSocketHandler;
     }
 
     @Override
@@ -31,6 +38,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
         registry.addHandler(notificationWebSocketHandler, "/notifications").setAllowedOrigins("*");
         registry.addHandler(chatWebSocketHandler, "/chat").setAllowedOrigins("*");
         registry.addHandler(videoWebSocketHandler, "/video").setAllowedOrigins("*");
+        registry.addHandler(locationWebSocketHandler, "/location").setAllowedOrigins("*");
         log.info("WebSocket handlers registered: /notifications, /chat and /video");
         //System.out.println("WebSocket handlers registered: /notifications, /chat and /video");
     }
