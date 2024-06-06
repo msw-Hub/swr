@@ -15,6 +15,7 @@ import io.cloudtype.Demo.mypage.user.UserEntity;
 import io.cloudtype.Demo.jwt.JWTUtil;
 import io.cloudtype.Demo.mypage.pet.PetRepository;
 import io.cloudtype.Demo.mypage.user.UserRepository;
+import io.cloudtype.Demo.notification.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -50,6 +51,7 @@ public class CareMatchingService {
     private final CareRecordRepository careRecordRepository;
     private final ChatRoomService chatRoomService;
     private final PartnerRepository partnerRepository;
+    private final NotificationService notificationService;
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -62,7 +64,8 @@ public class CareMatchingService {
             CareMatchingRepository careMatchingRepository,
             CommunityBoardService communityBoardService,
             CareRecordRepository careRecordRepository,
-            ChatRoomService chatRoomService, PartnerRepository partnerRepository
+            ChatRoomService chatRoomService, PartnerRepository partnerRepository,
+            NotificationService notificationService
     ) {
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
@@ -75,6 +78,7 @@ public class CareMatchingService {
         this.careRecordRepository = careRecordRepository;
         this.chatRoomService = chatRoomService;
         this.partnerRepository = partnerRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -204,7 +208,18 @@ public class CareMatchingService {
         careMatching.setRequestMessage(careApplyDTO.getRequestMessage());
         log.info("careMatching: {}",careMatching);
         careMatchingRepository.save(careMatching);
-        //신청한거 메세지 보내야함
+        //돌봄 신청으로 인한 알림
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "예약을 신청하였습니다");
+        } else {
+            log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        UserEntity partner = carePost.getCaregiver();
+        if (notificationService.isUserConnected(partner.getUsername())) {
+            notificationService.notifyUser(partner.getUsername(), "돌봄글에 신청이 왔습니다");
+        }else {
+            log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
+        }
     }
 
     @Transactional
@@ -599,7 +614,17 @@ public class CareMatchingService {
         UserEntity consumer = careMatching.getOwner();
         // 채팅방 생성(name : username+walkername, username : username, walkername : )
         chatRoomService.createChatRoom(consumer, user);
-        //예약 수락한거 메세지 보내야함 양쪽
+        //돌봄 예약 성공 알림
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "돌봄 예약이 확정되었습니다");
+        } else {
+            log.warn("Partner " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        if (notificationService.isUserConnected(consumer.getUsername())) {
+            notificationService.notifyUser(consumer.getUsername(), "돌봄 예약이 확정되었습니다");
+        }else {
+            log.warn("consumer " + consumer.getUsername() + " is not connected. Notification not sent.");
+        }
 
         //결제 - 차감만 하면됌
         careMatching.getOwner().setCoin(careMatching.getOwner().getCoin()-careMatching.getAmount());
@@ -619,6 +644,17 @@ public class CareMatchingService {
         }
         careMatchingRepository.delete(careMatching);
         //예약 거절한거 메세지 보내야함
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "돌봄 예약이 거절하셨습니다");
+        } else {
+            log.warn("Partner " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        UserEntity consumer = careMatching.getOwner();
+        if (notificationService.isUserConnected(consumer.getUsername())) {
+            notificationService.notifyUser(consumer.getUsername(), "돌봄 예약이 거절되었습니다");
+        }else {
+            log.warn("consumer " + consumer.getUsername() + " is not connected. Notification not sent.");
+        }
     }
     @Transactional
     public void cancelApply(String accessToken, int careMatchingId) {
@@ -676,6 +712,17 @@ public class CareMatchingService {
             }
         }
         //예약 취소한거 메세지 보내야함
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "예약을 취소하셨습니다");
+        } else {
+            log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        UserEntity partner = carePost.getCaregiver();
+        if (notificationService.isUserConnected(partner.getUsername())) {
+            notificationService.notifyUser(partner.getUsername(), "확정된 에약 1건이 취소되었습니다");
+        }else {
+            log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
+        }
         //환불
         careMatching.getOwner().setCoin(careMatching.getOwner().getCoin()+careMatching.getAmount());
     }
@@ -699,7 +746,18 @@ public class CareMatchingService {
         careMatching.setStatus(2);
         careMatching.setStartDate(LocalDateTime.now());
         careMatchingRepository.save(careMatching);
-        //돌봄 시작 메세지 보내야함 양쪽
+        //돌봄 시작 알림
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "돌봄이 시작되었습니다");
+        } else {
+            log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        UserEntity consumer = careMatching.getOwner();
+        if (notificationService.isUserConnected(consumer.getUsername())) {
+            notificationService.notifyUser(consumer.getUsername(), "돌봄이 시작되었습니다");
+        }else {
+            log.warn("consumer " + consumer.getUsername() + " is not connected. Notification not sent.");
+        }
     }
     @Transactional
     public int completeCare(String accessToken, int careMatchingId) {
@@ -735,7 +793,19 @@ public class CareMatchingService {
         //CareMatching 삭제
         careMatchingRepository.delete(careMatching);
 
-        //돌봄 완료 메세지 보내야함 양쪽
+        //돌봄 완료 알림
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "돌봄이 완료되었습니다");
+        } else {
+            log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        UserEntity partner = carePost.getCaregiver();
+        if (notificationService.isUserConnected(partner.getUsername())) {
+            notificationService.notifyUser(partner.getUsername(), "돌봄이 완료되었습니다");
+        }else {
+            log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
+        }
+
         return careRecode.getId();
     }
     @Transactional
@@ -771,6 +841,17 @@ public class CareMatchingService {
         carePostRepository.save(carePost);
 
         //돌봄 미완료 메세지 보내야함 양쪽
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "문제발생으로 비정상종료되었습니다");
+        } else {
+            log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        UserEntity partner = carePost.getCaregiver();
+        if (notificationService.isUserConnected(partner.getUsername())) {
+            notificationService.notifyUser(partner.getUsername(), "문제발생으로 비정상종료되었습니다");
+        }else {
+            log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
+        }
     }
     public int getUserCareStatus(String accessToken,int status) {
         UserEntity user = getUserEntity(accessToken);

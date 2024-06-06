@@ -4,6 +4,7 @@ import io.cloudtype.Demo.chat.ChatRoomService;
 import io.cloudtype.Demo.mypage.pet.PetEntity;
 import io.cloudtype.Demo.mypage.user.PartnerRepository;
 import io.cloudtype.Demo.mypage.user.UserEntity;
+import io.cloudtype.Demo.notification.NotificationService;
 import io.cloudtype.Demo.walk.DTO.WaiterDTO;
 import io.cloudtype.Demo.walk.DTO.WalkMatchingDTO;
 import io.cloudtype.Demo.walk.DTO.WalkMatchingDetailsDTO;
@@ -45,6 +46,7 @@ public class WalkMatchingService {
     private final WalkRecordRepository walkRecordRepository;
     private final ChatRoomService chatRoomService;
     private final PartnerRepository partnerRepository;
+    private final NotificationService notificationService;
 
     @Autowired
     public WalkMatchingService(UserRepository userRepository, PetRepository petRepository, JWTUtil jwtUtil,
@@ -52,7 +54,8 @@ public class WalkMatchingService {
                                WaiterRepository waiterRepository,
                                WalkRecordRepository walkRecordRepository,
                                  ChatRoomService chatRoomService,
-                                 PartnerRepository partnerRepository
+                                 PartnerRepository partnerRepository,
+                                    NotificationService notificationService
     ) {
         this.userRepository = userRepository;
         this.petRepository = petRepository;
@@ -62,6 +65,7 @@ public class WalkMatchingService {
         this.walkRecordRepository = walkRecordRepository;
         this.chatRoomService = chatRoomService;
         this.partnerRepository = partnerRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -218,7 +222,19 @@ public class WalkMatchingService {
         waiter.setWriter(post.getUser());
         waiter.setWaiter(user);
         waiterRepository.save(waiter);
+
         //신청이 완료되었음으로 주인에게 신청 알람을 보내야함
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "신청을 하였습니다");
+        } else {
+            log.warn("Partner " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        UserEntity customer = post.getUser();
+        if (notificationService.isUserConnected(customer.getUsername())) {
+            notificationService.notifyUser(customer.getUsername(), "산책글에 신청이 왔습니다");
+        }else {
+            log.warn("consumer " + customer.getUsername() + " is not connected. Notification not sent.");
+        }
     }
     public WalkMatchingDetailsDTO myPost(String accessToken) {
         UserEntity user = getUserEntity(accessToken);
@@ -342,8 +358,17 @@ public class WalkMatchingService {
         // 채팅방 생성(name : username+walkername, username : username, walkername : )
         chatRoomService.createChatRoom(user, partner);
 
-        //서브 서버에게 매칭완료 메세지와 채팅방 개설 요청을 보내야함
-        //양쪽에게 매칭완료 메세지를 보내야함
+        // 매칭 완료 시, 두 사용자에게 알림을 보냄
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "매칭이 성사되었습니다 채팅방을 이용해보세요");
+        } else {
+            log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        if (notificationService.isUserConnected(partner.getUsername())) {
+            notificationService.notifyUser(partner.getUsername(), "매칭이 성사되었습니다 채팅방을 이용해보세요");
+        }else {
+            log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
+        }
     }
     @Transactional
     public void deletePost(String accessToken, int postId) {
@@ -393,7 +418,19 @@ public class WalkMatchingService {
         post.setStatus(2);
         post.setStartTime(LocalDateTime.now());
         walkMatchingRepository.save(post);
-        //주인에게 산책 시작 알람을 보내야함
+
+        // 산책 시작시 알림
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "산책이 시작되었습니다");
+        } else {
+            log.warn("Partner " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        UserEntity customer = post.getUser();
+        if (notificationService.isUserConnected(customer.getUsername())) {
+            notificationService.notifyUser(customer.getUsername(), "산책이 시작되었습니다");
+        }else {
+            log.warn("consumer " + customer.getUsername() + " is not connected. Notification not sent.");
+        }
     }
     @Transactional
     public int end(String accessToken, int postId) {
@@ -422,13 +459,25 @@ public class WalkMatchingService {
         }
         //고객의 토큰 계산내용 들가야함.
         post.getUser().setCoin(post.getUser().getCoin()-post.getAmount());
-        //파트너에게 산책 종료 알람을 보내야함
 
         int status = 3; // 산책 완료
         String reason = "no problem"; // 문제가 없을 경우
         //레코드 테이블로 이동
         int recodeId = createRecord(post, now, status, reason);
         walkMatchingRepository.delete(post);
+
+        // 산책 종료시 알림
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "산책이 종료되었습니다");
+        } else {
+            log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        UserEntity partner = post.getWalker();
+        if (notificationService.isUserConnected(partner.getUsername())) {
+            notificationService.notifyUser(partner.getUsername(), "산책이 종료되었습니다");
+        }else {
+            log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
+        }
         return recodeId;
     }
     private int createRecord(WalkMatchingEntity post, LocalDateTime now, int status, String reason) {
@@ -469,12 +518,23 @@ public class WalkMatchingService {
         if (post.getStatus() ==0) {
             throw new IllegalArgumentException("산책중인 게시글이 아닙니다");
         }
-        //파트너에게 산책 비정상종료 알람을 보내야함
-
         int status = 4; // 산책 미완료
         //레코드 테이블로 이동
         int walkRecodeId = createRecord(post, LocalDateTime.now(), status, reason);
         walkMatchingRepository.delete(post);
+
+        // 산책 비정상종료시 알림
+        if (notificationService.isUserConnected(user.getUsername())) {
+            notificationService.notifyUser(user.getUsername(), "문제가 발생하여 산책을 종료합니다");
+        } else {
+            log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
+        }
+        UserEntity partner = post.getWalker();
+        if (notificationService.isUserConnected(partner.getUsername())) {
+            notificationService.notifyUser(partner.getUsername(), "문제가 발생하여 산책을 종료합니다");
+        }else {
+            log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
+        }
     }
     public int getUserWalkStatus(String accessToken,int status) {
         UserEntity user = getUserEntity(accessToken);
