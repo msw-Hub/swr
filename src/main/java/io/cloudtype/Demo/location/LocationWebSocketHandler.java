@@ -149,7 +149,7 @@ public class LocationWebSocketHandler extends TextWebSocketHandler {
             } catch (Exception e) {
                 log.error("Error checking condition or sending location: {}", e.getMessage(), e);
             }
-        }, 0, 10, TimeUnit.SECONDS);
+        }, 0, 5, TimeUnit.SECONDS);
         userTasks.put(userName, scheduledFuture);
     }
 
