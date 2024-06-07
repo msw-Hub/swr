@@ -97,7 +97,7 @@ public class LocationWebSocketHandler extends TextWebSocketHandler {
                 log.info("Received location message from senderId: {}", senderId);
                 String latitude = messagePayload.get("latitude");
                 String longitude = messagePayload.get("longitude");
-
+                log.info("Received location message: {} - {}", latitude, longitude);
                 if (latitude != null && longitude != null) {
                     String locationJson = objectMapper.writeValueAsString(Map.of("latitude", latitude, "longitude", longitude));
                     userLocationMap.put(senderId, locationJson);
