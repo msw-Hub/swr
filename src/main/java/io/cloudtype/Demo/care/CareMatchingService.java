@@ -435,6 +435,7 @@ public class CareMatchingService {
                 .sorted(Comparator.comparing(CareImgEntity::getId))
                 .map(CareImgEntity::getImgUrl)
                 .collect(Collectors.toList()));
+        dto.setCaregiverProfileImage(partnerRepository.findByUser_Id(user.getId()).getPartnerProfileImage());
         return dto;
     }
     public List<CareApplyDetailDTO> getApplierList(String accessToken) {
@@ -517,6 +518,7 @@ public class CareMatchingService {
                 .sorted(Comparator.comparing(CareImgEntity::getId))
                 .map(CareImgEntity::getImgUrl)
                 .collect(Collectors.toList()));
+        dto.setCaregiverProfileImage(partnerRepository.findByUser_Id(carePost.getCaregiver().getId()).getPartnerProfileImage());
         return dto;
     }
     public List<CareApplyDetailDTO> myConfirmedList(String accessToken) {
