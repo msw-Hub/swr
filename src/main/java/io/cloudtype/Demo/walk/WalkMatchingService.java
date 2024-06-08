@@ -225,13 +225,13 @@ public class WalkMatchingService {
 
         //신청이 완료되었음으로 주인에게 신청 알람을 보내야함
         if (notificationService.isUserConnected(user.getUsername())) {
-            notificationService.notifyUser(user.getUsername(), "신청을 하였습니다");
+            notificationService.notifyUser(user.getUsername(), "파트너:신청을 하였습니다");
         } else {
             log.warn("Partner " + user.getUsername() + " is not connected. Notification not sent.");
         }
         UserEntity customer = post.getUser();
         if (notificationService.isUserConnected(customer.getUsername())) {
-            notificationService.notifyUser(customer.getUsername(), "산책글에 신청이 왔습니다");
+            notificationService.notifyUser(customer.getUsername(), "유저:산책글에 신청이 왔습니다");
         }else {
             log.warn("consumer " + customer.getUsername() + " is not connected. Notification not sent.");
         }
@@ -360,12 +360,12 @@ public class WalkMatchingService {
 
         // 매칭 완료 시, 두 사용자에게 알림을 보냄
         if (notificationService.isUserConnected(user.getUsername())) {
-            notificationService.notifyUser(user.getUsername(), "매칭이 성사되었습니다");
+            notificationService.notifyUser(user.getUsername(), "유저:매칭이 성사되었습니다");
         } else {
             log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
         }
         if (notificationService.isUserConnected(partner.getUsername())) {
-            notificationService.notifyUser(partner.getUsername(), "매칭이 성사되었습니다");
+            notificationService.notifyUser(partner.getUsername(), "파트너:매칭이 성사되었습니다");
         }else {
             log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
         }
@@ -421,13 +421,13 @@ public class WalkMatchingService {
 
         // 산책 시작시 알림
         if (notificationService.isUserConnected(user.getUsername())) {
-            notificationService.notifyUser(user.getUsername(), "산책이 시작되었습니다");
+            notificationService.notifyUser(user.getUsername(), "유저:산책이 시작되었습니다");
         } else {
             log.warn("Partner " + user.getUsername() + " is not connected. Notification not sent.");
         }
         UserEntity customer = post.getUser();
         if (notificationService.isUserConnected(customer.getUsername())) {
-            notificationService.notifyUser(customer.getUsername(), "산책이 시작되었습니다");
+            notificationService.notifyUser(customer.getUsername(), "파트너:산책이 시작되었습니다");
         }else {
             log.warn("consumer " + customer.getUsername() + " is not connected. Notification not sent.");
         }
@@ -468,13 +468,13 @@ public class WalkMatchingService {
 
         // 산책 종료시 알림
         if (notificationService.isUserConnected(user.getUsername())) {
-            notificationService.notifyUser(user.getUsername(), "산책이 종료되었습니다");
+            notificationService.notifyUser(user.getUsername(), "유저:산책이 종료되었습니다");
         } else {
             log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
         }
         UserEntity partner = post.getWalker();
         if (notificationService.isUserConnected(partner.getUsername())) {
-            notificationService.notifyUser(partner.getUsername(), "산책이 종료되었습니다");
+            notificationService.notifyUser(partner.getUsername(), "파트너:산책이 종료되었습니다");
         }else {
             log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
         }
@@ -525,13 +525,13 @@ public class WalkMatchingService {
 
         // 산책 비정상종료시 알림
         if (notificationService.isUserConnected(user.getUsername())) {
-            notificationService.notifyUser(user.getUsername(), "문제가 발생하여 산책을 종료합니다");
+            notificationService.notifyUser(user.getUsername(), "유저:문제가 발생하여 산책을 종료합니다");
         } else {
             log.warn("User " + user.getUsername() + " is not connected. Notification not sent.");
         }
         UserEntity partner = post.getWalker();
         if (notificationService.isUserConnected(partner.getUsername())) {
-            notificationService.notifyUser(partner.getUsername(), "문제가 발생하여 산책을 종료합니다");
+            notificationService.notifyUser(partner.getUsername(), "파트너:문제가 발생하여 산책을 종료합니다");
         }else {
             log.warn("Partner " + partner.getUsername() + " is not connected. Notification not sent.");
         }
