@@ -117,7 +117,9 @@ public class WalkMatchingService {
         }
         post.setUser(user);
         post.setPet(pet);
-        post.setWalkTime(walkMatchingEntity.getWalkTime());
+        //시연용 산책 고정1분
+        //post.setWalkTime(walkMatchingEntity.getWalkTime());
+        post.setWalkTime(1);
         post.setLatitude(walkMatchingEntity.getLatitude());
         post.setLongitude(walkMatchingEntity.getLongitude());
         post.setAddress(walkMatchingEntity.getAddress());
