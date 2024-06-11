@@ -423,13 +423,13 @@ public class WalkMatchingService {
 
         // 산책 시작시 알림
         if (notificationService.isUserConnected(user.getUsername())) {
-            notificationService.notifyUser(user.getUsername(), "유저:산책이 시작되었습니다");
+            notificationService.notifyUser(user.getUsername(), "파트너:산책이 시작되었습니다");
         } else {
             log.warn("Partner " + user.getUsername() + " is not connected. Notification not sent.");
         }
         UserEntity customer = post.getUser();
         if (notificationService.isUserConnected(customer.getUsername())) {
-            notificationService.notifyUser(customer.getUsername(), "파트너:산책이 시작되었습니다");
+            notificationService.notifyUser(customer.getUsername(), "유저:산책이 시작되었습니다");
         }else {
             log.warn("consumer " + customer.getUsername() + " is not connected. Notification not sent.");
         }
