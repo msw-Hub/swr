@@ -17,7 +17,7 @@ public class LogoutController {
     }
 
     //로그아웃
-    @GetMapping("")
+    @GetMapping("/logout")
     public ResponseEntity<String> logout(@RequestHeader("Authorization") String accessToken,
                                          @RequestHeader("X-Refresh-Token") String refreshToken
     ) {
