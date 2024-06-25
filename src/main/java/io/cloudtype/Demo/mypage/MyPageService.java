@@ -367,6 +367,7 @@ public class MyPageService {
         user.setRefreshToken(null);
         userRepository.save(user);
         //먼저 있는 지를 찾아서 없으면 추가
+        accessToken = accessToken.split(" ")[1];
         if (blacklistRepository.existsByAccessToken(accessToken) || blacklistRepository.existsByRefreshToken(refreshToken)) {
             throw new IllegalStateException("이미 로그아웃된 사용자입니다");
         }
