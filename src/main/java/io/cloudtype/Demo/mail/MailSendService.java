@@ -21,24 +21,23 @@ public class MailSendService {
         this.mailSender=mailSender;
         this.emailCheckRepository=emailCheckRepository;
     }
-    private int authNumber;
 
     //임의의 6자리 양수를 반환합니다.
-    public void makeRandomNumber() {
+    public int makeRandomNumber() {
         Random r = new Random();
         String randomNumber = "";
         for(int i = 0; i < 6; i++) {
             randomNumber += Integer.toString(r.nextInt(10));
         }
 
-        authNumber = Integer.parseInt(randomNumber);
+        return Integer.parseInt(randomNumber);
     }
 
 
 
     //mail을 어디서 보내는지, 어디로 보내는지 , 인증 번호를 html 형식으로 어떻게 보내는지 작성합니다.
     public String joinEmail(String email) {
-        makeRandomNumber();
+        int authNumber =  makeRandomNumber();
         String setFrom = "teamswr2019@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
         String toMail = email;
         String title = "회원 가입 인증 이메일 입니다."; // 이메일 제목
@@ -63,7 +62,9 @@ public class MailSendService {
             emailCheckRepository.save(emailCheckEntity);
         }
         else{
-            emailCheckEntity.setAuthNum(authNum);
+            int authNumber =  makeRandomNumber();
+            emailCheckEntity.setAuthNum(String.valueOf(authNumber));
+            emailCheckEntity.setTryDateTime(LocalDateTime.now());
             emailCheckRepository.save(emailCheckEntity);
         }
     }
@@ -86,6 +87,7 @@ public class MailSendService {
     }
 
     //인증번호가 맞는지 확인합니다.
+    @Transactional
     public Boolean checkAuthNum(String email,String authNum){
         EmailCheckEntity emailCheckEntity=emailCheckRepository.findByEmail(email);
         if(emailCheckEntity==null){
