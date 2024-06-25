@@ -1,5 +1,6 @@
 package io.cloudtype.Demo.mail;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -7,12 +8,19 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.time.LocalDateTime;
 import java.util.Random;
 
 @Service
 public class MailSendService {
+
+    private final JavaMailSender mailSender;
+    private final EmailCheckRepository emailCheckRepository;
     @Autowired
-    private JavaMailSender mailSender;
+    public MailSendService(JavaMailSender mailSender, EmailCheckRepository emailCheckRepository){
+        this.mailSender=mailSender;
+        this.emailCheckRepository=emailCheckRepository;
+    }
     private int authNumber;
 
     //임의의 6자리 양수를 반환합니다.
@@ -25,6 +33,7 @@ public class MailSendService {
 
         authNumber = Integer.parseInt(randomNumber);
     }
+
 
 
     //mail을 어디서 보내는지, 어디로 보내는지 , 인증 번호를 html 형식으로 어떻게 보내는지 작성합니다.
@@ -42,6 +51,22 @@ public class MailSendService {
         mailSend(setFrom, toMail, title, content);
         return Integer.toString(authNumber);
     }
+    @Transactional
+    public void saveAuthNum(String email,String authNum){
+        //만일 해당 이메일이 이미 있다면 6자리를 새로 갱신
+        //없다면 새로 생성
+        EmailCheckEntity emailCheckEntity=emailCheckRepository.findByEmail(email);
+        if(emailCheckEntity==null){
+            emailCheckEntity=new EmailCheckEntity();
+            emailCheckEntity.setEmail(email);
+            emailCheckEntity.setAuthNum(authNum);
+            emailCheckRepository.save(emailCheckEntity);
+        }
+        else{
+            emailCheckEntity.setAuthNum(authNum);
+            emailCheckRepository.save(emailCheckEntity);
+        }
+    }
 
     //이메일을 전송합니다.
     public void mailSend(String setFrom, String toMail, String title, String content) {
@@ -58,8 +83,26 @@ public class MailSendService {
             // 이러한 경우 MessagingException이 발생
             e.printStackTrace();//e.printStackTrace()는 예외를 기본 오류 스트림에 출력하는 메서드
         }
-
-
     }
 
+    //인증번호가 맞는지 확인합니다.
+    public Boolean checkAuthNum(String email,String authNum){
+        EmailCheckEntity emailCheckEntity=emailCheckRepository.findByEmail(email);
+        if(emailCheckEntity==null){
+            throw new IllegalArgumentException("해당 이메일 요청내역이 없습니다");
+        }
+        //인증 요청 시간이 5분이 지났다면 인증번호를 삭제하고 예외를 던집니다. getTryDateTime은 인증시작시간.
+        if(emailCheckEntity.getTryDateTime().plusMinutes(5).isBefore(LocalDateTime.now())){
+            emailCheckRepository.delete(emailCheckEntity);
+            throw new IllegalArgumentException("인증 시간이 초과되었습니다.");
+        }
+        if(emailCheckEntity.getAuthNum().equals(authNum)){
+            emailCheckRepository.delete(emailCheckEntity);
+            return true;
+        }
+        else{
+            throw new IllegalArgumentException("인증번호가 일치하지 않습니다.");
+        }
+        //db에 24시간 마다 체크해서 인증 요청이 5분이 지났다면 삭제하는 이벤트 넣어야함.
+    }
 }
