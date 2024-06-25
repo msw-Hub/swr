@@ -55,6 +55,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springframework:spring-messaging'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3'
+
+	//이메일 인증
+	implementation 'javax.mail:mail:1.4.7'
+	implementation 'org.springframework:spring-context-support:5.3.9'
 }
 
 tasks.named('bootBuildImage') {

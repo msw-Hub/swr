@@ -22,6 +22,8 @@ public class LogoutController {
                                          @RequestHeader("X-Refresh-Token") String refreshToken
     ) {
         try {
+            log.info("accessToken: {}", accessToken);
+            log.info("refreshToken: {}", refreshToken);
             logoutService.logout(accessToken, refreshToken);
             return ResponseEntity.ok("로그아웃 성공");
         } catch (IllegalStateException | IllegalArgumentException e) {
