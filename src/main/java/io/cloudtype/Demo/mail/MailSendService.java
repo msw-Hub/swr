@@ -62,8 +62,7 @@ public class MailSendService {
             emailCheckRepository.save(emailCheckEntity);
         }
         else{
-            int authNumber =  makeRandomNumber();
-            emailCheckEntity.setAuthNum(String.valueOf(authNumber));
+            emailCheckEntity.setAuthNum(String.valueOf(authNum));
             emailCheckEntity.setTryDateTime(LocalDateTime.now());
             emailCheckRepository.save(emailCheckEntity);
         }
