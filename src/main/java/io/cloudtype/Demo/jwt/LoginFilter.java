@@ -40,7 +40,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         //클라이언트 요청에서 username, password 추출
         String username = obtainUsername(request);
         String password = obtainPassword(request);
-        log.info("username: " + username + " password: " + password);
+        // 비밀번호가 로그에 남지 않도록 출력하지 않는다(공개 전 정리, 2026-11-21)
+        // log.info("username: " + username + " password: " + password);
 
         //스프링 시큐리티에서 username과 password를 검증하기 위해서는 token에 담아야 함
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
